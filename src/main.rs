@@ -7,12 +7,15 @@ use std::{
     rc::Rc,
 };
 
-use constants::DEFAULT_WELL_KNOWN_PREFIX;
+use constants::{DEFAULT_WELL_KNOWN_PREFIX, NS_TYPE};
 use scraper::{ElementRef, Html, Selector};
 use url::Url;
 use uuid::Uuid;
 mod constants;
 mod utils;
+
+#[cfg(test)]
+mod tests;
 
 macro_rules! select {
     ($e:literal) => {
@@ -27,7 +30,6 @@ struct RdfaGraph<'a>(Vec<Statement<'a>>);
 struct Context<'a> {
     base: &'a str,
     vocab: Option<&'a str>,
-    type_of: Option<&'a str>,
     parent: Option<Rc<Context<'a>>>,
     current_node: Option<Node<'a>>,
 }
@@ -144,7 +146,6 @@ fn traverse_element<'a>(
     let type_of = elt.attr("typeof");
 
     ctx.vocab = vocab;
-    ctx.type_of = type_of;
 
     let predicate = if let Some(property) = property {
         Some(resolve_uri(property, &ctx.vocab, ctx.base, true)?)
@@ -197,6 +198,14 @@ fn traverse_element<'a>(
         subject
     };
 
+    if let Some(type_of) = type_of {
+        let a = Node::Iri(Cow::Borrowed(NS_TYPE));
+        stmts.push(Statement {
+            subject: current_node.clone(),
+            predicate: a,
+            object: resolve_uri(type_of, &ctx.vocab, ctx.base, false)?,
+        })
+    }
     ctx.current_node = Some(current_node);
 
     if element_ref.has_children() {
@@ -288,105 +297,4 @@ fn resolve_uri<'a>(
 }
 
 #[cfg(test)]
-mod test {
-    use scraper::Html;
-    use url::Url;
-
-    use crate::{traverse_element, Context, RdfaGraph};
-
-    #[test]
-    fn test_example2() {
-        let html = include_str!("../examples/example2.html");
-
-        let document = Html::parse_document(html);
-        let root = document.root_element();
-
-        let mut stmts = vec![];
-        let root_ctx = Default::default();
-        traverse_element(&root, root_ctx, &mut stmts).unwrap();
-        println!("{}", RdfaGraph(stmts));
-    }
-    #[test]
-    fn test_example4() {
-        let html = include_str!("../examples/example4.html");
-
-        let document = Html::parse_document(html);
-        let root = document.root_element();
-
-        let mut stmts = vec![];
-        let root_ctx = Default::default();
-        traverse_element(&root, root_ctx, &mut stmts).unwrap();
-
-        println!("{}", RdfaGraph(stmts));
-    }
-
-    #[test]
-    fn test_example6() {
-        let html = include_str!("../examples/example6.html");
-
-        let document = Html::parse_document(html);
-        let root = document.root_element();
-
-        let mut stmts = vec![];
-        let root_ctx = Default::default();
-        traverse_element(&root, root_ctx, &mut stmts).unwrap();
-
-        println!("{}", RdfaGraph(stmts));
-    }
-
-    #[test]
-    fn test_example7() {
-        let html = include_str!("../examples/example7.html");
-
-        let document = Html::parse_document(html);
-        let root = document.root_element();
-
-        let mut stmts = vec![];
-        let root_ctx = Default::default();
-        traverse_element(&root, root_ctx, &mut stmts).unwrap();
-
-        println!("{}", RdfaGraph(stmts));
-    }
-
-    #[test]
-    fn test_example8() {
-        let html = include_str!("../examples/example8.html");
-
-        let document = Html::parse_document(html);
-        let root = document.root_element();
-
-        let mut stmts = vec![];
-        let root_ctx = Default::default();
-        traverse_element(&root, root_ctx, &mut stmts).unwrap();
-
-        println!("{}", RdfaGraph(stmts));
-    }
-
-    #[test]
-    fn test_example9() {
-        let html = include_str!("../examples/example9.html");
-
-        let document = Html::parse_document(html);
-        let root = document.root_element();
-
-        let mut stmts = vec![];
-        let root_ctx = Default::default();
-        traverse_element(&root, root_ctx, &mut stmts).unwrap();
-
-        println!("{}", RdfaGraph(stmts));
-    }
-
-    #[test]
-    fn test_example10() {
-        let html = include_str!("../examples/example10.html");
-
-        let document = Html::parse_document(html);
-        let root = document.root_element();
-
-        let mut stmts = vec![];
-        let root_ctx = Default::default();
-        traverse_element(&root, root_ctx, &mut stmts).unwrap();
-
-        println!("{}", RdfaGraph(stmts));
-    }
-}
+mod test {}
