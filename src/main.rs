@@ -3,10 +3,13 @@ use std::{
     borrow::{BorrowMut, Cow},
     default,
     error::Error,
+    fmt::{Display, Formatter},
     rc::Rc,
 };
 
+use constants::DEFAULT_WELL_KNOWN_PREFIX;
 use scraper::{ElementRef, Html, Selector};
+use url::Url;
 use uuid::Uuid;
 mod constants;
 mod utils;
@@ -17,14 +20,12 @@ macro_rules! select {
     };
 }
 
-#[derive(Debug, Default)]
-struct RdfaGraph<'a> {
-    lang: Option<&'a str>,
-    statements: Vec<Statement<'a>>,
-}
+#[derive(Debug)]
+struct RdfaGraph<'a>(Vec<Statement<'a>>);
 
 #[derive(Debug, Default, Clone)]
 struct Context<'a> {
+    base: &'a str,
     vocab: Option<&'a str>,
     type_of: Option<&'a str>,
     parent: Option<Rc<Context<'a>>>,
@@ -40,7 +41,7 @@ pub struct Literal<'a> {
 
 #[derive(Debug, Clone)]
 pub enum Node<'a> {
-    Iri(&'a str),
+    Iri(Cow<'a, str>),
     Literal(Literal<'a>),
     Ref(Box<Node<'a>>),
     List(Vec<Node<'a>>),
@@ -54,6 +55,58 @@ pub struct Statement<'a> {
     pub object: Node<'a>,
 }
 
+impl Display for Node<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Node::Iri(iri) => f.write_str(&format!("<{}>", iri)),
+            Node::Ref(iri) => f.write_str(&format!("{}", iri)),
+            Node::Literal(Literal {
+                datatype,
+                lang,
+                value,
+            }) => {
+                let mut s = format!(r#""{value}""#);
+                if let Some(datatype) = datatype {
+                    s.push_str(&format!(r#"^^{datatype}"#));
+                } else if let Some(lang) = lang {
+                    s.push_str(&format!(r#"@{lang}"#));
+                }
+                f.write_str(&s)
+            }
+            Node::BNode(id) => {
+                // todo maybe this should use the base?
+                f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
+            }
+            e => {
+                eprintln!("fixme! format for {e:?} not implemented");
+                Err(std::fmt::Error)
+            }
+        }
+    }
+}
+
+impl Display for Statement<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let Statement {
+            subject,
+            predicate,
+            object,
+        } = self;
+        f.write_str(&format!(r#"{subject} {predicate} {object}."#))
+    }
+}
+impl Display for RdfaGraph<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(
+            &self
+                .0
+                .iter()
+                .map(Statement::to_string)
+                .collect::<Vec<String>>()
+                .join("\n"),
+        )
+    }
+}
 fn main() -> Result<(), Box<dyn Error>> {
     // let buf = include_str!("test-page.html");
     // let document = Html::parse_document(buf);
@@ -80,7 +133,9 @@ fn traverse_element<'a>(
     let elt = element_ref.value();
 
     // extract attrs
-    let vocab = elt.attr("vocab");
+    let vocab = elt
+        .attr("vocab")
+        .or(ctx.parent.as_ref().and_then(|p| p.vocab.clone()));
     let resource = elt.attr("resource");
     let about = elt.attr("about");
     let property = elt.attr("property");
@@ -92,14 +147,14 @@ fn traverse_element<'a>(
     ctx.type_of = type_of;
 
     let predicate = if let Some(property) = property {
-        Some(resolve_uri(property))
+        Some(resolve_uri(property, &ctx.vocab, ctx.base, true)?)
     } else {
         None
     };
     let current_node = if let Some(resource) = resource {
         // handle resource case. set the context.
         // if property is present, this becomes an object of the parent.
-        let object = resolve_uri(resource);
+        let object = resolve_uri(resource, &ctx.vocab, ctx.base, false)?;
         if let Some(predicate) = &predicate {
             let subject = ctx
                 .parent
@@ -116,13 +171,13 @@ fn traverse_element<'a>(
     } else if let Some(about) = about {
         // handle about case. set the context.
         // if property is present, children become objects of current.
-        let subject = resolve_uri(about);
+        let subject = resolve_uri(about, &ctx.vocab, ctx.base, false)?;
 
         if let Some(predicate) = &predicate {
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref),
+                object: extract_literal(element_ref, &ctx.vocab, ctx.base, true)?,
             })
         }
         subject
@@ -136,7 +191,7 @@ fn traverse_element<'a>(
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref),
+                object: extract_literal(element_ref, &ctx.vocab, ctx.base, true)?,
             })
         }
         subject
@@ -160,21 +215,32 @@ fn traverse_element<'a>(
     Ok(ctx.current_node.clone())
 }
 
-fn extract_literal<'a>(element_ref: &ElementRef<'a>) -> Node<'a> {
+fn extract_literal<'a>(
+    element_ref: &ElementRef<'a>,
+    vocab: &Option<&'a str>,
+    base: &'a str,
+    is_property: bool,
+) -> Result<Node<'a>, &'static str> {
     let elt_val = element_ref.value();
     let datatype = elt_val
         .attr("datatype")
-        .map(|dt| resolve_uri(dt))
-        .map(Box::new); //todo lang
+        .map(|dt| match resolve_uri(dt, vocab, base, false) {
+            Ok(d) => Some(Box::new(d)),
+            Err(e) => {
+                eprintln!("could not parse {dt}. error {e}");
+                None
+            }
+        })
+        .flatten(); //todo lang
 
     if let Some(href) = elt_val.attr("href") {
-        resolve_uri(href)
+        resolve_uri(href, vocab, base, false)
     } else if let Some(content) = elt_val.attr("content") {
-        Node::Literal(Literal {
+        Ok(Node::Literal(Literal {
             datatype,
             value: Cow::Borrowed(content),
             lang: None,
-        })
+        }))
     } else {
         let texts = element_ref.text().collect::<Vec<_>>();
         let text = if texts.is_empty() {
@@ -184,23 +250,49 @@ fn extract_literal<'a>(element_ref: &ElementRef<'a>) -> Node<'a> {
         } else {
             Cow::Owned(texts.iter().map(|t| t.to_string()).collect())
         };
-        Node::Literal(Literal {
+        Ok(Node::Literal(Literal {
             datatype,
             value: text,
             lang: None,
-        })
+        }))
     }
 }
 
-fn resolve_uri<'a>(uri: &'a str) -> Node<'a> {
-    Node::Iri(uri)
+fn resolve_uri<'a>(
+    uri: &'a str,
+    vocab: &Option<&'a str>,
+    base: &'a str,
+    is_property: bool,
+) -> Result<Node<'a>, &'static str> {
+    let iri = Url::parse(uri);
+    match iri {
+        Ok(iri) if !iri.cannot_be_a_base() => Ok(Node::Iri(Cow::Borrowed(uri))),
+        // Curie
+        Ok(iri) => Ok(Node::Iri(Cow::Borrowed("fixme! I'm a prefix"))),
+        Err(url::ParseError::RelativeUrlWithoutBase) => {
+            if let Some(vocab) = vocab {
+                Ok(Node::Iri(Cow::Owned([vocab, uri].join("")))) // todo check if uri with base is
+                                                                 // valid
+            } else if !is_property {
+                // use base for resource
+                Ok(Node::Iri(Cow::Owned([base, uri].join(""))))
+            } else {
+                Err("could not determine base/vocab")
+            }
+        }
+        Err(e) => {
+            eprintln!("invalid uri {uri}. error: {e}");
+            Err("could not resolve uri")
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
     use scraper::Html;
+    use url::Url;
 
-    use crate::{traverse_element, Context};
+    use crate::{traverse_element, Context, RdfaGraph};
 
     #[test]
     fn test_example2() {
@@ -212,7 +304,7 @@ mod test {
         let mut stmts = vec![];
         let root_ctx = Default::default();
         traverse_element(&root, root_ctx, &mut stmts).unwrap();
-        dbg!(stmts);
+        println!("{}", RdfaGraph(stmts));
     }
     #[test]
     fn test_example4() {
@@ -224,6 +316,77 @@ mod test {
         let mut stmts = vec![];
         let root_ctx = Default::default();
         traverse_element(&root, root_ctx, &mut stmts).unwrap();
-        dbg!(stmts);
+
+        println!("{}", RdfaGraph(stmts));
+    }
+
+    #[test]
+    fn test_example6() {
+        let html = include_str!("../examples/example6.html");
+
+        let document = Html::parse_document(html);
+        let root = document.root_element();
+
+        let mut stmts = vec![];
+        let root_ctx = Default::default();
+        traverse_element(&root, root_ctx, &mut stmts).unwrap();
+
+        println!("{}", RdfaGraph(stmts));
+    }
+
+    #[test]
+    fn test_example7() {
+        let html = include_str!("../examples/example7.html");
+
+        let document = Html::parse_document(html);
+        let root = document.root_element();
+
+        let mut stmts = vec![];
+        let root_ctx = Default::default();
+        traverse_element(&root, root_ctx, &mut stmts).unwrap();
+
+        println!("{}", RdfaGraph(stmts));
+    }
+
+    #[test]
+    fn test_example8() {
+        let html = include_str!("../examples/example8.html");
+
+        let document = Html::parse_document(html);
+        let root = document.root_element();
+
+        let mut stmts = vec![];
+        let root_ctx = Default::default();
+        traverse_element(&root, root_ctx, &mut stmts).unwrap();
+
+        println!("{}", RdfaGraph(stmts));
+    }
+
+    #[test]
+    fn test_example9() {
+        let html = include_str!("../examples/example9.html");
+
+        let document = Html::parse_document(html);
+        let root = document.root_element();
+
+        let mut stmts = vec![];
+        let root_ctx = Default::default();
+        traverse_element(&root, root_ctx, &mut stmts).unwrap();
+
+        println!("{}", RdfaGraph(stmts));
+    }
+
+    #[test]
+    fn test_example10() {
+        let html = include_str!("../examples/example10.html");
+
+        let document = Html::parse_document(html);
+        let root = document.root_element();
+
+        let mut stmts = vec![];
+        let root_ctx = Default::default();
+        traverse_element(&root, root_ctx, &mut stmts).unwrap();
+
+        println!("{}", RdfaGraph(stmts));
     }
 }

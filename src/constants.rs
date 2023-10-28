@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-
+pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
 pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";
 pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
