@@ -120,7 +120,7 @@ impl<'a> RdfaGraph<'a> {
         initial_context: Context<'a>,
     ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
         let mut triples = vec![];
-        traverse_element(&input, initial_context, &mut triples)?;
+        traverse_element(input, initial_context, &mut triples)?;
         copy_pattern(&mut triples);
         // copy patterns
 
@@ -128,7 +128,7 @@ impl<'a> RdfaGraph<'a> {
     }
 }
 
-pub fn copy_pattern<'a>(triples: &mut Vec<Statement<'a>>) -> Result<(), Box<dyn Error>> {
+pub fn copy_pattern(triples: &mut Vec<Statement<'_>>) -> Result<(), Box<dyn Error>> {
     let mut copy_patterns_subject = triples
         .iter()
         .filter_map(|stmt| {
@@ -158,7 +158,7 @@ pub fn copy_pattern<'a>(triples: &mut Vec<Statement<'a>>) -> Result<(), Box<dyn 
             }
         })
         .fold(HashMap::new(), |mut map, (k, v)| {
-            map.entry(k).or_insert_with(|| Vec::new()).push(v);
+            map.entry(k).or_insert_with(Vec::new).push(v);
             map
         });
 
@@ -204,7 +204,7 @@ pub fn traverse_element<'a>(
     // extract attrs
     let vocab = elt
         .attr("vocab")
-        .or(ctx.parent.as_ref().and_then(|p| p.vocab.clone()));
+        .or(ctx.parent.as_ref().and_then(|p| p.vocab));
     let resource = elt.attr("resource");
     let about = elt.attr("about");
     let property = elt.attr("property");
@@ -314,16 +314,16 @@ fn extract_literal<'a>(
     is_property: bool,
 ) -> Result<Node<'a>, &'static str> {
     let elt_val = element_ref.value();
-    let datatype = elt_val
-        .attr("datatype")
-        .map(|dt| match resolve_uri(dt, vocab, base, false) {
-            Ok(d) => Some(Box::new(d)),
-            Err(e) => {
-                eprintln!("could not parse {dt}. error {e}");
-                None
-            }
-        })
-        .flatten(); //todo lang
+    let datatype =
+        elt_val
+            .attr("datatype")
+            .and_then(|dt| match resolve_uri(dt, vocab, base, false) {
+                Ok(d) => Some(Box::new(d)),
+                Err(e) => {
+                    eprintln!("could not parse {dt}. error {e}");
+                    None
+                }
+            }); //todo lang
 
     if let Some(href) = elt_val.attr("href") {
         resolve_uri(href, vocab, base, false)
@@ -367,7 +367,7 @@ fn resolve_uri<'a>(
             }
             // todo handle other cases
             else if let Some(value) = COMMON_PREFIXES.get(iri.scheme()) {
-                let iri = uri.replace(":", "").replacen(iri.scheme(), value, 1);
+                let iri = uri.replace(':', "").replacen(iri.scheme(), value, 1);
                 Ok(Node::Iri(Cow::Owned(iri)))
             } else {
                 Ok(Node::Iri(Cow::Borrowed("fixme! I'm a prefix")))
