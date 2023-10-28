@@ -126,3 +126,30 @@ fn test_example15() {
 
     println!("{}", RdfaGraph(stmts));
 }
+
+#[test]
+fn test_example17() {
+    let html = include_str!("../../examples/example17.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let mut stmts = vec![];
+    let root_ctx = Default::default();
+    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+
+    println!("{}", RdfaGraph(stmts));
+}
+#[test]
+fn test_example18() {
+    let html = include_str!("../../examples/example18.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let mut stmts = vec![];
+    let root_ctx = Default::default();
+    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+
+    println!("{}", RdfaGraph(stmts));
+}

@@ -1,1 +1,1 @@
-mod rdfa_prime;
+mod rdfa_primer;
