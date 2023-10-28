@@ -1,33 +1,30 @@
 <html>
-  <head> </head>
 
-  <body vocab="http://purl.org/dc/terms/">
-    <div resource="/alice/posts/trouble_with_bob">
-      <h2 property="title">The trouble with Bob</h2>
-      <p>Date: <span property="created">2011-09-10</span></p>
-      <h3 property="creator">Alice</h3>
+<head> </head>
 
-      <link property="rdfa:copy" href="#ccpattern" />
-    </div>
+<body vocab="http://purl.org/dc/terms/">
+  <div resource="/alice/posts/trouble_with_bob">
+    <h2 property="title">The trouble with Bob</h2>
+    <p>Date: <span property="created">2011-09-10</span></p>
+    <h3 property="creator">Alice</h3>
 
-    <div resource="/alice/posts/jims_concert">
-      <h2 property="title">I was at Jim's concert the other day</h2>
-      <p>Date: <span property="created">2011-10-22</span></p>
-      <h3 property="creator">Alice</h3>
-      ...
-      <link property="rdfa:copy" href="#ccpattern" />
-    </div>
+    <link property="rdfa:copy" href="#ccpattern" />
+  </div>
 
-    <div resource="#ccpattern" typeof="rdfa:Pattern">
-      <p vocab="http://creativecommons.org/ns#">
-        All content on this blog item is licensed under
-        <a
-          property="license"
-          href="http://creativecommons.org/licenses/by/3.0/"
-        >
-          a Creative Commons License</a
-        >. <span property="attributionName">©2011 Alice Birpemswick</span>.
-      </p>
-    </div>
-  </body>
+  <div resource="/alice/posts/jims_concert">
+    <h2 property="title">I was at Jim's concert the other day</h2>
+    <p>Date: <span property="created">2011-10-22</span></p>
+    <h3 property="creator">Alice</h3>
+    <link property="rdfa:copy" href="#ccpattern" />
+  </div>
+
+  <div resource="#ccpattern" typeof="rdfa:Pattern">
+    <p vocab="http://creativecommons.org/ns#">
+      All content on this blog item is licensed under
+      <a property="license" href="http://creativecommons.org/licenses/by/3.0/">
+        a Creative Commons License</a>. <span property="attributionName">©2011 Alice Birpemswick</span>.
+    </p>
+  </div>
+</body>
+
 </html>

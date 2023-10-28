@@ -192,7 +192,7 @@ pub fn copy_pattern(triples: &mut Vec<Statement<'_>>) -> Result<(), Box<dyn Erro
     }
 
     triples.retain(|stmt| {
-        copy_patterns_subject.iter().any(|s| &stmt.subject != s)
+        !copy_patterns_subject.iter().any(|s| &stmt.subject == s)
             && stmt.predicate != *NODE_RDFA_COPY_PREDICATE
     });
     Ok(())

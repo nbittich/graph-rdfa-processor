@@ -5,7 +5,7 @@ use crate::{Context, RdfaGraph};
 
 #[test]
 fn test_example2() {
-    let html = include_str!("../../examples/example2.html");
+    let html = include_str!("../../examples/example02.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();
@@ -16,7 +16,7 @@ fn test_example2() {
 }
 #[test]
 fn test_example4() {
-    let html = include_str!("../../examples/example4.html");
+    let html = include_str!("../../examples/example04.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();
@@ -29,7 +29,7 @@ fn test_example4() {
 
 #[test]
 fn test_example6() {
-    let html = include_str!("../../examples/example6.html");
+    let html = include_str!("../../examples/example06.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();
@@ -42,7 +42,7 @@ fn test_example6() {
 
 #[test]
 fn test_example7() {
-    let html = include_str!("../../examples/example7.html");
+    let html = include_str!("../../examples/example07.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();
@@ -55,7 +55,7 @@ fn test_example7() {
 
 #[test]
 fn test_example8() {
-    let html = include_str!("../../examples/example8.html");
+    let html = include_str!("../../examples/example08.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();
@@ -68,7 +68,7 @@ fn test_example8() {
 
 #[test]
 fn test_example9() {
-    let html = include_str!("../../examples/example9.html");
+    let html = include_str!("../../examples/example09.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();
@@ -172,6 +172,21 @@ fn test_example20() {
 #[test]
 fn test_example22() {
     let html = include_str!("../../examples/example22.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let mut root_ctx = Context {
+        base: "http://test.org",
+        ..Default::default()
+    };
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
+
+    println!("{}", stmts);
+}
+#[test]
+fn test_example23() {
+    let html = include_str!("../../examples/example23.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();
