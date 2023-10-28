@@ -84,7 +84,7 @@ impl Display for Node<'_> {
                 f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
             }
             e => {
-                eprintln!("fixme! format for {e:?} not implemented");
+                writeln!(f, "fixme! format for {e:?} not implemented");
                 Err(std::fmt::Error)
             }
         }
@@ -157,10 +157,13 @@ pub fn copy_pattern(triples: &mut Vec<Statement<'_>>) -> Result<(), Box<dyn Erro
                 None
             }
         })
-        .fold(HashMap::new(), |mut map, (k, v)| {
-            map.entry(k).or_insert_with(Vec::new).push(v);
-            map
-        });
+        .fold(
+            HashMap::new(),
+            |mut map: HashMap<_, Vec<(_, _)>>, (k, v)| {
+                map.entry(k).or_default().push(v);
+                map
+            },
+        );
 
     let copy_patterns_predicate_subject = triples
         .iter()
