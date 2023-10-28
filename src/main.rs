@@ -1,13 +1,17 @@
 #![allow(unused)]
 use std::{
     borrow::{BorrowMut, Cow},
+    collections::HashMap,
     default,
     error::Error,
     fmt::{Display, Formatter},
     rc::Rc,
 };
 
-use constants::{DEFAULT_WELL_KNOWN_PREFIX, NS_TYPE};
+use constants::{
+    COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE, NODE_RDFA_COPY_PREDICATE,
+    NODE_RDFA_PATTERN_TYPE, NS_TYPE, RDFA_COPY_PREDICATE, RDFA_PATTERN_TYPE,
+};
 use scraper::{ElementRef, Html, Selector};
 use url::Url;
 use uuid::Uuid;
@@ -24,24 +28,24 @@ macro_rules! select {
 }
 
 #[derive(Debug)]
-struct RdfaGraph<'a>(Vec<Statement<'a>>);
+pub struct RdfaGraph<'a>(Vec<Statement<'a>>);
 
 #[derive(Debug, Default, Clone)]
-struct Context<'a> {
+pub struct Context<'a> {
     base: &'a str,
     vocab: Option<&'a str>,
     parent: Option<Rc<Context<'a>>>,
     current_node: Option<Node<'a>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub struct Literal<'a> {
     datatype: Option<Box<Node<'a>>>,
     value: Cow<'a, str>,
     lang: Option<&'a str>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub enum Node<'a> {
     Iri(Cow<'a, str>),
     Literal(Literal<'a>),
@@ -50,7 +54,7 @@ pub enum Node<'a> {
     BNode(Uuid),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub struct Statement<'a> {
     pub subject: Node<'a>,
     pub predicate: Node<'a>,
@@ -109,25 +113,86 @@ impl Display for RdfaGraph<'_> {
         )
     }
 }
-fn main() -> Result<(), Box<dyn Error>> {
-    // let buf = include_str!("test-page.html");
-    // let document = Html::parse_document(buf);
-    // let mut graph: RdfaGraph = Default::default();
-    //
-    // let root = document.root_element();
-    //
-    // graph.lang = root.value().attr("lang");
-    //
-    // let body = root.select(select!("body")).last().ok_or("no body")?;
-    // dbg!(graph);
 
-    Ok(())
-    // let selector = Selector::parse(r#"div[property="prov:value"]"#).unwrap();
-    // let mut s = document.select(&selector);
-    // dbg!(s.next().unwrap().html());
+impl<'a> RdfaGraph<'a> {
+    pub fn parse(
+        input: &ElementRef<'a>,
+        initial_context: Context<'a>,
+    ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
+        let mut triples = vec![];
+        traverse_element(&input, initial_context, &mut triples)?;
+
+        // copy patterns
+
+        let mut copy_patterns_subject = triples
+            .iter()
+            .filter_map(|stmt| {
+                if stmt.predicate == *NODE_NS_TYPE && stmt.object == *NODE_RDFA_PATTERN_TYPE {
+                    Some(stmt.subject.clone())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        // triples.retain(|stmt| stmt.object != *NODE_RDFA_PATTERN_TYPE);
+
+        let copy_patterns = triples
+            .iter()
+            .filter_map(|stmt| {
+                if copy_patterns_subject
+                    .iter()
+                    .any(|c| &stmt.subject == c && stmt.object != *NODE_RDFA_PATTERN_TYPE)
+                {
+                    Some((
+                        stmt.subject.clone(),
+                        (stmt.predicate.clone(), stmt.object.clone()),
+                    ))
+                } else {
+                    None
+                }
+            })
+            .fold(HashMap::new(), |mut map, (k, v)| {
+                map.entry(k).or_insert_with(|| Vec::new()).push(v);
+                map
+            });
+
+        let copy_patterns_predicate_subject = triples
+            .iter()
+            .filter_map(|stmt| {
+                if stmt.predicate == *NODE_RDFA_COPY_PREDICATE {
+                    Some(stmt.clone())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        // patch where there is a copy pattern predicate
+
+        for Statement {
+            subject, object, ..
+        } in copy_patterns_predicate_subject
+        {
+            let to_copy = copy_patterns.get(&object).ok_or("missing copy pattern!")?;
+            for (pred, obj) in to_copy.iter() {
+                triples.push(Statement {
+                    subject: subject.clone(),
+                    predicate: pred.clone(),
+                    object: obj.clone(),
+                })
+            }
+        }
+
+        triples.retain(|stmt| {
+            copy_patterns_subject.iter().any(|s| &stmt.subject != s)
+                && stmt.predicate != *NODE_RDFA_COPY_PREDICATE
+        });
+
+        Ok(RdfaGraph(triples))
+    }
 }
 
-fn traverse_element<'a>(
+pub fn traverse_element<'a>(
     element_ref: &ElementRef<'a>,
     mut ctx: Context<'a>,
     stmts: &mut Vec<Statement<'a>>,
@@ -215,10 +280,9 @@ fn traverse_element<'a>(
     };
 
     if let Some(type_of) = type_of {
-        let a = Node::Iri(Cow::Borrowed(NS_TYPE));
         stmts.push(Statement {
             subject: current_node.clone(),
-            predicate: a,
+            predicate: NODE_NS_TYPE.clone(),
             object: resolve_uri(type_of, &ctx.vocab, ctx.base, false)?,
         })
     }
@@ -291,9 +355,21 @@ fn resolve_uri<'a>(
 ) -> Result<Node<'a>, &'static str> {
     let iri = Url::parse(uri);
     match iri {
-        Ok(iri) if !iri.cannot_be_a_base() => Ok(Node::Iri(Cow::Borrowed(uri))),
+        Ok(iri) if !iri.cannot_be_a_base() || iri.is_special() => Ok(Node::Iri(Cow::Borrowed(uri))),
+
         // Curie
-        Ok(iri) => Ok(Node::Iri(Cow::Borrowed("fixme! I'm a prefix"))),
+        Ok(iri) => {
+            if uri.starts_with("mail") || uri.starts_with("tel") {
+                Ok(Node::Iri(Cow::Borrowed(uri)))
+            }
+            // todo handle other cases
+            else if let Some(value) = COMMON_PREFIXES.get(iri.scheme()) {
+                let iri = uri.replace(":", "").replacen(iri.scheme(), value, 1);
+                Ok(Node::Iri(Cow::Owned(iri)))
+            } else {
+                Ok(Node::Iri(Cow::Borrowed("fixme! I'm a prefix")))
+            }
+        }
         Err(url::ParseError::RelativeUrlWithoutBase) => {
             if let Some(vocab) = vocab {
                 Ok(Node::Iri(Cow::Owned([vocab, uri].join("")))) // todo check if uri with base is
@@ -312,5 +388,20 @@ fn resolve_uri<'a>(
     }
 }
 
-#[cfg(test)]
-mod test {}
+fn main() -> Result<(), Box<dyn Error>> {
+    // let buf = include_str!("test-page.html");
+    // let document = Html::parse_document(buf);
+    // let mut graph: RdfaGraph = Default::default();
+    //
+    // let root = document.root_element();
+    //
+    // graph.lang = root.value().attr("lang");
+    //
+    // let body = root.select(select!("body")).last().ok_or("no body")?;
+    // dbg!(graph);
+
+    Ok(())
+    // let selector = Selector::parse(r#"div[property="prov:value"]"#).unwrap();
+    // let mut s = document.select(&selector);
+    // dbg!(s.next().unwrap().html());
+}

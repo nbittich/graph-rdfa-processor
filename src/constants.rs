@@ -1,10 +1,15 @@
-use std::collections::HashMap;
+use std::{borrow::Cow, collections::HashMap};
+
+use crate::Node;
 pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
 pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";
 pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 lazy_static::lazy_static! {
-   pub static  ref PREFIXES: HashMap<&'static str, &'static str> =
+    pub static ref NODE_RDFA_PATTERN_TYPE: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_PATTERN_TYPE));
+    pub static ref NODE_RDFA_COPY_PREDICATE: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_COPY_PREDICATE));
+    pub static ref NODE_NS_TYPE: Node<'static>=Node::Iri(Cow::Borrowed(NS_TYPE));
+   pub static  ref COMMON_PREFIXES: HashMap<&'static str, &'static str> =
         HashMap::from([
             ("", "http://www.w3.org/1999/xhtml/vocab#"),
             // w3c

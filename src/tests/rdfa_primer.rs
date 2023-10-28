@@ -1,7 +1,7 @@
 use scraper::Html;
 use url::Url;
 
-use crate::{traverse_element, Context, RdfaGraph};
+use crate::{Context, RdfaGraph};
 
 #[test]
 fn test_example2() {
@@ -10,10 +10,9 @@ fn test_example2() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
-    println!("{}", RdfaGraph(stmts));
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
+    println!("{}", stmts);
 }
 #[test]
 fn test_example4() {
@@ -22,11 +21,10 @@ fn test_example4() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -36,11 +34,10 @@ fn test_example6() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -50,11 +47,10 @@ fn test_example7() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -64,11 +60,10 @@ fn test_example8() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -78,11 +73,10 @@ fn test_example9() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -92,11 +86,10 @@ fn test_example10() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -106,11 +99,10 @@ fn test_example11() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -120,11 +112,10 @@ fn test_example15() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -134,11 +125,10 @@ fn test_example17() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 #[test]
 fn test_example18() {
@@ -147,11 +137,10 @@ fn test_example18() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -161,11 +150,10 @@ fn test_example19() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
 }
 
 #[test]
@@ -175,9 +163,21 @@ fn test_example20() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut stmts = vec![];
     let root_ctx = Default::default();
-    traverse_element(&root, root_ctx, &mut stmts).unwrap();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
-    println!("{}", RdfaGraph(stmts));
+    println!("{}", stmts);
+}
+
+#[test]
+fn test_example22() {
+    let html = include_str!("../../examples/example22.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let root_ctx = Default::default();
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
+
+    println!("{}", stmts);
 }
