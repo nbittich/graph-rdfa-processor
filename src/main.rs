@@ -291,6 +291,7 @@ pub fn traverse_element<'a>(
     if element_ref.has_children() {
         let mut child_ctx = Context {
             parent: Some(Rc::new(ctx.clone())),
+            base: ctx.base,
             ..Default::default()
         };
         for child in element_ref.children() {
@@ -372,8 +373,12 @@ fn resolve_uri<'a>(
         }
         Err(url::ParseError::RelativeUrlWithoutBase) => {
             if let Some(vocab) = vocab {
-                Ok(Node::Iri(Cow::Owned([vocab, uri].join("")))) // todo check if uri with base is
-                                                                 // valid
+                if !is_property {
+                    Ok(Node::Iri(Cow::Owned([base, uri].join(""))))
+                } else {
+                    Ok(Node::Iri(Cow::Owned([vocab, uri].join("")))) // todo check if uri with base is
+                                                                     // valid
+                }
             } else if !is_property {
                 // use base for resource
                 Ok(Node::Iri(Cow::Owned([base, uri].join(""))))

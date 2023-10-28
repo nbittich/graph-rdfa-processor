@@ -176,7 +176,10 @@ fn test_example22() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let root_ctx = Default::default();
+    let mut root_ctx = Context {
+        base: "http://test.org",
+        ..Default::default()
+    };
     let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
 
     println!("{}", stmts);
