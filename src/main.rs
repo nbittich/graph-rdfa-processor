@@ -182,15 +182,28 @@ fn traverse_element<'a>(
             })
         }
         subject
+    } else if type_of.is_some() {
+        let node = Node::BNode(Uuid::new_v4());
+        let subject = ctx
+            .parent
+            .as_ref()
+            .and_then(|p| p.current_node.clone())
+            .unwrap_or_else(|| Node::BNode(Uuid::new_v4()));
+        if let Some(predicate) = &predicate {
+            stmts.push(Statement {
+                subject: subject.clone(),
+                predicate: predicate.clone(),
+                object: node.clone(),
+            })
+        }
+        node
     } else {
-        let subject = if type_of.is_some() {
-            Node::BNode(Uuid::new_v4())
-        } else {
-            ctx.parent
-                .as_ref()
-                .and_then(|p| p.current_node.clone())
-                .unwrap_or_else(|| Node::BNode(Uuid::new_v4()))
-        };
+        let subject = ctx
+            .parent
+            .as_ref()
+            .and_then(|p| p.current_node.clone())
+            .unwrap_or_else(|| Node::BNode(Uuid::new_v4()));
+
         if let Some(predicate) = &predicate {
             stmts.push(Statement {
                 subject: subject.clone(),
