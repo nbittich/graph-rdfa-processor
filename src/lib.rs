@@ -194,7 +194,7 @@ pub fn traverse_element<'a>(
     let resource = elt.attr("resource");
     let about = elt.attr("about");
     let property = elt.attr("property");
-    let _rel = elt.attr("rel");
+    let rel = elt.attr("rel");
     let _href = elt.attr("href");
     let prefix = elt.attr("prefix");
 
@@ -205,6 +205,12 @@ pub fn traverse_element<'a>(
     } else if let Some(parent) = &ctx.parent {
         ctx.prefixes = parent.prefixes.clone();
     }
+
+    let rel = rel.and_then(|r| {
+        resolve_uri(r, &ctx, false)
+            .map(|n| Node::Ref(Arc::new(n)))
+            .ok()
+    });
 
     let predicates = property.map(|p| parse_property_or_type_of(p, &ctx));
     let type_ofs = elt
@@ -227,7 +233,11 @@ pub fn traverse_element<'a>(
                     object: object.clone(),
                 });
             }
-            subject
+            if type_ofs.is_some() {
+                object
+            } else {
+                subject
+            }
         } else {
             object
         }
@@ -299,7 +309,7 @@ pub fn traverse_element<'a>(
             })
         }
     }
-    ctx.current_node = Some(current_node);
+    ctx.current_node = Some(current_node.clone());
 
     if element_ref.has_children() {
         let child_ctx = Context {
@@ -310,7 +320,14 @@ pub fn traverse_element<'a>(
         };
         for child in element_ref.children() {
             if let Some(c) = ElementRef::wrap(child) {
-                traverse_element(&c, child_ctx.clone(), stmts)?;
+                let obj = traverse_element(&c, child_ctx.clone(), stmts)?;
+                if let (Some(rel), Some(obj)) = (&rel, obj) {
+                    stmts.push(Statement {
+                        subject: current_node.clone(),
+                        predicate: rel.clone(),
+                        object: obj,
+                    });
+                }
             } else if let Some(_text) = child.value().as_text() {
                 // todo do smth with text
             }
