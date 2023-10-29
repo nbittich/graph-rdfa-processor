@@ -12,6 +12,7 @@ use constants::{
     COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE, NODE_RDFA_COPY_PREDICATE,
     NODE_RDFA_PATTERN_TYPE, NS_TYPE, RDFA_COPY_PREDICATE, RDFA_PATTERN_TYPE,
 };
+use itertools::Itertools;
 use scraper::{ElementRef, Html, Selector};
 use url::Url;
 use uuid::Uuid;
@@ -35,6 +36,7 @@ pub struct Context<'a> {
     vocab: Option<&'a str>,
     parent: Option<Rc<Context<'a>>>,
     current_node: Option<Node<'a>>,
+    prefixes: HashMap<&'a str, &'a str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
@@ -173,25 +175,32 @@ pub fn traverse_element<'a>(
     // extract attrs
     let vocab = elt
         .attr("vocab")
-        .or(ctx.parent.as_ref().and_then(|p| p.vocab));
+        .or_else(|| ctx.parent.as_ref().and_then(|p| p.vocab));
     let resource = elt.attr("resource");
     let about = elt.attr("about");
     let property = elt.attr("property");
     let rel = elt.attr("rel");
     let href = elt.attr("href");
     let type_of = elt.attr("typeof");
+    let prefix = elt.attr("prefix");
 
     ctx.vocab = vocab;
 
+    if let Some(prefix) = prefix {
+        ctx.prefixes = parse_curie(prefix);
+    } else if let Some(parent) = &ctx.parent {
+        ctx.prefixes = parent.prefixes.clone();
+    }
+
     let predicate = if let Some(property) = property {
-        Some(resolve_uri(property, &ctx.vocab, ctx.base, false)?)
+        Some(resolve_uri(property, &ctx, false)?)
     } else {
         None
     };
     let current_node = if let Some(resource) = resource {
         // handle resource case. set the context.
         // if property is present, this becomes an object of the parent.
-        let object = resolve_uri(resource, &ctx.vocab, ctx.base, true)?;
+        let object = resolve_uri(resource, &ctx, true)?;
         if let Some(predicate) = &predicate {
             let subject = ctx
                 .parent
@@ -208,13 +217,13 @@ pub fn traverse_element<'a>(
     } else if let Some(about) = about {
         // handle about case. set the context.
         // if property is present, children become objects of current.
-        let subject = resolve_uri(about, &ctx.vocab, ctx.base, true)?;
+        let subject = resolve_uri(about, &ctx, true)?;
 
         if let Some(predicate) = &predicate {
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref, &ctx.vocab, ctx.base, true)?,
+                object: extract_literal(element_ref, &ctx, true)?,
             })
         }
         subject
@@ -247,7 +256,7 @@ pub fn traverse_element<'a>(
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref, &ctx.vocab, ctx.base, true)?,
+                object: extract_literal(element_ref, &ctx, true)?,
             })
         }
         subject
@@ -257,7 +266,7 @@ pub fn traverse_element<'a>(
         stmts.push(Statement {
             subject: current_node.clone(),
             predicate: NODE_NS_TYPE.clone(),
-            object: resolve_uri(type_of, &ctx.vocab, ctx.base, false)?,
+            object: resolve_uri(type_of, &ctx, false)?,
         })
     }
     ctx.current_node = Some(current_node);
@@ -266,6 +275,7 @@ pub fn traverse_element<'a>(
         let mut child_ctx = Context {
             parent: Some(Rc::new(ctx.clone())),
             base: ctx.base,
+
             ..Default::default()
         };
         for child in element_ref.children() {
@@ -281,24 +291,22 @@ pub fn traverse_element<'a>(
 
 pub fn extract_literal<'a>(
     element_ref: &ElementRef<'a>,
-    vocab: &Option<&'a str>,
-    base: &'a str,
+    ctx: &Context<'a>,
     is_property: bool,
 ) -> Result<Node<'a>, &'static str> {
     let elt_val = element_ref.value();
-    let datatype =
-        elt_val
-            .attr("datatype")
-            .and_then(|dt| match resolve_uri(dt, vocab, base, true) {
-                Ok(d) => Some(Box::new(d)),
-                Err(e) => {
-                    eprintln!("could not parse {dt}. error {e}");
-                    None
-                }
-            }); //todo lang
+    let datatype = elt_val
+        .attr("datatype")
+        .and_then(|dt| match resolve_uri(dt, ctx, true) {
+            Ok(d) => Some(Box::new(d)),
+            Err(e) => {
+                eprintln!("could not parse {dt}. error {e}");
+                None
+            }
+        }); //todo lang
 
     if let Some(href) = elt_val.attr("href") {
-        resolve_uri(href, vocab, base, true)
+        resolve_uri(href, &ctx, true)
     } else if let Some(content) = elt_val.attr("content") {
         Ok(Node::Literal(Literal {
             datatype,
@@ -324,8 +332,7 @@ pub fn extract_literal<'a>(
 
 pub fn resolve_uri<'a>(
     uri: &'a str,
-    vocab: &Option<&'a str>,
-    base: &'a str,
+    ctx: &Context<'a>,
     is_resource: bool,
 ) -> Result<Node<'a>, &'static str> {
     let iri = Url::parse(uri);
@@ -336,19 +343,20 @@ pub fn resolve_uri<'a>(
         Ok(iri) => {
             if uri.starts_with("mail") || uri.starts_with("tel") {
                 Ok(Node::Iri(Cow::Borrowed(uri)))
-            }
-            // todo handle other cases
-            else if let Some(value) = COMMON_PREFIXES.get(iri.scheme()) {
-                let iri = uri.replace(':', "").replacen(iri.scheme(), value, 1);
+            } else if let Some(value) = ctx.prefixes.get(iri.scheme()) {
+                let iri = uri.replace(':', "").trim().replacen(iri.scheme(), value, 1);
+                Ok(Node::Iri(Cow::Owned(iri)))
+            } else if let Some(value) = COMMON_PREFIXES.get(iri.scheme()) {
+                let iri = uri.replace(':', "").trim().replacen(iri.scheme(), value, 1);
                 Ok(Node::Iri(Cow::Owned(iri)))
             } else {
-                Ok(Node::Iri(Cow::Borrowed("fixme! I'm a prefix")))
+                Ok(Node::Iri(Cow::Owned(format!("fixme! {uri}"))))
             }
         }
         Err(url::ParseError::RelativeUrlWithoutBase) => {
             if is_resource {
-                Ok(Node::Iri(Cow::Owned([base, uri].join(""))))
-            } else if let Some(vocab) = vocab {
+                Ok(Node::Iri(Cow::Owned([ctx.base, uri].join(""))))
+            } else if let Some(vocab) = ctx.vocab {
                 Ok(Node::Iri(Cow::Owned([vocab, uri].join(""))))
             } else {
                 Err("could not determine base/vocab")
@@ -359,6 +367,23 @@ pub fn resolve_uri<'a>(
             Err("could not resolve uri")
         }
     }
+}
+
+fn parse_curie(s: &str) -> HashMap<&str, &str> {
+    //to do SafeCurie
+    // https://www.w3.org/MarkUp/2008/ED-curie-20080318/#processorconf
+    s.split_whitespace()
+        .map(|s| s.trim())
+        .tuples::<(_, _)>()
+        .filter_map(|(s, p)| {
+            if let Some((s, _)) = s.split_once(":") {
+                Some((s, p))
+            } else {
+                eprintln!("fixme! couldn't parse curie for {s}, {p}");
+                None
+            }
+        })
+        .collect()
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
