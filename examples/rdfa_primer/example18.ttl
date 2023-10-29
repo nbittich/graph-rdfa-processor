@@ -1,0 +1,6 @@
+<http://data.lblod.info/.well-known/genid#2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
+<http://data.lblod.info/.well-known/genid#2> <http://xmlns.com/foaf/0.1/homepage> <http://example.com/bob/>.
+<http://data.lblod.info/.well-known/genid#3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
+<http://data.lblod.info/.well-known/genid#3> <http://xmlns.com/foaf/0.1/homepage> <http://example.com/eve/>.
+<http://data.lblod.info/.well-known/genid#4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
+<http://data.lblod.info/.well-known/genid#4> <http://xmlns.com/foaf/0.1/homepage> <http://example.com/manu/>.

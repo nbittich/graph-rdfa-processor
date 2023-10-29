@@ -1,0 +1,10 @@
+<http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/title> "The trouble with Bob".
+<http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/created> "2011-09-10".
+<http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/creator> "Alice".
+<http://test.org/alice/posts/jims_concert> <http://purl.org/dc/terms/title> "I was at Jim's concert the other day".
+<http://test.org/alice/posts/jims_concert> <http://purl.org/dc/terms/created> "2011-10-22".
+<http://test.org/alice/posts/jims_concert> <http://purl.org/dc/terms/creator> "Alice".
+<http://test.org/alice/posts/trouble_with_bob> <http://creativecommons.org/ns#license> <http://creativecommons.org/licenses/by/3.0/>.
+<http://test.org/alice/posts/trouble_with_bob> <http://creativecommons.org/ns#attributionName> "©2011 Alice Birpemswick".
+<http://test.org/alice/posts/jims_concert> <http://creativecommons.org/ns#license> <http://creativecommons.org/licenses/by/3.0/>.
+<http://test.org/alice/posts/jims_concert> <http://creativecommons.org/ns#attributionName> "©2011 Alice Birpemswick".

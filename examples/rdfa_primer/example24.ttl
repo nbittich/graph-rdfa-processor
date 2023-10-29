@@ -1,0 +1,4 @@
+<http://test.org#me> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
+<http://test.org#me> <http://xmlns.com/foaf/0.1/name> "Alice Birpemswick".
+<http://test.org#me> <http://xmlns.com/foaf/0.1/mbox> <mailto:alice@example.com>.
+<http://test.org#me> <http://xmlns.com/foaf/0.1/phone> <tel:+1-617-555-7332>.

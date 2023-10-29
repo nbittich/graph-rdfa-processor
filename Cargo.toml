@@ -11,3 +11,9 @@ lazy_static = "1.4.0"
 scraper = "0.18.0"
 url = "2.4.1"
 uuid = { version = "1.5.0", features = ["v4"] }
+
+[dev-dependencies]
+# some test must be run sequentially. 
+# if library is broken, alternative is: cargo test -- --test-threads 1
+serial_test = "2.0.0"
+test-case = "3.2.1"

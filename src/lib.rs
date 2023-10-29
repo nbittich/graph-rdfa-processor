@@ -78,7 +78,16 @@ impl Display for Node<'_> {
                 lang,
                 value,
             }) => {
-                let mut s = format!(r#""{value}""#);
+                let mut s = if value
+                    .as_ref()
+                    .chars()
+                    .any(|c| c.is_ascii_control() || c.is_control())
+                {
+                    format!(r#""""{value}""""#)
+                } else {
+                    format!(r#""{value}""#)
+                };
+
                 if let Some(datatype) = datatype {
                     s.push_str(&format!(r#"^^{datatype}"#));
                 } else if let Some(lang) = lang {
