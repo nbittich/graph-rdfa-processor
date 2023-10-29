@@ -34,6 +34,11 @@ const INPUT_OUTPUT_DIR: &str = "examples/rdfa_primer";
 #[test_case("example35" ; "2.2.1 Using the content attribute          : rdfa_primer_35")]
 #[test_case("example36" ; "2.2.1 Using the content attribute          : rdfa_primer_36")]
 #[test_case("example39" ; "2.2.2 Datatypes                            : rdfa_primer_39")]
+#[test_case("example40" ; "2.2.3 Alternative for setting the context  : rdfa_primer_40")]
+#[test_case("example41" ; "2.2.3 Alternative for setting the context  : rdfa_primer_41")]
+#[test_case("example42" ; "2.2.3 Alternative for setting the context  : rdfa_primer_42")]
+#[test_case("example43" ; "2.2.3 Alternative for setting the context  : rdfa_primer_43")]
+#[test_case("example44" ; "2.2.3 Alternative for setting the context  : rdfa_primer_44")]
 #[serial]
 fn test(test_name: &str) {
     println!("running test {test_name}");

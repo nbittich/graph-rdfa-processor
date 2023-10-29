@@ -1,0 +1,2 @@
+<http://test.org/alice/posts/trouble_with_bob> <http://z.com/title> "The trouble with Bob".
+<http://test.org/alice/posts/trouble_with_bob> <http://z.com/creator> <http://test.org#me>.
