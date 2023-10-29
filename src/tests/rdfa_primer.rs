@@ -184,9 +184,58 @@ fn test_example22() {
 
     println!("{}", stmts);
 }
+
 #[test]
 fn test_example23() {
     let html = include_str!("../../examples/example23.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let mut root_ctx = Context {
+        base: "http://test.org",
+        ..Default::default()
+    };
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
+
+    println!("{}", stmts);
+}
+
+#[test]
+fn test_example24() {
+    let html = include_str!("../../examples/example24.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let mut root_ctx = Context {
+        base: "http://test.org",
+        ..Default::default()
+    };
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
+
+    println!("{}", stmts);
+}
+
+#[test]
+fn test_example25() {
+    let html = include_str!("../../examples/example25.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let mut root_ctx = Context {
+        base: "http://test.org",
+        ..Default::default()
+    };
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
+
+    println!("{}", stmts);
+}
+
+#[test]
+fn test_example26() {
+    let html = include_str!("../../examples/example26.html");
 
     let document = Html::parse_document(html);
     let root = document.root_element();

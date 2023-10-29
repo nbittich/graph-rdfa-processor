@@ -140,8 +140,6 @@ pub fn copy_pattern(triples: &mut Vec<Statement<'_>>) -> Result<(), Box<dyn Erro
         })
         .collect::<Vec<_>>();
 
-    // triples.retain(|stmt| stmt.object != *NODE_RDFA_PATTERN_TYPE);
-
     let copy_patterns = triples
         .iter()
         .filter_map(|stmt| {
@@ -175,6 +173,7 @@ pub fn copy_pattern(triples: &mut Vec<Statement<'_>>) -> Result<(), Box<dyn Erro
             }
         })
         .collect::<Vec<_>>();
+
     // patch where there is a copy pattern predicate
 
     for Statement {
@@ -218,14 +217,14 @@ pub fn traverse_element<'a>(
     ctx.vocab = vocab;
 
     let predicate = if let Some(property) = property {
-        Some(resolve_uri(property, &ctx.vocab, ctx.base, true)?)
+        Some(resolve_uri(property, &ctx.vocab, ctx.base, false)?)
     } else {
         None
     };
     let current_node = if let Some(resource) = resource {
         // handle resource case. set the context.
         // if property is present, this becomes an object of the parent.
-        let object = resolve_uri(resource, &ctx.vocab, ctx.base, false)?;
+        let object = resolve_uri(resource, &ctx.vocab, ctx.base, true)?;
         if let Some(predicate) = &predicate {
             let subject = ctx
                 .parent
@@ -242,7 +241,7 @@ pub fn traverse_element<'a>(
     } else if let Some(about) = about {
         // handle about case. set the context.
         // if property is present, children become objects of current.
-        let subject = resolve_uri(about, &ctx.vocab, ctx.base, false)?;
+        let subject = resolve_uri(about, &ctx.vocab, ctx.base, true)?;
 
         if let Some(predicate) = &predicate {
             stmts.push(Statement {
@@ -253,6 +252,9 @@ pub fn traverse_element<'a>(
         }
         subject
     } else if type_of.is_some() {
+        // for some reasons it seems that if there is a typeof but no
+        // about and no resource, it becomes an anon node
+        // this might be incorrect
         let node = Node::BNode(Uuid::new_v4());
         let subject = ctx
             .parent
@@ -310,7 +312,7 @@ pub fn traverse_element<'a>(
     Ok(ctx.current_node.clone())
 }
 
-fn extract_literal<'a>(
+pub fn extract_literal<'a>(
     element_ref: &ElementRef<'a>,
     vocab: &Option<&'a str>,
     base: &'a str,
@@ -320,7 +322,7 @@ fn extract_literal<'a>(
     let datatype =
         elt_val
             .attr("datatype")
-            .and_then(|dt| match resolve_uri(dt, vocab, base, false) {
+            .and_then(|dt| match resolve_uri(dt, vocab, base, true) {
                 Ok(d) => Some(Box::new(d)),
                 Err(e) => {
                     eprintln!("could not parse {dt}. error {e}");
@@ -329,7 +331,7 @@ fn extract_literal<'a>(
             }); //todo lang
 
     if let Some(href) = elt_val.attr("href") {
-        resolve_uri(href, vocab, base, false)
+        resolve_uri(href, vocab, base, true)
     } else if let Some(content) = elt_val.attr("content") {
         Ok(Node::Literal(Literal {
             datatype,
@@ -353,11 +355,11 @@ fn extract_literal<'a>(
     }
 }
 
-fn resolve_uri<'a>(
+pub fn resolve_uri<'a>(
     uri: &'a str,
     vocab: &Option<&'a str>,
     base: &'a str,
-    is_property: bool,
+    is_resource: bool,
 ) -> Result<Node<'a>, &'static str> {
     let iri = Url::parse(uri);
     match iri {
@@ -377,16 +379,10 @@ fn resolve_uri<'a>(
             }
         }
         Err(url::ParseError::RelativeUrlWithoutBase) => {
-            if let Some(vocab) = vocab {
-                if !is_property {
-                    Ok(Node::Iri(Cow::Owned([base, uri].join(""))))
-                } else {
-                    Ok(Node::Iri(Cow::Owned([vocab, uri].join("")))) // todo check if uri with base is
-                                                                     // valid
-                }
-            } else if !is_property {
-                // use base for resource
+            if is_resource {
                 Ok(Node::Iri(Cow::Owned([base, uri].join(""))))
+            } else if let Some(vocab) = vocab {
+                Ok(Node::Iri(Cow::Owned([vocab, uri].join(""))))
             } else {
                 Err("could not determine base/vocab")
             }
