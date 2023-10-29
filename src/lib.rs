@@ -3,7 +3,7 @@ use std::{
     collections::HashMap,
     error::Error,
     fmt::{Display, Formatter},
-    rc::Rc,
+    sync::Arc,
 };
 
 use constants::{COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE};
@@ -23,7 +23,7 @@ pub struct RdfaGraph<'a>(Vec<Statement<'a>>);
 pub struct Context<'a> {
     base: &'a str,
     vocab: Option<&'a str>,
-    parent: Option<Rc<Context<'a>>>,
+    parent: Option<Arc<Context<'a>>>,
     current_node: Option<Node<'a>>,
     prefixes: HashMap<&'a str, &'a str>,
 }
@@ -35,13 +35,28 @@ pub struct Literal<'a> {
     lang: Option<&'a str>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, Eq, PartialOrd, Hash)]
 pub enum Node<'a> {
     Iri(Cow<'a, str>),
     Literal(Literal<'a>),
-    Ref(Box<Node<'a>>),
+    Ref(Arc<Node<'a>>),
     List(Vec<Node<'a>>),
     BNode(Uuid),
+}
+
+impl PartialEq for Node<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Iri(l0), Self::Iri(r0)) => l0 == r0,
+            (Self::Literal(l0), Self::Literal(r0)) => l0 == r0,
+            (Self::Ref(l0), Self::Ref(r0)) => l0 == r0,
+            (Self::Ref(l0), rhs) => l0.as_ref() == rhs,
+            (lhs, Self::Ref(r0)) => lhs == r0.as_ref(),
+            (Self::List(l0), Self::List(r0)) => l0 == r0,
+            (Self::BNode(l0), Self::BNode(r0)) => l0 == r0,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
@@ -128,26 +143,38 @@ pub fn copy_pattern<'a>(triples: Vec<Statement<'a>>) -> Result<Vec<Statement<'a>
         .into_iter()
         .partition(|stmt| pattern_type.iter().any(|s| s.subject == stmt.subject));
 
-    let (pattern_subject, mut triples): (Vec<Statement>, Vec<Statement>) = pattern
+    let pattern_predicate = pattern_predicate
         .into_iter()
-        .partition(|stmt| pattern_predicate.iter().any(|s| s.subject == stmt.object));
+        .map(|stmt| {
+            (
+                stmt.subject,
+                Arc::new(stmt.predicate),
+                Arc::new(stmt.object),
+            )
+        })
+        .collect_vec();
+
+    let (pattern_subject, mut triples): (Vec<Statement>, Vec<Statement>) =
+        pattern.into_iter().partition(|stmt| {
+            pattern_predicate
+                .iter()
+                .any(|(subject, _, _)| subject == &stmt.object)
+        });
 
     for Statement {
         subject, object, ..
     } in pattern_subject
     {
-        for Statement {
-            predicate,
-            object: obj,
-            ..
-        } in pattern_predicate
+        let subject = Arc::new(subject);
+
+        for (_, predicate, object) in pattern_predicate
             .iter()
-            .filter(|stmt| object == stmt.subject)
+            .filter(|(subject, _, _)| &object == subject)
         {
             triples.push(Statement {
-                subject: subject.clone(),
-                predicate: predicate.clone(),
-                object: obj.clone(),
+                subject: Node::Ref(subject.clone()),
+                predicate: Node::Ref(predicate.clone()),
+                object: Node::Ref(object.clone()),
             })
         }
     }
@@ -182,14 +209,14 @@ pub fn traverse_element<'a>(
     }
 
     let predicate = if let Some(property) = property {
-        Some(resolve_uri(property, &ctx, false)?)
+        Some(Node::Ref(Arc::new(resolve_uri(property, &ctx, false)?)))
     } else {
         None
     };
     let current_node = if let Some(resource) = resource {
         // handle resource case. set the context.
         // if property is present, this becomes an object of the parent.
-        let object = resolve_uri(resource, &ctx, true)?;
+        let object = Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?));
         if let Some(predicate) = &predicate {
             let subject = ctx
                 .parent
@@ -206,7 +233,7 @@ pub fn traverse_element<'a>(
     } else if let Some(about) = about {
         // handle about case. set the context.
         // if property is present, children become objects of current.
-        let subject = resolve_uri(about, &ctx, true)?;
+        let subject = Node::Ref(Arc::new(resolve_uri(about, &ctx, true)?));
 
         if let Some(predicate) = &predicate {
             stmts.push(Statement {
@@ -255,14 +282,14 @@ pub fn traverse_element<'a>(
         stmts.push(Statement {
             subject: current_node.clone(),
             predicate: NODE_NS_TYPE.clone(),
-            object: resolve_uri(type_of, &ctx, false)?,
+            object: Node::Ref(Arc::new(resolve_uri(type_of, &ctx, false)?)),
         })
     }
     ctx.current_node = Some(current_node);
 
     if element_ref.has_children() {
         let child_ctx = Context {
-            parent: Some(Rc::new(ctx.clone())),
+            parent: Some(Arc::new(ctx.clone())),
             base: ctx.base,
 
             ..Default::default()
