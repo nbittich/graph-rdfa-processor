@@ -1,31 +1,20 @@
-#![allow(unused)]
 use std::{
-    borrow::{BorrowMut, Cow},
+    borrow::Cow,
     collections::HashMap,
-    default,
     error::Error,
     fmt::{Display, Formatter},
     rc::Rc,
 };
 
-use constants::{
-    COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE, NODE_RDFA_COPY_PREDICATE,
-    NODE_RDFA_PATTERN_TYPE, NS_TYPE, RDFA_COPY_PREDICATE, RDFA_PATTERN_TYPE,
-};
+use constants::{COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE};
 use itertools::Itertools;
-use scraper::{ElementRef, Html, Selector};
+use scraper::ElementRef;
 use url::Url;
 use uuid::Uuid;
 mod constants;
 
 #[cfg(test)]
 mod tests;
-
-macro_rules! select {
-    ($e:literal) => {
-        &Selector::parse($e)?
-    };
-}
 
 #[derive(Debug)]
 pub struct RdfaGraph<'a>(Vec<Statement<'a>>);
@@ -57,9 +46,9 @@ pub enum Node<'a> {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub struct Statement<'a> {
-    pub subject: Node<'a>,
-    pub predicate: Node<'a>,
-    pub object: Node<'a>,
+    subject: Node<'a>,
+    predicate: Node<'a>,
+    object: Node<'a>,
 }
 
 impl Display for Node<'_> {
@@ -85,7 +74,7 @@ impl Display for Node<'_> {
                 f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
             }
             e => {
-                writeln!(f, "fixme! format for {e:?} not implemented");
+                writeln!(f, "fixme! format for {e:?} not implemented")?;
                 Err(std::fmt::Error)
             }
         }
@@ -179,8 +168,8 @@ pub fn traverse_element<'a>(
     let resource = elt.attr("resource");
     let about = elt.attr("about");
     let property = elt.attr("property");
-    let rel = elt.attr("rel");
-    let href = elt.attr("href");
+    let _rel = elt.attr("rel");
+    let _href = elt.attr("href");
     let type_of = elt.attr("typeof");
     let prefix = elt.attr("prefix");
 
@@ -223,7 +212,7 @@ pub fn traverse_element<'a>(
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref, &ctx, true)?,
+                object: extract_literal(element_ref, &ctx)?,
             })
         }
         subject
@@ -256,7 +245,7 @@ pub fn traverse_element<'a>(
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref, &ctx, true)?,
+                object: extract_literal(element_ref, &ctx)?,
             })
         }
         subject
@@ -272,7 +261,7 @@ pub fn traverse_element<'a>(
     ctx.current_node = Some(current_node);
 
     if element_ref.has_children() {
-        let mut child_ctx = Context {
+        let child_ctx = Context {
             parent: Some(Rc::new(ctx.clone())),
             base: ctx.base,
 
@@ -281,8 +270,8 @@ pub fn traverse_element<'a>(
         for child in element_ref.children() {
             if let Some(c) = ElementRef::wrap(child) {
                 traverse_element(&c, child_ctx.clone(), stmts)?;
-            } else if let Some(text) = child.value().as_text() {
-                // do smth with text
+            } else if let Some(_text) = child.value().as_text() {
+                // todo do smth with text
             }
         }
     }
@@ -292,7 +281,6 @@ pub fn traverse_element<'a>(
 pub fn extract_literal<'a>(
     element_ref: &ElementRef<'a>,
     ctx: &Context<'a>,
-    is_property: bool,
 ) -> Result<Node<'a>, &'static str> {
     let elt_val = element_ref.value();
     let datatype = elt_val
@@ -384,22 +372,4 @@ fn parse_curie(s: &str) -> HashMap<&str, &str> {
             }
         })
         .collect()
-}
-
-fn main() -> Result<(), Box<dyn Error>> {
-    // let buf = include_str!("test-page.html");
-    // let document = Html::parse_document(buf);
-    // let mut graph: RdfaGraph = Default::default();
-    //
-    // let root = document.root_element();
-    //
-    // graph.lang = root.value().attr("lang");
-    //
-    // let body = root.select(select!("body")).last().ok_or("no body")?;
-    // dbg!(graph);
-
-    Ok(())
-    // let selector = Selector::parse(r#"div[property="prov:value"]"#).unwrap();
-    // let mut s = document.select(&selector);
-    // dbg!(s.next().unwrap().html());
 }

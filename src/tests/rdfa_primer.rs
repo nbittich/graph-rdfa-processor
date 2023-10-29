@@ -1,5 +1,4 @@
 use scraper::Html;
-use url::Url;
 
 use crate::{Context, RdfaGraph};
 
@@ -176,7 +175,7 @@ fn test_example22() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
@@ -192,7 +191,7 @@ fn test_example23() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
@@ -208,7 +207,7 @@ fn test_example24() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
@@ -224,7 +223,7 @@ fn test_example25() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
@@ -240,7 +239,7 @@ fn test_example26() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
@@ -256,7 +255,7 @@ fn test_example27() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
@@ -272,7 +271,7 @@ fn test_example28() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
@@ -288,7 +287,7 @@ fn test_example29() {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let mut root_ctx = Context {
+    let root_ctx = Context {
         base: "http://test.org",
         ..Default::default()
     };
