@@ -202,7 +202,7 @@ pub fn traverse_element<'a>(
     ctx.vocab = vocab;
 
     if let Some(prefix) = prefix {
-        ctx.prefixes = parse_curie(prefix);
+        ctx.prefixes = parse_prefixes(prefix);
     } else if let Some(parent) = &ctx.parent {
         ctx.prefixes = parent.prefixes.clone();
     }
@@ -388,9 +388,7 @@ pub fn resolve_uri<'a>(
     }
 }
 
-fn parse_curie(s: &str) -> HashMap<&str, &str> {
-    // todo SafeCurie
-    // https://www.w3.org/MarkUp/2008/ED-curie-20080318/#processorconf
+fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
     s.split_whitespace()
         .map(|s| s.trim())
         .tuples::<(_, _)>()

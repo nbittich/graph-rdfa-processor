@@ -2,3 +2,4 @@
 - implement datatypes
 - figure out how to test with real world examples
 - check the fixme's & todo's
+- SafeCurie: https://www.w3.org/MarkUp/2008/ED-curie-20080318/#processorconf
