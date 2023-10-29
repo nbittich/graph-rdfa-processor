@@ -6,11 +6,13 @@ use std::{
     sync::Arc,
 };
 
-use constants::{COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE};
+use constants::{
+    BNODE_ID_GENERATOR, COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE,
+    NODE_RDFA_PATTERN_TYPE,
+};
 use itertools::Itertools;
 use scraper::ElementRef;
 use url::Url;
-use uuid::Uuid;
 mod constants;
 
 #[cfg(test)]
@@ -41,7 +43,7 @@ pub enum Node<'a> {
     Literal(Literal<'a>),
     Ref(Arc<Node<'a>>),
     List(Vec<Node<'a>>),
-    BNode(Uuid),
+    BNode(u64),
 }
 
 impl PartialEq for Node<'_> {
@@ -235,12 +237,15 @@ pub fn traverse_element<'a>(
         // for some reasons it seems that if there is a typeof but no
         // about and no resource, it becomes an anon node
         // this might be incorrect
-        let node = Node::BNode(Uuid::new_v4());
+        let node =
+            Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst));
         let subject = ctx
             .parent
             .as_ref()
             .and_then(|p| p.current_node.clone())
-            .unwrap_or_else(|| Node::BNode(Uuid::new_v4()));
+            .unwrap_or_else(|| {
+                Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+            });
         if let Some(predicate) = &predicate {
             stmts.push(Statement {
                 subject: subject.clone(),
@@ -254,7 +259,9 @@ pub fn traverse_element<'a>(
             .parent
             .as_ref()
             .and_then(|p| p.current_node.clone())
-            .unwrap_or_else(|| Node::BNode(Uuid::new_v4()));
+            .unwrap_or_else(|| {
+                Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+            });
 
         if let Some(predicate) = &predicate {
             stmts.push(Statement {
