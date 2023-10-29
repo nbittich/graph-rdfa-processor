@@ -1,0 +1,3 @@
+<http://data.lblod.info/.well-known/genid#1> <http://ogp.me/ns#title> "The Trouble with Bob".
+<http://data.lblod.info/.well-known/genid#1> <http://ogp.me/ns#type> "text".
+<http://data.lblod.info/.well-known/genid#1> <http://ogp.me/ns#image> "http://example.com/alice/bob-ugly.jpg".

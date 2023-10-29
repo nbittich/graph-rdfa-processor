@@ -31,6 +31,8 @@ const INPUT_OUTPUT_DIR: &str = "examples/rdfa_primer";
 #[test_case("example31" ; "2.1.5.1  Repeating properties              : rdfa_primer_31")]
 #[test_case("example32" ; "2.1.5.1  Repeating properties              : rdfa_primer_32")]
 #[test_case("example33" ; "2.1.5.2 Default Prefixes (Initial Context) : rdfa_primer_33")]
+#[test_case("example35" ; "2.2.1 Using the content attribute          : rdfa_primer_35")]
+#[test_case("example36" ; "2.2.1 Using the content attribute          : rdfa_primer_36")]
 #[serial]
 fn test(test_name: &str) {
     println!("running test {test_name}");
