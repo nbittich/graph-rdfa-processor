@@ -134,7 +134,7 @@ impl<'a> RdfaGraph<'a> {
     }
 }
 
-pub fn copy_pattern<'a>(triples: Vec<Statement<'a>>) -> Result<Vec<Statement<'a>>, Box<dyn Error>> {
+pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, Box<dyn Error>> {
     let (pattern_type, pattern): (Vec<Statement>, Vec<Statement>) = triples
         .into_iter()
         .partition(|stmt| stmt.object == *NODE_RDFA_PATTERN_TYPE);
@@ -143,38 +143,26 @@ pub fn copy_pattern<'a>(triples: Vec<Statement<'a>>) -> Result<Vec<Statement<'a>
         .into_iter()
         .partition(|stmt| pattern_type.iter().any(|s| s.subject == stmt.subject));
 
-    let pattern_predicate = pattern_predicate
+    let (pattern_subject, mut triples): (Vec<Statement>, Vec<Statement>) = pattern
         .into_iter()
-        .map(|stmt| {
-            (
-                stmt.subject,
-                Arc::new(stmt.predicate),
-                Arc::new(stmt.object),
-            )
-        })
-        .collect_vec();
-
-    let (pattern_subject, mut triples): (Vec<Statement>, Vec<Statement>) =
-        pattern.into_iter().partition(|stmt| {
-            pattern_predicate
-                .iter()
-                .any(|(subject, _, _)| subject == &stmt.object)
-        });
+        .partition(|stmt| pattern_predicate.iter().any(|s| s.subject == stmt.object));
 
     for Statement {
         subject, object, ..
     } in pattern_subject
     {
-        let subject = Arc::new(subject);
-
-        for (_, predicate, object) in pattern_predicate
+        for Statement {
+            predicate,
+            object: obj,
+            ..
+        } in pattern_predicate
             .iter()
-            .filter(|(subject, _, _)| &object == subject)
+            .filter(|stmt| object == stmt.subject)
         {
             triples.push(Statement {
-                subject: Node::Ref(subject.clone()),
-                predicate: Node::Ref(predicate.clone()),
-                object: Node::Ref(object.clone()),
+                subject: subject.clone(),
+                predicate: predicate.clone(),
+                object: obj.clone(),
             })
         }
     }
@@ -239,7 +227,7 @@ pub fn traverse_element<'a>(
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref, &ctx)?,
+                object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
             })
         }
         subject
@@ -272,7 +260,7 @@ pub fn traverse_element<'a>(
             stmts.push(Statement {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
-                object: extract_literal(element_ref, &ctx)?,
+                object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
             })
         }
         subject
@@ -321,7 +309,7 @@ pub fn extract_literal<'a>(
         }); //todo lang
 
     if let Some(href) = elt_val.attr("href") {
-        resolve_uri(href, &ctx, true)
+        resolve_uri(href, ctx, true)
     } else if let Some(content) = elt_val.attr("content") {
         Ok(Node::Literal(Literal {
             datatype,
@@ -391,7 +379,7 @@ fn parse_curie(s: &str) -> HashMap<&str, &str> {
         .map(|s| s.trim())
         .tuples::<(_, _)>()
         .filter_map(|(s, p)| {
-            if let Some((s, _)) = s.split_once(":") {
+            if let Some((s, _)) = s.split_once(':') {
                 Some((s, p))
             } else {
                 eprintln!("fixme! couldn't parse curie for {s}, {p}");
