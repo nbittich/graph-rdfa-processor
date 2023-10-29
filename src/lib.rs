@@ -358,7 +358,7 @@ pub fn resolve_uri<'a>(
 }
 
 fn parse_curie(s: &str) -> HashMap<&str, &str> {
-    //to do SafeCurie
+    // todo SafeCurie
     // https://www.w3.org/MarkUp/2008/ED-curie-20080318/#processorconf
     s.split_whitespace()
         .map(|s| s.trim())
