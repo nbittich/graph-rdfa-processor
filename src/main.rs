@@ -16,7 +16,6 @@ use scraper::{ElementRef, Html, Selector};
 use url::Url;
 use uuid::Uuid;
 mod constants;
-mod utils;
 
 #[cfg(test)]
 mod tests;
@@ -121,81 +120,49 @@ impl<'a> RdfaGraph<'a> {
     ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
         let mut triples = vec![];
         traverse_element(input, initial_context, &mut triples)?;
-        copy_pattern(&mut triples);
+
+        triples = copy_pattern(triples)?;
         // copy patterns
 
         Ok(RdfaGraph(triples))
     }
 }
 
-pub fn copy_pattern(triples: &mut Vec<Statement<'_>>) -> Result<(), Box<dyn Error>> {
-    let mut copy_patterns_subject = triples
-        .iter()
-        .filter_map(|stmt| {
-            if stmt.predicate == *NODE_NS_TYPE && stmt.object == *NODE_RDFA_PATTERN_TYPE {
-                Some(stmt.subject.clone())
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>();
+pub fn copy_pattern<'a>(triples: Vec<Statement<'a>>) -> Result<Vec<Statement<'a>>, Box<dyn Error>> {
+    let (pattern_type, pattern): (Vec<Statement>, Vec<Statement>) = triples
+        .into_iter()
+        .partition(|stmt| stmt.object == *NODE_RDFA_PATTERN_TYPE);
 
-    let copy_patterns = triples
-        .iter()
-        .filter_map(|stmt| {
-            if copy_patterns_subject
-                .iter()
-                .any(|c| &stmt.subject == c && stmt.object != *NODE_RDFA_PATTERN_TYPE)
-            {
-                Some((
-                    stmt.subject.clone(),
-                    (stmt.predicate.clone(), stmt.object.clone()),
-                ))
-            } else {
-                None
-            }
-        })
-        .fold(
-            HashMap::new(),
-            |mut map: HashMap<_, Vec<(_, _)>>, (k, v)| {
-                map.entry(k).or_default().push(v);
-                map
-            },
-        );
+    let (pattern_predicate, pattern): (Vec<Statement>, Vec<Statement>) = pattern
+        .into_iter()
+        .partition(|stmt| pattern_type.iter().any(|s| s.subject == stmt.subject));
 
-    let copy_patterns_predicate_subject = triples
-        .iter()
-        .filter_map(|stmt| {
-            if stmt.predicate == *NODE_RDFA_COPY_PREDICATE {
-                Some(stmt.clone())
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>();
-
-    // patch where there is a copy pattern predicate
+    let (pattern_subject, mut triples): (Vec<Statement>, Vec<Statement>) = pattern
+        .into_iter()
+        .partition(|stmt| pattern_predicate.iter().any(|s| s.subject == stmt.object));
 
     for Statement {
         subject, object, ..
-    } in copy_patterns_predicate_subject
+    } in pattern_subject
     {
-        let to_copy = copy_patterns.get(&object).ok_or("missing copy pattern!")?;
-        for (pred, obj) in to_copy.iter() {
+        for Statement {
+            predicate,
+            object: obj,
+            ..
+        } in pattern_predicate
+            .iter()
+            .filter(|stmt| object == stmt.subject)
+        {
             triples.push(Statement {
                 subject: subject.clone(),
-                predicate: pred.clone(),
+                predicate: predicate.clone(),
                 object: obj.clone(),
             })
         }
     }
-
-    triples.retain(|stmt| {
-        !copy_patterns_subject.iter().any(|s| &stmt.subject == s)
-            && stmt.predicate != *NODE_RDFA_COPY_PREDICATE
-    });
-    Ok(())
+    Ok(triples)
 }
+
 pub fn traverse_element<'a>(
     element_ref: &ElementRef<'a>,
     mut ctx: Context<'a>,

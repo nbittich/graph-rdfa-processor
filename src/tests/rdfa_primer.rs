@@ -248,3 +248,19 @@ fn test_example26() {
 
     println!("{}", stmts);
 }
+
+#[test]
+fn test_example27() {
+    let html = include_str!("../../examples/example27.html");
+
+    let document = Html::parse_document(html);
+    let root = document.root_element();
+
+    let mut root_ctx = Context {
+        base: "http://test.org",
+        ..Default::default()
+    };
+    let stmts = RdfaGraph::parse(&root, root_ctx).unwrap();
+
+    println!("{}", stmts);
+}
