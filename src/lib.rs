@@ -196,7 +196,6 @@ pub fn traverse_element<'a>(
     let property = elt.attr("property");
     let _rel = elt.attr("rel");
     let _href = elt.attr("href");
-    let type_of = elt.attr("typeof");
     let prefix = elt.attr("prefix");
 
     ctx.vocab = vocab;
@@ -207,42 +206,47 @@ pub fn traverse_element<'a>(
         ctx.prefixes = parent.prefixes.clone();
     }
 
-    let predicate = if let Some(property) = property {
-        Some(Node::Ref(Arc::new(resolve_uri(property, &ctx, false)?)))
-    } else {
-        None
-    };
+    let predicates = property.map(|p| parse_property_or_type_of(p, &ctx));
+    let type_ofs = elt
+        .attr("typeof")
+        .map(|t| parse_property_or_type_of(t, &ctx));
     let current_node = if let Some(resource) = resource {
         // handle resource case. set the context.
         // if property is present, this becomes an object of the parent.
         let object = Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?));
-        if let Some(predicate) = &predicate {
+        if let Some(predicates) = &predicates {
             let subject = ctx
                 .parent
                 .as_ref()
                 .and_then(|p| p.current_node.clone())
                 .ok_or("no parent node")?;
-            stmts.push(Statement {
-                subject,
-                predicate: predicate.clone(),
-                object: object.clone(),
-            });
+            for predicate in predicates {
+                stmts.push(Statement {
+                    subject: subject.clone(),
+                    predicate: predicate.clone(),
+                    object: object.clone(),
+                });
+            }
+            subject
+        } else {
+            object
         }
-        object
     } else if let Some(about) = about {
         // handle about case. set the context.
         // if property is present, children become objects of current.
         let subject = Node::Ref(Arc::new(resolve_uri(about, &ctx, true)?));
 
-        if let Some(predicate) = &predicate {
-            stmts.push(Statement {
-                subject: subject.clone(),
-                predicate: predicate.clone(),
-                object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
-            })
+        if let Some(predicates) = &predicates {
+            for predicate in predicates {
+                stmts.push(Statement {
+                    subject: subject.clone(),
+                    predicate: predicate.clone(),
+                    object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+                });
+            }
         }
         subject
-    } else if type_of.is_some() {
+    } else if type_ofs.is_some() {
         // for some reasons it seems that if there is a typeof but no
         // about and no resource, it becomes an anon node
         // this might be incorrect
@@ -255,12 +259,14 @@ pub fn traverse_element<'a>(
             .unwrap_or_else(|| {
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
             });
-        if let Some(predicate) = &predicate {
-            stmts.push(Statement {
-                subject: subject.clone(),
-                predicate: predicate.clone(),
-                object: node.clone(),
-            })
+        if let Some(predicates) = &predicates {
+            for predicate in predicates {
+                stmts.push(Statement {
+                    subject: subject.clone(),
+                    predicate: predicate.clone(),
+                    object: node.clone(),
+                });
+            }
         }
         node
     } else {
@@ -272,22 +278,26 @@ pub fn traverse_element<'a>(
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
             });
 
-        if let Some(predicate) = &predicate {
-            stmts.push(Statement {
-                subject: subject.clone(),
-                predicate: predicate.clone(),
-                object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
-            })
+        if let Some(predicates) = &predicates {
+            for predicate in predicates {
+                stmts.push(Statement {
+                    subject: subject.clone(),
+                    predicate: predicate.clone(),
+                    object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+                });
+            }
         }
         subject
     };
 
-    if let Some(type_of) = type_of {
-        stmts.push(Statement {
-            subject: current_node.clone(),
-            predicate: NODE_NS_TYPE.clone(),
-            object: Node::Ref(Arc::new(resolve_uri(type_of, &ctx, false)?)),
-        })
+    if let Some(type_ofs) = type_ofs {
+        for type_of in type_ofs {
+            stmts.push(Statement {
+                subject: current_node.clone(),
+                predicate: NODE_NS_TYPE.clone(),
+                object: type_of,
+            })
+        }
     }
     ctx.current_node = Some(current_node);
 
@@ -401,4 +411,11 @@ fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
             }
         })
         .collect()
+}
+
+fn parse_property_or_type_of<'a>(s: &'a str, ctx: &Context<'a>) -> Vec<Node<'a>> {
+    s.split_whitespace()
+        .filter_map(|uri| resolve_uri(uri, ctx, false).ok())
+        .map(|n| Node::Ref(Arc::new(n)))
+        .collect_vec()
 }

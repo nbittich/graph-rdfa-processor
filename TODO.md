@@ -1,4 +1,3 @@
-- multiple values for property and typeof, should emit a triple for each
 - implement datatypes
 - figure out how to test with real world examples
 - check the fixme's & todo's
