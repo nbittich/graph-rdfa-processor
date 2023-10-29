@@ -1,0 +1,2 @@
+- multiple values for property and typeof, should emit a triple for each
+- check the fixme's & todo's
