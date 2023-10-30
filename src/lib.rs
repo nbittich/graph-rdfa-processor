@@ -14,7 +14,9 @@ use itertools::Itertools;
 use scraper::ElementRef;
 use url::Url;
 mod constants;
+use log::{debug, error};
 
+use crate::constants::NODE_RDF_XML_LITERAL;
 #[cfg(test)]
 mod tests;
 
@@ -25,19 +27,20 @@ pub struct RdfaGraph<'a>(Vec<Statement<'a>>);
 pub struct Context<'a> {
     base: &'a str,
     vocab: Option<&'a str>,
-    parent: Option<Arc<Context<'a>>>,
+    lang: Option<&'a str>,
+    in_rel: Option<Node<'a>>,
     current_node: Option<Node<'a>>,
     prefixes: HashMap<&'a str, &'a str>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Literal<'a> {
     datatype: Option<Box<Node<'a>>>,
     value: Cow<'a, str>,
     lang: Option<&'a str>,
 }
 
-#[derive(Debug, Clone, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, Eq, PartialOrd, Ord, Hash)]
 pub enum Node<'a> {
     Iri(Cow<'a, str>),
     Literal(Literal<'a>),
@@ -61,7 +64,7 @@ impl PartialEq for Node<'_> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Statement<'a> {
     subject: Node<'a>,
     predicate: Node<'a>,
@@ -100,7 +103,7 @@ impl Display for Node<'_> {
                 f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
             }
             e => {
-                writeln!(f, "fixme! format for {e:?} not implemented")?;
+                error!("fixme! format for {e:?} not implemented");
                 Err(std::fmt::Error)
             }
         }
@@ -136,7 +139,7 @@ impl<'a> RdfaGraph<'a> {
         initial_context: Context<'a>,
     ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
         let mut triples = vec![];
-        traverse_element(input, initial_context, &mut triples)?;
+        traverse_element(input, None, initial_context, &mut triples)?;
 
         triples = copy_pattern(triples)?;
         // copy patterns
@@ -170,74 +173,106 @@ pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, B
             .iter()
             .filter(|stmt| object == stmt.subject)
         {
-            triples.push(Statement {
-                subject: subject.clone(),
-                predicate: predicate.clone(),
-                object: obj.clone(),
-            })
+            push_to_vec_if_not_present(
+                &mut triples,
+                Statement {
+                    subject: subject.clone(),
+                    predicate: predicate.clone(),
+                    object: obj.clone(),
+                },
+            )
         }
     }
     Ok(triples)
 }
 
+fn push_to_vec_if_not_present<T: PartialEq>(array: &mut Vec<T>, value: T) {
+    if !array.contains(&value) {
+        array.push(value);
+    }
+}
 pub fn traverse_element<'a>(
     element_ref: &ElementRef<'a>,
+    parent: Option<&Context<'a>>,
     mut ctx: Context<'a>,
     stmts: &mut Vec<Statement<'a>>,
 ) -> Result<Option<Node<'a>>, Box<dyn Error>> {
     let elt = element_ref.value();
 
     // extract attrs
-    let vocab = elt
+    ctx.vocab = elt
         .attr("vocab")
-        .or_else(|| ctx.parent.as_ref().and_then(|p| p.vocab));
-    let resource = elt.attr("resource");
-    let about = elt.attr("about");
-    let property = elt.attr("property");
-    let rel = elt.attr("rel");
-    let _href = elt.attr("href");
-    let prefix = elt.attr("prefix");
+        .or_else(|| parent.as_ref().and_then(|p| p.vocab));
 
-    ctx.vocab = vocab;
-
-    if let Some(prefix) = prefix {
+    if let Some(prefix) = elt.attr("prefix") {
         ctx.prefixes = parse_prefixes(prefix);
-    } else if let Some(parent) = &ctx.parent {
+    } else if let Some(parent) = parent {
         ctx.prefixes = parent.prefixes.clone();
     }
 
-    let rel = rel.and_then(|r| {
+    let resource = elt.attr("resource");
+    ctx.lang = elt
+        .attr("lang")
+        .or_else(|| elt.attr("xml:lang"))
+        .or_else(|| parent.and_then(|p| p.lang));
+    let about = elt.attr("about");
+    let property = elt.attr("property");
+    let mut rel = elt.attr("rel").and_then(|r| {
         resolve_uri(r, &ctx, false)
             .map(|n| Node::Ref(Arc::new(n)))
             .ok()
     });
-
-    let predicates = property.map(|p| parse_property_or_type_of(p, &ctx));
+    let parent_in_rel = parent.and_then(|c| c.in_rel.clone());
+    let rev = elt.attr("rev").and_then(|r| {
+        resolve_uri(r, &ctx, false)
+            .map(|n| Node::Ref(Arc::new(n)))
+            .ok()
+    });
+    let src_or_href = elt
+        .attr("href")
+        .or_else(|| elt.attr("src"))
+        .and_then(|v| resolve_uri(v, &ctx, true).ok());
     let type_ofs = elt
         .attr("typeof")
         .map(|t| parse_property_or_type_of(t, &ctx));
+    let predicates = property.map(|p| parse_property_or_type_of(p, &ctx));
+
     let current_node = if let Some(resource) = resource {
         // handle resource case. set the context.
         // if property is present, this becomes an object of the parent.
         let object = Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?));
         if let Some(predicates) = &predicates {
-            let subject = ctx
-                .parent
-                .as_ref()
+            let subject = parent
                 .and_then(|p| p.current_node.clone())
                 .ok_or("no parent node")?;
             for predicate in predicates {
-                stmts.push(Statement {
-                    subject: subject.clone(),
-                    predicate: predicate.clone(),
-                    object: object.clone(),
-                });
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: subject.clone(),
+                        predicate: predicate.clone(),
+                        object: object.clone(),
+                    },
+                );
             }
             if type_ofs.is_some() {
                 object
             } else {
                 subject
             }
+        } else if let Some(rel) = rel.take() {
+            let subject = parent
+                .and_then(|p| p.current_node.clone())
+                .ok_or("no parent node")?;
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
+                    subject: subject.clone(),
+                    predicate: rel,
+                    object,
+                },
+            );
+            subject
         } else {
             object
         }
@@ -248,13 +283,87 @@ pub fn traverse_element<'a>(
 
         if let Some(predicates) = &predicates {
             for predicate in predicates {
-                stmts.push(Statement {
+                if let Some(content) = element_ref.attr("content") {
+                    push_to_vec_if_not_present(
+                        stmts,
+                        Statement {
+                            subject: subject.clone(),
+                            predicate: predicate.clone(),
+                            object: Node::Ref(Arc::new(Node::Literal(Literal {
+                                datatype: None,
+                                value: Cow::Borrowed(content),
+                                lang: ctx.lang,
+                            }))),
+                        },
+                    );
+                }
+                if let (Some(src_or_href), Some(rel)) = (&src_or_href, &rel) {
+                    push_to_vec_if_not_present(
+                        stmts,
+                        Statement {
+                            subject: subject.clone(),
+                            predicate: rel.clone(),
+                            object: src_or_href.clone(),
+                        },
+                    );
+                    if let Some(rev) = &rev {
+                        push_to_vec_if_not_present(
+                            stmts,
+                            Statement {
+                                subject: src_or_href.clone(),
+                                predicate: rev.clone(),
+                                object: subject.clone(),
+                            },
+                        )
+                    }
+                } else {
+                    push_to_vec_if_not_present(
+                        stmts,
+                        Statement {
+                            subject: subject.clone(),
+                            predicate: predicate.clone(),
+                            object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+                        },
+                    );
+                }
+            }
+        } else if let (Some(src_or_href), Some(rel)) = (&src_or_href, &rel) {
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
                     subject: subject.clone(),
-                    predicate: predicate.clone(),
-                    object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
-                });
+                    predicate: rel.clone(),
+                    object: src_or_href.clone(),
+                },
+            );
+            if let Some(rev) = &rev {
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: src_or_href.clone(),
+                        predicate: rev.clone(),
+                        object: subject.clone(),
+                    },
+                )
             }
         }
+        subject
+    } else if let (Some(src_or_href), Some(rel)) = (&src_or_href, &rel) {
+        // https://www.w3.org/TR/rdfa-core/#using-href-or-src-to-set-the-object
+        let subject = parent
+            .and_then(|p| p.current_node.clone())
+            .unwrap_or_else(|| {
+                Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+            });
+
+        push_to_vec_if_not_present(
+            stmts,
+            Statement {
+                subject: subject.clone(),
+                predicate: rel.clone(),
+                object: src_or_href.clone(),
+            },
+        );
         subject
     } else if type_ofs.is_some() {
         // for some reasons it seems that if there is a typeof but no
@@ -262,27 +371,26 @@ pub fn traverse_element<'a>(
         // this might be incorrect
         let node =
             Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst));
-        let subject = ctx
-            .parent
-            .as_ref()
+        let subject = parent
             .and_then(|p| p.current_node.clone())
             .unwrap_or_else(|| {
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
             });
         if let Some(predicates) = &predicates {
             for predicate in predicates {
-                stmts.push(Statement {
-                    subject: subject.clone(),
-                    predicate: predicate.clone(),
-                    object: node.clone(),
-                });
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: subject.clone(),
+                        predicate: predicate.clone(),
+                        object: node.clone(),
+                    },
+                );
             }
         }
         node
     } else {
-        let subject = ctx
-            .parent
-            .as_ref()
+        let subject = parent
             .and_then(|p| p.current_node.clone())
             .unwrap_or_else(|| {
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
@@ -290,11 +398,14 @@ pub fn traverse_element<'a>(
 
         if let Some(predicates) = &predicates {
             for predicate in predicates {
-                stmts.push(Statement {
-                    subject: subject.clone(),
-                    predicate: predicate.clone(),
-                    object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
-                });
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: subject.clone(),
+                        predicate: predicate.clone(),
+                        object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+                    },
+                );
             }
         }
         subject
@@ -302,40 +413,68 @@ pub fn traverse_element<'a>(
 
     if let Some(type_ofs) = type_ofs {
         for type_of in type_ofs {
-            stmts.push(Statement {
-                subject: current_node.clone(),
-                predicate: NODE_NS_TYPE.clone(),
-                object: type_of,
-            })
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
+                    subject: current_node.clone(),
+                    predicate: NODE_NS_TYPE.clone(),
+                    object: type_of,
+                },
+            )
         }
     }
     ctx.current_node = Some(current_node.clone());
+    ctx.in_rel = rel;
+    if let Some(in_rel) = parent_in_rel {
+        let parent = parent
+            .and_then(|p| p.current_node.clone())
+            .ok_or("in_rel: no parent node")?;
 
+        push_to_vec_if_not_present(
+            stmts,
+            Statement {
+                subject: parent,
+                predicate: in_rel,
+                object: current_node.clone(),
+            },
+        );
+    }
     if element_ref.has_children() {
-        let child_ctx = Context {
-            parent: Some(Arc::new(ctx.clone())),
-            base: ctx.base,
-
-            ..Default::default()
-        };
         for child in element_ref.children() {
             if let Some(c) = ElementRef::wrap(child) {
-                let obj = traverse_element(&c, child_ctx.clone(), stmts)?;
-                if let (Some(rel), Some(obj)) = (&rel, obj) {
-                    stmts.push(Statement {
-                        subject: current_node.clone(),
-                        predicate: rel.clone(),
-                        object: obj,
-                    });
+                if let Some(in_rel) = &ctx.in_rel {
+                    // Triples are also 'completed' if any one of @property, @rel or @rev are present.
+                    // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
+                    if (c.attr("property").is_some()
+                        || c.attr("rel").is_some()
+                        || c.attr("rev").is_some())
+                        && (c.attr("about").is_none() && c.attr("typeof").is_none())
+                    {
+                        let b_node = Node::BNode(
+                            BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
+                        );
+                        push_to_vec_if_not_present(
+                            stmts,
+                            Statement {
+                                subject: current_node.clone(),
+                                predicate: in_rel.clone(),
+                                object: b_node.clone(),
+                            },
+                        );
+                        ctx.current_node = Some(b_node);
+                        ctx.in_rel = None;
+                    }
                 }
-            } else if let Some(_text) = child.value().as_text() {
-                // todo do smth with text
+                let child_ctx = Context {
+                    base: ctx.base,
+                    ..Default::default()
+                };
+                let _ = traverse_element(&c, Some(&ctx), child_ctx, stmts)?;
             }
         }
     }
     Ok(ctx.current_node.clone())
 }
-
 pub fn extract_literal<'a>(
     element_ref: &ElementRef<'a>,
     ctx: &Context<'a>,
@@ -343,20 +482,36 @@ pub fn extract_literal<'a>(
     let elt_val = element_ref.value();
     let datatype = elt_val
         .attr("datatype")
-        .and_then(|dt| match resolve_uri(dt, ctx, true) {
+        .filter(|dt| !dt.is_empty())
+        .and_then(|dt| match resolve_uri(dt, ctx, false) {
             Ok(d) => Some(Box::new(d)),
             Err(e) => {
                 eprintln!("could not parse {dt}. error {e}");
                 None
             }
-        }); //todo lang
+        });
+    let lang = elt_val
+        .attr("lang")
+        .or_else(|| elt_val.attr("xml:lang"))
+        .or(ctx.lang)
+        .filter(|_| datatype.is_none());
 
-    if let Some(href) = elt_val.attr("href") {
-        resolve_uri(href, ctx, true)
+    if let Some(value) = elt_val.attr("href").or(elt_val.attr("src")) {
+        resolve_uri(value, ctx, true)
     } else if let Some(content) = elt_val.attr("content") {
         Ok(Node::Literal(Literal {
             datatype,
             value: Cow::Borrowed(content),
+            lang,
+        }))
+    } else if datatype
+        .as_ref()
+        .filter(|dt| dt.as_ref() == &*NODE_RDF_XML_LITERAL)
+        .is_some()
+    {
+        Ok(Node::Literal(Literal {
+            value: Cow::Owned(element_ref.inner_html()),
+            datatype,
             lang: None,
         }))
     } else {
@@ -371,7 +526,7 @@ pub fn extract_literal<'a>(
         Ok(Node::Literal(Literal {
             datatype,
             value: text,
-            lang: None,
+            lang,
         }))
     }
 }
@@ -396,16 +551,28 @@ pub fn resolve_uri<'a>(
                 let iri = uri.replace(':', "").trim().replacen(iri.scheme(), value, 1);
                 Ok(Node::Iri(Cow::Owned(iri)))
             } else {
-                Ok(Node::Iri(Cow::Owned(format!("fixme! {uri}"))))
+                Ok(Node::Iri(Cow::Owned(uri.to_string())))
             }
         }
         Err(url::ParseError::RelativeUrlWithoutBase) => {
             if is_resource {
-                Ok(Node::Iri(Cow::Owned([ctx.base, uri].join(""))))
+                let trailing_white_space = if ctx.base.ends_with('/')
+                    || ctx.base.ends_with('#')
+                    || uri.starts_with('/')
+                    || uri.starts_with('#')
+                {
+                    ""
+                } else {
+                    "/"
+                };
+                Ok(Node::Iri(Cow::Owned(
+                    [ctx.base, trailing_white_space, uri].join(""),
+                )))
             } else if let Some(vocab) = ctx.vocab {
                 Ok(Node::Iri(Cow::Owned([vocab, uri].join(""))))
             } else {
-                Err("could not determine base/vocab")
+                debug!("could not determine base/vocab {:?}", ctx);
+                Ok(Node::Iri(Cow::Borrowed(uri)))
             }
         }
         Err(e) => {
@@ -423,7 +590,7 @@ fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
             if let Some((s, _)) = s.split_once(':') {
                 Some((s, p))
             } else {
-                eprintln!("fixme! couldn't parse curie for {s}, {p}");
+                error!("fixme! couldn't parse curie for {s}, {p}");
                 None
             }
         })

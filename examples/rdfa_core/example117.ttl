@@ -1,0 +1,1 @@
+<mailto:john@example.org> <http://xmlns.com/foaf/0.1/knows> <mailto:sue@example.org>.

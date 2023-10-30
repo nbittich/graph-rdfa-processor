@@ -1,0 +1,2 @@
+<http://www.blogger.com/profile/1109404> <http://xmlns.com/foaf/0.1/img> <http://test.org/photo1.jpg>.
+<http://test.org/photo1.jpg> <http://purl.org/dc/terms/creator> <http://www.blogger.com/profile/1109404>.

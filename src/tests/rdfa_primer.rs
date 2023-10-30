@@ -43,6 +43,8 @@ const INPUT_OUTPUT_DIR: &str = "examples/rdfa_primer";
 #[test_case("example46" ; "2.2.4    Alternative for setting the property : rdfa_primer_46")]
 #[serial]
 fn test(test_name: &str) {
+    let _ = env_logger::try_init();
+
     println!("running test {test_name}");
     // reset bnode id generator
     BNODE_ID_GENERATOR.store(1, std::sync::atomic::Ordering::SeqCst);

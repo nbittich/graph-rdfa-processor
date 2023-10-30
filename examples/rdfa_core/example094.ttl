@@ -1,0 +1,5 @@
+<http://dbpedia.org/resource/Baruch_Spinoza> <dbp-owl:influenced> <http://data.lblod.info/.well-known/genid#2>.
+<http://data.lblod.info/.well-known/genid#2> <http://xmlns.com/foaf/0.1/name> "Albert Einstein".
+<http://data.lblod.info/.well-known/genid#2> <dbp:dateOfBirth> "1879-03-14"^^<http://www.w3.org/2001/XMLSchema#date>.
+<http://data.lblod.info/.well-known/genid#2> <dbp-owl:residence> <http://dbpedia.org/resource/German_Empire>.
+<http://data.lblod.info/.well-known/genid#2> <dbp-owl:residence> <http://dbpedia.org/resource/Switzerland>.

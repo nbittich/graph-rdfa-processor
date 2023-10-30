@@ -1,0 +1,2 @@
+<http://dbpedia.org/resource/Albert_Einstein> <dbp-owl:residence> <http://dbpedia.org/resource/German_Empire>.
+<http://dbpedia.org/resource/Albert_Einstein> <dbp-owl:residence> <http://dbpedia.org/resource/Switzerland>.
