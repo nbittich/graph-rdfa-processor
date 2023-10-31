@@ -1,6 +1,6 @@
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/title> "The trouble with Bob".
-<http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/creator> <http://data.lblod.info/.well-known/genid#2>.
-<http://data.lblod.info/.well-known/genid#2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
-<http://data.lblod.info/.well-known/genid#2> <http://xmlns.com/foaf/0.1/name> "Alice Birpemswick".
-<http://data.lblod.info/.well-known/genid#2> <http://xmlns.com/foaf/0.1/mbox> <mailto:alice@example.com>.
-<http://data.lblod.info/.well-known/genid#2> <http://xmlns.com/foaf/0.1/phone> <tel:+1-617-555-7332>.
+<http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/creator> <http://data.lblod.info/.well-known/genid#1>.
+<http://data.lblod.info/.well-known/genid#1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
+<http://data.lblod.info/.well-known/genid#1> <http://xmlns.com/foaf/0.1/name> "Alice Birpemswick".
+<http://data.lblod.info/.well-known/genid#1> <http://xmlns.com/foaf/0.1/mbox> <mailto:alice@example.com>.
+<http://data.lblod.info/.well-known/genid#1> <http://xmlns.com/foaf/0.1/phone> <tel:+1-617-555-7332>.

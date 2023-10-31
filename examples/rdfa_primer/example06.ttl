@@ -1,2 +1,2 @@
-<http://data.lblod.info/.well-known/genid#1> <http://purl.org/dc/terms/title> "The Trouble with Bob".
-<http://data.lblod.info/.well-known/genid#1> <http://purl.org/dc/terms/created> "2011-09-10".
+<http://test.org> <http://purl.org/dc/terms/title> "The Trouble with Bob".
+<http://test.org> <http://purl.org/dc/terms/created> "2011-09-10".
