@@ -30,8 +30,8 @@ pub struct Context<'a> {
     base: &'a str,
     vocab: Option<&'a str>,
     lang: Option<&'a str>,
-    in_rel: Option<Node<'a>>,
-    in_rev: Option<Node<'a>>,
+    in_rel: Option<Vec<Node<'a>>>,
+    in_rev: Option<Vec<Node<'a>>>,
     current_node: Option<Node<'a>>,
     prefixes: HashMap<&'a str, &'a str>,
 }
@@ -254,18 +254,10 @@ pub fn traverse_element<'a>(
         .attr("about")
         .and_then(|a| resolve_uri(a, &ctx, true).ok());
     let property = elt.attr("property");
-    let mut rel = elt.attr("rel").and_then(|r| {
-        resolve_uri(r, &ctx, false)
-            .map(|n| Node::Ref(Arc::new(n)))
-            .ok()
-    });
+    let mut rels = elt.attr("rel").map(|r| parse_property_or_type_of(r, &ctx));
     let parent_in_rel = parent.and_then(|c| c.in_rel.clone());
     let parent_in_rev = parent.and_then(|c| c.in_rev.clone());
-    let rev = elt.attr("rev").and_then(|r| {
-        resolve_uri(r, &ctx, false)
-            .map(|n| Node::Ref(Arc::new(n)))
-            .ok()
-    });
+    let revs = elt.attr("rev").map(|r| parse_property_or_type_of(r, &ctx));
     let src_or_href = elt
         .attr("href")
         .or_else(|| elt.attr("src"))
@@ -297,19 +289,21 @@ pub fn traverse_element<'a>(
             } else {
                 subject
             }
-        } else if let Some(rel) = rel.take() {
+        } else if let Some(rels) = rels.take() {
             let subject = about
                 .map(|a| Node::Ref(Arc::new(a)))
                 .or_else(|| parent.and_then(|p| p.current_node.clone()))
                 .ok_or("no parent node")?;
-            push_to_vec_if_not_present(
-                stmts,
-                Statement {
-                    subject: subject.clone(),
-                    predicate: rel,
-                    object: object.clone(),
-                },
-            );
+            for rel in rels {
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: subject.clone(),
+                        predicate: rel,
+                        object: object.clone(),
+                    },
+                );
+            }
             object
         } else {
             object
@@ -338,8 +332,8 @@ pub fn traverse_element<'a>(
                         },
                     );
                 }
-                if let (Some(src_or_href), Some(rel)) = (&src_or_href, &rel) {
-                    if !rel.is_empty() {
+                if let (Some(src_or_href), Some(rels)) = (&src_or_href, &rels) {
+                    for rel in rels {
                         push_to_vec_if_not_present(
                             stmts,
                             Statement {
@@ -349,15 +343,17 @@ pub fn traverse_element<'a>(
                             },
                         );
                     }
-                    if let Some(rev) = &rev {
-                        push_to_vec_if_not_present(
-                            stmts,
-                            Statement {
-                                subject: src_or_href.clone(),
-                                predicate: rev.clone(),
-                                object: subject.clone(),
-                            },
-                        )
+                    if let Some(revs) = &revs {
+                        for rev in revs {
+                            push_to_vec_if_not_present(
+                                stmts,
+                                Statement {
+                                    subject: src_or_href.clone(),
+                                    predicate: rev.clone(),
+                                    object: subject.clone(),
+                                },
+                            )
+                        }
                     }
                 } else {
                     push_to_vec_if_not_present(
@@ -370,8 +366,8 @@ pub fn traverse_element<'a>(
                     );
                 }
             }
-        } else if let (Some(src_or_href), Some(rel)) = (&src_or_href, &rel) {
-            if !rel.is_empty() {
+        } else if let (Some(src_or_href), Some(rels)) = (&src_or_href, &rels) {
+            for rel in rels {
                 push_to_vec_if_not_present(
                     stmts,
                     Statement {
@@ -381,34 +377,37 @@ pub fn traverse_element<'a>(
                     },
                 );
             }
-            if let Some(rev) = &rev {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: src_or_href.clone(),
-                        predicate: rev.clone(),
-                        object: subject.clone(),
-                    },
-                )
+            if let Some(revs) = &revs {
+                for rev in revs {
+                    push_to_vec_if_not_present(
+                        stmts,
+                        Statement {
+                            subject: src_or_href.clone(),
+                            predicate: rev.clone(),
+                            object: subject.clone(),
+                        },
+                    )
+                }
             }
         }
         subject
-    } else if let (Some(src_or_href), Some(rel)) = (&src_or_href, &rel) {
+    } else if let (Some(src_or_href), Some(rels)) = (&src_or_href, &rels) {
         // https://www.w3.org/TR/rdfa-core/#using-href-or-src-to-set-the-object
         let subject = parent
             .and_then(|p| p.current_node.clone())
             .unwrap_or_else(|| {
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
             });
-
-        push_to_vec_if_not_present(
-            stmts,
-            Statement {
-                subject: subject.clone(),
-                predicate: rel.clone(),
-                object: src_or_href.clone(),
-            },
-        );
+        for rel in rels {
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
+                    subject: subject.clone(),
+                    predicate: rel.clone(),
+                    object: src_or_href.clone(),
+                },
+            );
+        }
         subject
     } else if type_ofs.is_some() {
         // for some reasons it seems that if there is a typeof but no
@@ -467,39 +466,43 @@ pub fn traverse_element<'a>(
         }
     }
     ctx.current_node = Some(current_node.clone());
-    ctx.in_rel = rel;
-    ctx.in_rev = rev;
-    if let Some(in_rel) = parent_in_rel {
+    ctx.in_rel = rels;
+    ctx.in_rev = revs;
+    if let Some(in_rels) = parent_in_rel {
         let parent = parent
             .and_then(|p| p.current_node.clone())
             .ok_or("in_rel: no parent node")?;
 
-        push_to_vec_if_not_present(
-            stmts,
-            Statement {
-                subject: parent,
-                predicate: in_rel,
-                object: current_node.clone(),
-            },
-        );
+        for in_rel in in_rels {
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
+                    subject: parent.clone(),
+                    predicate: in_rel,
+                    object: current_node.clone(),
+                },
+            );
+        }
     }
-    if let Some(in_rev) = parent_in_rev {
+    if let Some(in_revs) = parent_in_rev {
         let parent = parent
             .and_then(|p| p.current_node.clone())
             .ok_or("in_rel: no parent node")?;
-        push_to_vec_if_not_present(
-            stmts,
-            Statement {
-                object: parent,
-                predicate: in_rev,
-                subject: current_node.clone(),
-            },
-        );
+        for in_rev in in_revs {
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
+                    object: parent.clone(),
+                    predicate: in_rev,
+                    subject: current_node.clone(),
+                },
+            );
+        }
     }
     if element_ref.has_children() {
         for child in element_ref.children() {
             if let Some(c) = ElementRef::wrap(child) {
-                if let Some(in_rel) = &ctx.in_rel {
+                if let Some(in_rels) = &ctx.in_rel {
                     // Triples are also 'completed' if any one of @property, @rel or @rev are present.
                     // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
                     if (c.attr("property").is_some()
@@ -510,18 +513,48 @@ pub fn traverse_element<'a>(
                         let b_node = Node::BNode(
                             BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
                         );
-                        push_to_vec_if_not_present(
-                            stmts,
-                            Statement {
-                                subject: current_node.clone(),
-                                predicate: in_rel.clone(),
-                                object: b_node.clone(),
-                            },
-                        );
+                        for in_rel in in_rels {
+                            push_to_vec_if_not_present(
+                                stmts,
+                                Statement {
+                                    subject: current_node.clone(),
+                                    predicate: in_rel.clone(),
+                                    object: b_node.clone(),
+                                },
+                            );
+                        }
                         ctx.current_node = Some(b_node);
                         ctx.in_rel = None;
+                        ctx.in_rev = None;
                     }
                 }
+                if let Some(in_revs) = &ctx.in_rev {
+                    // Triples are also 'completed' if any one of @property, @rel or @rev are present.
+                    // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
+                    if (c.attr("property").is_some()
+                        || c.attr("rel").is_some()
+                        || c.attr("rev").is_some())
+                        && (c.attr("about").is_none() && c.attr("typeof").is_none())
+                    {
+                        let b_node = Node::BNode(
+                            BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
+                        );
+                        for in_rev in in_revs {
+                            push_to_vec_if_not_present(
+                                stmts,
+                                Statement {
+                                    subject: b_node.clone(),
+                                    predicate: in_rev.clone(),
+                                    object: current_node.clone(),
+                                },
+                            );
+                        }
+                        ctx.current_node = Some(b_node);
+                        ctx.in_rel = None;
+                        ctx.in_rev = None;
+                    }
+                }
+
                 let child_ctx = Context {
                     base: ctx.base,
                     ..Default::default()
@@ -616,6 +649,10 @@ pub fn resolve_uri<'a>(
             if let Ok((prefix, reference)) = parse_safe_curie(uri) {
                 if prefix.trim() == "_" {
                     return Ok(Node::RefBNode((reference, Uuid::new_v4())));
+                } else if prefix.trim().is_empty() && !reference.is_empty() {
+                    return Ok(Node::Iri(Cow::Owned(
+                        [COMMON_PREFIXES[""], reference].join(""),
+                    )));
                 }
             }
             if is_resource || uri.starts_with('#') || uri.starts_with('/') {
@@ -672,7 +709,8 @@ fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
 }
 
 fn parse_property_or_type_of<'a>(s: &'a str, ctx: &Context<'a>) -> Vec<Node<'a>> {
-    s.split_whitespace()
+    s.trim()
+        .split_whitespace()
         .filter_map(|uri| resolve_uri(uri, ctx, false).ok())
         .map(|n| Node::Ref(Arc::new(n)))
         .collect_vec()
