@@ -45,6 +45,8 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0059"  ; "multiple hanging @rels with multiple children                          : earl_reports_html5_0059")]
 #[test_case("example0060"  ; "UTF-8 conformance                                                      : earl_reports_html5_0060")]
 #[test_case("example0063"  ; "@rel in head using reserved XHTML value and empty-prefix CURIE syntax  : earl_reports_html5_0063")]
+#[test_case("example0064"  ; "@about with safe CURIE                                                 : earl_reports_html5_0064")]
+#[test_case("example0065"  ; "@rel with safe CURIE                                                   : earl_reports_html5_0065")]
 #[serial]
 fn test(test_name: &str) {
     let _ = env_logger::try_init();

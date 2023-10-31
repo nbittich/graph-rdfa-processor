@@ -709,8 +709,7 @@ fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
 }
 
 fn parse_property_or_type_of<'a>(s: &'a str, ctx: &Context<'a>) -> Vec<Node<'a>> {
-    s.trim()
-        .split_whitespace()
+    s.split_whitespace()
         .filter_map(|uri| resolve_uri(uri, ctx, false).ok())
         .map(|n| Node::Ref(Arc::new(n)))
         .collect_vec()
