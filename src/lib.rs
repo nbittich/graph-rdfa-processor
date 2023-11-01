@@ -234,10 +234,15 @@ pub fn traverse_element<'a>(
 ) -> Result<Option<Node<'a>>, Box<dyn Error>> {
     let elt = element_ref.value();
 
-    // extract attrs
     ctx.vocab = elt
         .attr("vocab")
         .or_else(|| parent.as_ref().and_then(|p| p.vocab));
+
+    ctx.base = element_ref
+        .select(&Selector::parse("base")?)
+        .next()
+        .and_then(|e| e.attr("href"))
+        .unwrap_or(ctx.base);
 
     if let Some(prefix) = elt.attr("prefix") {
         ctx.prefixes = parse_prefixes(prefix);
@@ -246,6 +251,7 @@ pub fn traverse_element<'a>(
     }
 
     let resource = elt.attr("resource");
+
     ctx.lang = elt
         .attr("lang")
         .or_else(|| elt.attr("xml:lang"))
@@ -253,6 +259,7 @@ pub fn traverse_element<'a>(
     let about = elt
         .attr("about")
         .and_then(|a| resolve_uri(a, &ctx, true).ok());
+
     let property = elt.attr("property");
     let mut rels = elt.attr("rel").map(|r| parse_property_or_type_of(r, &ctx));
     let parent_in_rel = parent.and_then(|c| c.in_rel.clone());

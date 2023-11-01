@@ -48,6 +48,12 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0064"  ; "@about with safe CURIE                                                 : earl_reports_html5_0064")]
 #[test_case("example0065"  ; "@rel with safe CURIE                                                   : earl_reports_html5_0065")]
 #[test_case("example0066"  ; "@about with @typeof in the head                                        : earl_reports_html5_0066")]
+#[test_case("example0067"  ; "@property in the head                                                  : earl_reports_html5_0067")]
+#[test_case("example0068"  ; "Relative URI in @about                                                 : earl_reports_html5_0068")]
+#[test_case("example0069"  ; "Relative URI in @href                                                  : earl_reports_html5_0069")]
+#[test_case("example0070"  ; "Relative URI in @resource                                              : earl_reports_html5_0070")]
+#[test_case("example0071"  ; "No explicit @about                                                     : earl_reports_html5_0071")]
+#[test_case("example0072"  ; "Relative URI in @about (with XHTML base in head)                       : earl_reports_html5_0072")]
 #[serial]
 fn test(test_name: &str) {
     let _ = env_logger::try_init();
