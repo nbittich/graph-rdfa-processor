@@ -1,0 +1,5 @@
+<http://data.lblod.info/.well-known/genid#manu> <http://xmlns.com/foaf/0.1/mbox> <mailto:manu.sporny@digitalbazaar.com>.
+<http://data.lblod.info/.well-known/genid#manu> <http://xmlns.com/foaf/0.1/knows> <http://data.lblod.info/.well-known/genid#gregg>.
+<http://data.lblod.info/.well-known/genid#gregg> <http://xmlns.com/foaf/0.1/knows> <http://data.lblod.info/.well-known/genid#manu>.
+<http://data.lblod.info/.well-known/genid#gregg> <http://xmlns.com/foaf/0.1/bim> "object".
+<http://data.lblod.info/.well-known/genid#gregg> <http://xmlns.com/foaf/0.1/mbox> <mailto:gregg@kellogg-assoc.com>.

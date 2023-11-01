@@ -131,7 +131,7 @@ pub fn traverse_element<'a>(
         .map(|r| parse_property_or_type_of(r, &ctx, true));
     let parent_in_rel = parent.and_then(|c| c.in_rel.clone());
     let parent_in_rev = parent.and_then(|c| c.in_rev.clone());
-    let revs = elt
+    let mut revs = elt
         .attr("rev")
         .map(|r| parse_property_or_type_of(r, &ctx, true));
     let src_or_href = elt
@@ -181,6 +181,22 @@ pub fn traverse_element<'a>(
                         subject: subject.clone(),
                         predicate: rel,
                         object: object.clone(),
+                    },
+                );
+            }
+            object
+        } else if let Some(revs) = revs.take() {
+            let subject = about
+                .map(|a| Node::Ref(Arc::new(a)))
+                .or_else(|| parent.and_then(|p| p.current_node.clone()))
+                .ok_or("no parent node")?;
+            for rev in revs {
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: object.clone(),
+                        predicate: rev,
+                        object: subject.clone(),
                     },
                 );
             }
