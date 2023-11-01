@@ -104,8 +104,18 @@ pub fn traverse_element<'a>(
     } else if let Some(parent) = parent {
         ctx.prefixes = parent.prefixes.clone();
     }
+    let is_empty_curie = |s: &str| {
+        let mut s = s.trim();
+        if s.starts_with('[') {
+            s = &s[1..];
+        }
+        if s.ends_with(']') {
+            s = &s[0..s.len() - 1];
+        }
+        s.trim().is_empty()
+    };
 
-    let resource = elt.attr("resource");
+    let resource = elt.attr("resource").filter(|r| !is_empty_curie(r));
 
     ctx.lang = elt
         .attr("lang")
@@ -116,18 +126,22 @@ pub fn traverse_element<'a>(
         .and_then(|a| resolve_uri(a, &ctx, true).ok());
 
     let property = elt.attr("property");
-    let mut rels = elt.attr("rel").map(|r| parse_property_or_type_of(r, &ctx));
+    let mut rels = elt
+        .attr("rel")
+        .map(|r| parse_property_or_type_of(r, &ctx, true));
     let parent_in_rel = parent.and_then(|c| c.in_rel.clone());
     let parent_in_rev = parent.and_then(|c| c.in_rev.clone());
-    let revs = elt.attr("rev").map(|r| parse_property_or_type_of(r, &ctx));
+    let revs = elt
+        .attr("rev")
+        .map(|r| parse_property_or_type_of(r, &ctx, true));
     let src_or_href = elt
         .attr("href")
         .or_else(|| elt.attr("src"))
         .and_then(|v| resolve_uri(v, &ctx, true).ok());
     let type_ofs = elt
         .attr("typeof")
-        .map(|t| parse_property_or_type_of(t, &ctx));
-    let predicates = property.map(|p| parse_property_or_type_of(p, &ctx));
+        .map(|t| parse_property_or_type_of(t, &ctx, true));
+    let predicates = property.map(|p| parse_property_or_type_of(p, &ctx, false));
 
     let current_node = if let Some(resource) = resource {
         let object = about
@@ -554,17 +568,29 @@ pub fn resolve_uri<'a>(
         }
         Err(url::ParseError::RelativeUrlWithoutBase) => {
             if let Ok((prefix, reference)) = parse_safe_curie(uri) {
-                if prefix.trim() == "_" {
+                let prefix = prefix.trim();
+                if prefix == "_" {
                     let uuid = if cfg!(test) {
                         Uuid::nil()
                     } else {
                         Uuid::new_v4()
                     };
                     return Ok(Node::RefBNode((reference.trim(), uuid)));
-                } else if prefix.trim().is_empty() && !reference.is_empty() {
+                } else if prefix.is_empty() && !reference.is_empty() {
                     return Ok(Node::Iri(Cow::Owned(
                         [COMMON_PREFIXES[""], reference].join(""),
                     )));
+                } else if let Some(prefix) = ctx
+                    .prefixes
+                    .get(prefix)
+                    .or_else(|| COMMON_PREFIXES.get(prefix))
+                {
+                    let reference = if reference.trim().is_empty() {
+                        reference.trim()
+                    } else {
+                        reference
+                    };
+                    return Ok(Node::Iri(Cow::Owned([prefix, reference].join(""))));
                 }
             }
             if is_resource || uri.starts_with('#') || uri.starts_with('/') {
@@ -582,8 +608,13 @@ pub fn resolve_uri<'a>(
                 )))
             } else if let Some(vocab) = ctx.vocab {
                 Ok(Node::Iri(Cow::Owned([vocab, uri].join(""))))
-            } else if RESERVED_KEYWORDS.binary_search(&uri).ok().is_some() {
-                Ok(Node::Iri(Cow::Owned([COMMON_PREFIXES[""], uri].join(""))))
+            } else if RESERVED_KEYWORDS
+                .iter()
+                .any(|w| uri.eq_ignore_ascii_case(w))
+            {
+                Ok(Node::Iri(Cow::Owned(
+                    [COMMON_PREFIXES[""], &uri.to_lowercase()].join(""),
+                )))
             } else {
                 debug!("could not determine base/vocab {:?}", ctx);
                 Ok(Node::Iri(Cow::Borrowed(uri)))
@@ -622,9 +653,14 @@ fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
         .collect()
 }
 
-fn parse_property_or_type_of<'a>(s: &'a str, ctx: &Context<'a>) -> Vec<Node<'a>> {
+fn parse_property_or_type_of<'a>(
+    s: &'a str,
+    ctx: &Context<'a>,
+    allow_b_node: bool,
+) -> Vec<Node<'a>> {
     s.split_whitespace()
         .filter_map(|uri| resolve_uri(uri, ctx, false).ok())
+        .filter(|node| allow_b_node || !matches!(node, Node::BNode(_) | Node::RefBNode(_)))
         .map(|n| Node::Ref(Arc::new(n)))
         .collect_vec()
 }
