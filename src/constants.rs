@@ -5,12 +5,14 @@ pub static BNODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
 pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
 pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";
+pub static RDFA_USES_VOCABULARY: &str = "http://www.w3.org/ns/rdfa#usesVocabulary";
 pub static RDF_XML_LITERAL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";
 pub static RDF_XSD_STRING: &str = "http://www.w3.org/2001/XMLSchema#string";
 pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 pub static RESERVED_KEYWORDS: [&str; 2] = ["license", "LICENSE"];
 lazy_static::lazy_static! {
     pub static ref NODE_RDF_XML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XML_LITERAL));
+    pub static ref NODE_RDFA_USES_VOCABULARY: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_USES_VOCABULARY));
     pub static ref NODE_RDF_XSD_STRING: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XSD_STRING));
     pub static ref NODE_RDFA_PATTERN_TYPE: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_PATTERN_TYPE));
     pub static ref NODE_RDFA_COPY_PREDICATE: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_COPY_PREDICATE));

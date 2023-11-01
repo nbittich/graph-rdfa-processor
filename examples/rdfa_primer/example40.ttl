@@ -1,2 +1,3 @@
+<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://x.com/>.
 <http://test.org/alice/posts/trouble_with_bob> <http://x.com/title> "The trouble with Bob".
 <http://test.org/alice/posts/trouble_with_bob> <http://x.com/creator> <http://test.org#me>.

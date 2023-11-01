@@ -1,4 +1,6 @@
+<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://purl.org/dc/terms/>.
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/title> "The trouble with Bob".
+<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://xmlns.com/foaf/0.1/>.
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/creator> <http://data.lblod.info/.well-known/genid#1>.
 <http://data.lblod.info/.well-known/genid#1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
 <http://data.lblod.info/.well-known/genid#1> <http://xmlns.com/foaf/0.1/name> "Alice Birpemswick".

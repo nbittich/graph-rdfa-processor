@@ -1,3 +1,4 @@
+<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://purl.org/dc/terms/>.
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/title> "The trouble with Bob".
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/created> "2011-09-10".
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/creator> "Alice".

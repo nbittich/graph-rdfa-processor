@@ -1,3 +1,4 @@
+<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://purl.org/dc/terms/>.
 <http://test.org> <http://purl.org/dc/terms/title> "The Trouble with Bob".
 <http://test.org> <http://purl.org/dc/terms/created> "2011-09-10".
 <http://test.org> <http://creativecommons.org/ns#license> <http://creativecommons.org/licenses/by/3.0/>.

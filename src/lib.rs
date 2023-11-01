@@ -6,7 +6,8 @@ mod structs;
 mod tests;
 
 use constants::{
-    BNODE_ID_GENERATOR, COMMON_PREFIXES, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE, RESERVED_KEYWORDS,
+    BNODE_ID_GENERATOR, COMMON_PREFIXES, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE,
+    NODE_RDFA_USES_VOCABULARY, RESERVED_KEYWORDS,
 };
 use itertools::Itertools;
 use log::{debug, error};
@@ -88,6 +89,17 @@ pub fn traverse_element<'a>(
     ctx.vocab = elt
         .attr("vocab")
         .or_else(|| parent.as_ref().and_then(|p| p.vocab));
+
+    if let Some(vocab) = ctx.vocab {
+        push_to_vec_if_not_present(
+            stmts,
+            Statement {
+                subject: resolve_uri(ctx.base, &ctx, true)?,
+                predicate: NODE_RDFA_USES_VOCABULARY.clone(),
+                object: resolve_uri(vocab, &ctx, false)?,
+            },
+        )
+    }
 
     ctx.base = element_ref
         .select(&Selector::parse("base")?)

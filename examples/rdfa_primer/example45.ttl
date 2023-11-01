@@ -1,3 +1,4 @@
+<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://xmlns.com/foaf/0.1/>.
 <http://test.org#me> <http://xmlns.com/foaf/0.1/knows> <http://example.com/bob/#me>.
 <http://example.com/bob/#me> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
 <http://example.com/bob/#me> <http://xmlns.com/foaf/0.1/homepage> <http://example.com/bob/>.

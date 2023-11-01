@@ -85,6 +85,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0177"  ; "@prefix                                                                  : earl_reports_html5_0177 ")]
 #[test_case("example0178"  ; "@prefix with multiple mappings                                           : earl_reports_html5_0178 ")]
 #[test_case("example0182"  ; "prefix locality                                                          : earl_reports_html5_0182 ")]
+#[test_case("example0186"  ; "@vocab after subject declaration                                         : earl_reports_html5_0186 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
