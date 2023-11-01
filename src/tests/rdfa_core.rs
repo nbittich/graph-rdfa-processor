@@ -1,9 +1,7 @@
-use std::path::PathBuf;
-
-use crate::{constants::BNODE_ID_GENERATOR, Context, RdfaGraph};
-use scraper::Html;
 use serial_test::serial;
 use test_case::test_case;
+
+use super::cmp_files;
 const INPUT_OUTPUT_DIR: &str = "examples/rdfa_core";
 
 #[test_case("example002"  ; "2.1 The RDFa Attributes                            : rdfa_core_002")]
@@ -25,43 +23,5 @@ const INPUT_OUTPUT_DIR: &str = "examples/rdfa_core";
 #[test_case("example117"  ; "8.3.2.2 Using @href or @src to set the object      : rdfa_core_117")]
 #[serial]
 fn test(test_name: &str) {
-    let _ = env_logger::try_init();
-
-    println!("running test {test_name}");
-    // reset bnode id generator
-    BNODE_ID_GENERATOR.store(1, std::sync::atomic::Ordering::SeqCst);
-
-    let path_buf = PathBuf::from(INPUT_OUTPUT_DIR);
-    let path_to_html = path_buf.join(format!("{test_name}.html"));
-    if !path_to_html.exists() {
-        panic!("{path_to_html:?} does not exist");
-    }
-    let path_to_ttl = path_buf.join(format!("{test_name}.ttl"));
-    if !path_to_ttl.exists() {
-        panic!("{path_to_ttl:?} does not exist");
-    }
-    let html = std::fs::read_to_string(path_to_html).unwrap();
-    let html = html.trim_end();
-    println!("============ HTML ============");
-    println!("{html}");
-    let ttl = std::fs::read_to_string(&path_to_ttl).unwrap();
-    let ttl = ttl.trim_end();
-    println!("============ Expected result ============");
-    println!("{ttl}");
-    let document = Html::parse_document(html);
-    let root = document.root_element();
-
-    let root_ctx = Context {
-        base: "http://test.org",
-        ..Default::default()
-    };
-    let graph = RdfaGraph::parse(&root, root_ctx).unwrap().to_string();
-
-    println!("============ Actual result ============");
-    println!("{graph}");
-
-    // trick to keep the whitespaces at the right place
-    // uncomment line below and comment the last line if test doesn't work
-    //std::fs::write(path_to_ttl, graph);
-    assert_eq!(ttl, graph);
+    cmp_files(test_name, INPUT_OUTPUT_DIR, "http://test.org")
 }
