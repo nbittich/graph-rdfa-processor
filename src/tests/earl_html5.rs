@@ -63,6 +63,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0091"  ; "Non-reserved, un-prefixed CURIE in @property                           : earl_reports_html5_0091")]
 #[test_case("example0093"  ; "XMLLiteral content with explicit @datatype (user-data-typed literal)   : earl_reports_html5_0093")]
 #[test_case("example0099"  ; "Preservation of white space in literals                                : earl_reports_html5_0099")]
+#[test_case("example0104"  ; "rdf:value                                                              : earl_reports_html5_0104")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
