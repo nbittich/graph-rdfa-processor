@@ -68,7 +68,9 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0107"  ; "no garbage collecting bnodes                                           : earl_reports_html5_0107")]
 #[test_case("example0110"  ; "bNode generated even though no nested @about exists                    : earl_reports_html5_0110")]
 #[test_case("example0111"  ; "two bNodes generated after three levels of nesting                     : earl_reports_html5_0111")]
-#[test_case("example0112"  ; "plain literal with datatype=\"\"                                         : earl_reports_html5_0112")]
+#[test_case("example0112"  ; "plain literal with datatype=\"\"                                       : earl_reports_html5_0112")]
+#[test_case("example0115"  ; "XML Entities must be supported by RDFa parser                          : earl_reports_html5_0115")]
+#[test_case("example0117"  ; "Fragment identifiers stripped from BASE                                : earl_reports_html5_0117")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

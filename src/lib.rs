@@ -93,6 +93,10 @@ pub fn traverse_element<'a>(
         .select(&Selector::parse("base")?)
         .next()
         .and_then(|e| e.attr("href"))
+        .map(|b| {
+            let pos_fragment = b.chars().position(|p| p == '#').unwrap_or(b.len());
+            &b[0..pos_fragment]
+        })
         .unwrap_or(ctx.base);
 
     if let Some(prefix) = elt.attr("prefix") {
