@@ -12,7 +12,7 @@ use constants::{
     NODE_RDFA_PATTERN_TYPE, NODE_RDF_XSD_STRING,
 };
 use itertools::Itertools;
-use scraper::ElementRef;
+use scraper::{ElementRef, Selector};
 use url::Url;
 mod constants;
 use log::{debug, error};
@@ -410,11 +410,18 @@ pub fn traverse_element<'a>(
         }
         subject
     } else if type_ofs.is_some() {
-        // for some reasons it seems that if there is a typeof but no
-        // about and no resource, it becomes an anon node
-        // this might be incorrect
-        let node =
-            Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst));
+        let child_with_rdfa_tag = element_ref
+            .select(&Selector::parse(
+                "[href], [src], [resource], [typeof], [property]",
+            )?)
+            .count();
+
+        let node = if child_with_rdfa_tag == 0 {
+            resolve_uri(ctx.base, &ctx, true)?
+        } else {
+            Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+        };
+
         let subject = parent
             .and_then(|p| p.current_node.clone())
             .unwrap_or_else(|| {

@@ -47,6 +47,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0063"  ; "@rel in head using reserved XHTML value and empty-prefix CURIE syntax  : earl_reports_html5_0063")]
 #[test_case("example0064"  ; "@about with safe CURIE                                                 : earl_reports_html5_0064")]
 #[test_case("example0065"  ; "@rel with safe CURIE                                                   : earl_reports_html5_0065")]
+#[test_case("example0066"  ; "@about with @typeof in the head                                        : earl_reports_html5_0066")]
 #[serial]
 fn test(test_name: &str) {
     let _ = env_logger::try_init();
