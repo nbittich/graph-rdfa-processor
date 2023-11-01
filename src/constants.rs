@@ -8,13 +8,14 @@ pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";
 pub static RDF_XML_LITERAL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";
 pub static RDF_XSD_STRING: &str = "http://www.w3.org/2001/XMLSchema#string";
 pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+pub static RESERVED_KEYWORDS: [&str; 1] = ["license"];
 lazy_static::lazy_static! {
     pub static ref NODE_RDF_XML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XML_LITERAL));
     pub static ref NODE_RDF_XSD_STRING: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XSD_STRING));
     pub static ref NODE_RDFA_PATTERN_TYPE: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_PATTERN_TYPE));
     pub static ref NODE_RDFA_COPY_PREDICATE: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_COPY_PREDICATE));
     pub static ref NODE_NS_TYPE: Node<'static>=Node::Iri(Cow::Borrowed(NS_TYPE));
-   pub static  ref COMMON_PREFIXES: HashMap<&'static str, &'static str> =
+    pub static  ref COMMON_PREFIXES: HashMap<&'static str, &'static str> =
         HashMap::from([
             ("", "http://www.w3.org/1999/xhtml/vocab#"),
             // w3c

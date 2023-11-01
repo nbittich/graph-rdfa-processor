@@ -1,172 +1,23 @@
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-    error::Error,
-    fmt::{Display, Formatter},
-    sync::Arc,
-    u64,
-};
+use std::{borrow::Cow, collections::HashMap, error::Error, sync::Arc};
 
-use constants::{
-    BNODE_ID_GENERATOR, COMMON_PREFIXES, DEFAULT_WELL_KNOWN_PREFIX, NODE_NS_TYPE,
-    NODE_RDFA_PATTERN_TYPE, NODE_RDF_XSD_STRING,
-};
-use itertools::Itertools;
-use scraper::{ElementRef, Selector};
-use url::Url;
 mod constants;
-use log::{debug, error};
-use uuid::Uuid;
-
-use crate::constants::NODE_RDF_XML_LITERAL;
+mod structs;
 #[cfg(test)]
 mod tests;
 
-#[derive(Debug)]
-pub struct RdfaGraph<'a>(Vec<Statement<'a>>);
+use constants::{
+    BNODE_ID_GENERATOR, COMMON_PREFIXES, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE, RESERVED_KEYWORDS,
+};
+use itertools::Itertools;
+use log::{debug, error};
+use scraper::{ElementRef, Selector};
+use url::Url;
+use uuid::Uuid;
 
-#[derive(Debug, Default, Clone)]
-pub struct Context<'a> {
-    base: &'a str,
-    vocab: Option<&'a str>,
-    lang: Option<&'a str>,
-    in_rel: Option<Vec<Node<'a>>>,
-    in_rev: Option<Vec<Node<'a>>>,
-    current_node: Option<Node<'a>>,
-    prefixes: HashMap<&'a str, &'a str>,
-}
+use crate::constants::NODE_RDF_XML_LITERAL;
+use structs::{Context, Literal, Node, Statement};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Literal<'a> {
-    datatype: Option<Box<Node<'a>>>,
-    value: Cow<'a, str>,
-    lang: Option<&'a str>,
-}
-
-#[derive(Debug, Clone, Eq, PartialOrd, Ord, Hash)]
-pub enum Node<'a> {
-    Iri(Cow<'a, str>),
-    Literal(Literal<'a>),
-    Ref(Arc<Node<'a>>),
-    List(Vec<Node<'a>>),
-    BNode(u64),
-    RefBNode((&'a str, Uuid)),
-}
-impl Node<'_> {
-    pub fn is_empty(&self) -> bool {
-        match self {
-            Node::Iri(iri) => iri.is_empty(),
-            Node::Literal(l) => {
-                l.value.is_empty()
-                    && l.datatype.as_ref().filter(|li| !li.is_empty()).is_none()
-                    && l.lang.filter(|lan| lan.is_empty()).is_none()
-            }
-            Node::Ref(r) => r.is_empty(),
-            Node::List(list) => list.iter().all(|l| l.is_empty()),
-            Node::BNode(_) => false,
-            Node::RefBNode((s, _)) => s.is_empty(),
-        }
-    }
-}
-
-impl PartialEq for Node<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Iri(l0), Self::Iri(r0)) => l0 == r0,
-            (Self::Literal(l0), Self::Literal(r0)) => l0 == r0,
-            (Self::Ref(l0), Self::Ref(r0)) => l0 == r0,
-            (Self::Ref(l0), rhs) => l0.as_ref() == rhs,
-            (lhs, Self::Ref(r0)) => lhs == r0.as_ref(),
-            (Self::List(l0), Self::List(r0)) => l0 == r0,
-            (Self::BNode(l0), Self::BNode(r0)) => l0 == r0,
-            (Self::RefBNode(l0), Self::RefBNode(r0)) => l0 == r0,
-            _ => false,
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Statement<'a> {
-    subject: Node<'a>,
-    predicate: Node<'a>,
-    object: Node<'a>,
-}
-
-impl Display for Node<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Node::Iri(iri) => f.write_str(&format!("<{}>", iri)),
-            Node::Ref(iri) => f.write_str(&format!("{}", iri)),
-            Node::Literal(Literal {
-                datatype,
-                lang,
-                value,
-            }) => {
-                let mut s = if value
-                    .as_ref()
-                    .chars()
-                    .any(|c| c.is_ascii_control() || c.is_control())
-                {
-                    format!(r#""""{value}""""#)
-                } else {
-                    format!(r#""{value}""#)
-                };
-
-                if let Some(datatype) = datatype
-                    .as_ref()
-                    .filter(|dt| dt.as_ref() != &*NODE_RDF_XSD_STRING)
-                {
-                    s.push_str(&format!(r#"^^{datatype}"#));
-                } else if let Some(lang) = lang {
-                    s.push_str(&format!(r#"@{lang}"#));
-                }
-                f.write_str(&s)
-            }
-            Node::BNode(id) => {
-                // todo maybe this should use the base?
-                f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
-            }
-            Node::RefBNode((id, uuid)) => {
-                if let Ok(v) = id.parse::<u64>() {
-                    if v <= BNODE_ID_GENERATOR.load(std::sync::atomic::Ordering::SeqCst) {
-                        f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, uuid))
-                    } else {
-                        f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
-                    }
-                } else {
-                    f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
-                }
-            }
-            e => {
-                error!("fixme! format for {e:?} not implemented");
-                Err(std::fmt::Error)
-            }
-        }
-    }
-}
-
-impl Display for Statement<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let Statement {
-            subject,
-            predicate,
-            object,
-        } = self;
-        f.write_str(&format!(r#"{subject} {predicate} {object}."#))
-    }
-}
-impl Display for RdfaGraph<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(
-            &self
-                .0
-                .iter()
-                .map(Statement::to_string)
-                .collect::<Vec<String>>()
-                .join("\n"),
-        )
-    }
-}
+pub use structs::RdfaGraph;
 
 impl<'a> RdfaGraph<'a> {
     pub fn parse(
@@ -684,6 +535,8 @@ pub fn resolve_uri<'a>(
                 )))
             } else if let Some(vocab) = ctx.vocab {
                 Ok(Node::Iri(Cow::Owned([vocab, uri].join(""))))
+            } else if RESERVED_KEYWORDS.binary_search(&uri).ok().is_some() {
+                Ok(Node::Iri(Cow::Owned([COMMON_PREFIXES[""], uri].join(""))))
             } else {
                 debug!("could not determine base/vocab {:?}", ctx);
                 Ok(Node::Iri(Cow::Borrowed(uri)))
