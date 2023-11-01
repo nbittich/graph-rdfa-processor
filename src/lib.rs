@@ -78,6 +78,26 @@ fn push_to_vec_if_not_present<T: PartialEq>(array: &mut Vec<T>, value: T) {
         array.push(value);
     }
 }
+fn push_triples<'a>(
+    stmts: &mut Vec<Statement<'a>>,
+    subject: &Node<'a>,
+    predicates: &Option<Vec<Node<'a>>>,
+    object: &Node<'a>,
+) {
+    if let Some(predicate) = predicates {
+        for predicate in predicate {
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
+                    subject: subject.clone(),
+                    predicate: predicate.clone(),
+                    object: object.clone(),
+                },
+            );
+        }
+    }
+}
+
 pub fn traverse_element<'a>(
     element_ref: &ElementRef<'a>,
     parent: Option<&Context<'a>>,
@@ -90,6 +110,16 @@ pub fn traverse_element<'a>(
         .attr("vocab")
         .or_else(|| parent.as_ref().and_then(|p| p.vocab));
 
+    ctx.base = element_ref
+        .select(&Selector::parse("base")?)
+        .next()
+        .and_then(|e| e.attr("href"))
+        .map(|b| {
+            let pos_fragment = b.chars().position(|p| p == '#').unwrap_or(b.len());
+            &b[0..pos_fragment]
+        })
+        .unwrap_or(ctx.base);
+
     if let Some(vocab) = ctx.vocab {
         push_to_vec_if_not_present(
             stmts,
@@ -100,16 +130,6 @@ pub fn traverse_element<'a>(
             },
         )
     }
-
-    ctx.base = element_ref
-        .select(&Selector::parse("base")?)
-        .next()
-        .and_then(|e| e.attr("href"))
-        .map(|b| {
-            let pos_fragment = b.chars().position(|p| p == '#').unwrap_or(b.len());
-            &b[0..pos_fragment]
-        })
-        .unwrap_or(ctx.base);
 
     if let Some(prefix) = elt.attr("prefix") {
         ctx.prefixes = parse_prefixes(prefix);
@@ -133,26 +153,33 @@ pub fn traverse_element<'a>(
         .attr("lang")
         .or_else(|| elt.attr("xml:lang"))
         .or_else(|| parent.and_then(|p| p.lang));
+
     let about = elt
         .attr("about")
         .and_then(|a| resolve_uri(a, &ctx, true).ok());
 
     let property = elt.attr("property");
+
     let mut rels = elt
         .attr("rel")
         .map(|r| parse_property_or_type_of(r, &ctx, true));
-    let parent_in_rel = parent.and_then(|c| c.in_rel.clone());
-    let parent_in_rev = parent.and_then(|c| c.in_rev.clone());
+
+    let mut parent_in_rel = parent.and_then(|c| c.in_rel.clone());
+    let mut parent_in_rev = parent.and_then(|c| c.in_rev.clone());
+
     let mut revs = elt
         .attr("rev")
         .map(|r| parse_property_or_type_of(r, &ctx, true));
+
     let src_or_href = elt
         .attr("href")
         .or_else(|| elt.attr("src"))
         .and_then(|v| resolve_uri(v, &ctx, true).ok());
+
     let type_ofs = elt
         .attr("typeof")
         .map(|t| parse_property_or_type_of(t, &ctx, true));
+
     let predicates = property.map(|p| parse_property_or_type_of(p, &ctx, false));
 
     let current_node = if let Some(resource) = resource {
@@ -162,120 +189,45 @@ pub fn traverse_element<'a>(
             .map(|a| Node::Ref(Arc::new(a.clone())))
             .unwrap_or(Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?)));
         let mut curr_node = object;
-        if let Some(predicates) = &predicates {
-            let subject = about
-                .clone()
-                .map(|a| Node::Ref(Arc::new(a)))
-                .or_else(|| parent.and_then(|p| p.current_node.clone()))
-                .ok_or("no parent node")?;
-            for predicate in predicates {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: subject.clone(),
-                        predicate: predicate.clone(),
-                        object: curr_node.clone(),
-                    },
-                );
-            }
-            if type_ofs.is_none() {
-                curr_node = subject;
-            }
+        let subject = about
+            .clone()
+            .map(|a| Node::Ref(Arc::new(a)))
+            .or_else(|| parent.and_then(|p| p.current_node.clone()))
+            .ok_or("no parent node")?;
+
+        push_triples(stmts, &subject, &predicates, &curr_node);
+
+        if predicates.is_some() && type_ofs.is_none() {
+            curr_node = subject;
+        } else {
+            push_triples(stmts, &subject, &rels.take(), &curr_node);
+            push_triples(stmts, &curr_node, &revs.take(), &subject);
         }
-        if let Some(rels) = rels.take() {
-            let subject = about
-                .clone()
-                .map(|a| Node::Ref(Arc::new(a)))
-                .or_else(|| parent.and_then(|p| p.current_node.clone()))
-                .ok_or("no parent node")?;
-            for rel in rels {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: subject.clone(),
-                        predicate: rel,
-                        object: curr_node.clone(),
-                    },
-                );
-            }
-        }
-        if let Some(revs) = revs.take() {
-            let subject = about
-                .map(|a| Node::Ref(Arc::new(a)))
-                .or_else(|| parent.and_then(|p| p.current_node.clone()))
-                .ok_or("no parent node")?;
-            for rev in revs {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: curr_node.clone(),
-                        predicate: rev,
-                        object: subject.clone(),
-                    },
-                );
-            }
-        }
+
         curr_node
     } else if let Some(about) = about {
         // handle about case. set the context.
         // if property is present, children become objects of current.
         let subject = Node::Ref(Arc::new(about));
 
-        if let Some(predicates) = &predicates {
-            for predicate in predicates {
-                if let Some(content) = element_ref.attr("content") {
-                    push_to_vec_if_not_present(
-                        stmts,
-                        Statement {
-                            subject: subject.clone(),
-                            predicate: predicate.clone(),
-                            object: Node::Ref(Arc::new(Node::Literal(Literal {
-                                datatype: elt
-                                    .attr("datatype")
-                                    .and_then(|dt| resolve_uri(dt, &ctx, false).ok())
-                                    .map(Box::new),
-                                value: Cow::Borrowed(content),
-                                lang: elt.attr("lang").or(ctx.lang),
-                            }))),
-                        },
-                    );
-                } else {
-                    push_to_vec_if_not_present(
-                        stmts,
-                        Statement {
-                            subject: subject.clone(),
-                            predicate: predicate.clone(),
-                            object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
-                        },
-                    );
-                }
-            }
-        }
+        let obj = if let Some(content) = element_ref.attr("content") {
+            Node::Ref(Arc::new(Node::Literal(Literal {
+                datatype: elt
+                    .attr("datatype")
+                    .and_then(|dt| resolve_uri(dt, &ctx, false).ok())
+                    .map(Box::new),
+                value: Cow::Borrowed(content),
+                lang: elt.attr("lang").or(ctx.lang),
+            })))
+        } else {
+            Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
+        };
+
+        push_triples(stmts, &subject, &predicates, &obj);
+
         if let Some(src_or_href) = &src_or_href {
-            if let Some(rels) = &rels {
-                for rel in rels {
-                    push_to_vec_if_not_present(
-                        stmts,
-                        Statement {
-                            subject: subject.clone(),
-                            predicate: rel.clone(),
-                            object: src_or_href.clone(),
-                        },
-                    );
-                }
-            }
-            if let Some(revs) = &revs {
-                for rev in revs {
-                    push_to_vec_if_not_present(
-                        stmts,
-                        Statement {
-                            subject: src_or_href.clone(),
-                            predicate: rev.clone(),
-                            object: subject.clone(),
-                        },
-                    )
-                }
-            }
+            push_triples(stmts, &subject, &rels, src_or_href);
+            push_triples(stmts, src_or_href, &revs, &subject);
         }
         subject
     } else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
@@ -286,43 +238,21 @@ pub fn traverse_element<'a>(
             .unwrap_or_else(|| {
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
             });
-        if let Some(rels) = &rels {
-            for rel in rels {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: subject.clone(),
-                        predicate: rel.clone(),
-                        object: src_or_href.clone(),
-                    },
-                );
-            }
-        }
-        if let Some(revs) = &revs {
-            for rev in revs {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: src_or_href.clone(),
-                        predicate: rev.clone(),
-                        object: subject.clone(),
-                    },
-                );
-            }
-        }
+        push_triples(stmts, &subject, &rels, src_or_href);
+        push_triples(stmts, src_or_href, &revs, &subject);
+
         subject
     } else if type_ofs.is_some() {
         let child_with_rdfa_tag = element_ref
             .select(&Selector::parse(
                 "[href], [src], [resource], [typeof], [property]",
             )?)
-            .count();
+            .count()
+            == 0;
 
-        let node = if child_with_rdfa_tag == 0 || parent.is_none() {
+        let node = if child_with_rdfa_tag || parent.is_none() {
             resolve_uri(ctx.base, &ctx, true)?
         } else {
-            dbg!(element_ref.parent(), elt.name());
-
             Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
         };
 
@@ -331,18 +261,8 @@ pub fn traverse_element<'a>(
             .unwrap_or_else(|| {
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
             });
-        if let Some(predicates) = &predicates {
-            for predicate in predicates {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: subject.clone(),
-                        predicate: predicate.clone(),
-                        object: node.clone(),
-                    },
-                );
-            }
-        }
+        push_triples(stmts, &subject, &predicates, &node);
+
         node
     } else {
         let subject = src_or_href
@@ -350,18 +270,13 @@ pub fn traverse_element<'a>(
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
             .or_else(|| parent.and_then(|p| p.current_node.clone()))
             .unwrap_or(resolve_uri(ctx.base, &ctx, true)?);
-        if let Some(predicates) = &predicates {
-            for predicate in predicates {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: subject.clone(),
-                        predicate: predicate.clone(),
-                        object: Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
-                    },
-                );
-            }
-        }
+        push_triples(
+            stmts,
+            &subject,
+            &predicates,
+            &Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+        );
+
         subject
     };
 
@@ -381,36 +296,13 @@ pub fn traverse_element<'a>(
     ctx.current_node = Some(current_node.clone());
     ctx.in_rel = rels.clone();
     ctx.in_rev = revs.clone();
-    if let Some(in_rels) = parent_in_rel {
-        let parent = parent
-            .and_then(|p| p.current_node.clone())
-            .ok_or("in_rel: no parent node")?;
 
-        for in_rel in in_rels {
-            push_to_vec_if_not_present(
-                stmts,
-                Statement {
-                    subject: parent.clone(),
-                    predicate: in_rel,
-                    object: current_node.clone(),
-                },
-            );
-        }
-    }
-    if let Some(in_revs) = parent_in_rev {
+    if parent_in_rel.is_some() || parent_in_rev.is_some() {
         let parent = parent
             .and_then(|p| p.current_node.clone())
             .ok_or("in_rel: no parent node")?;
-        for in_rev in in_revs {
-            push_to_vec_if_not_present(
-                stmts,
-                Statement {
-                    object: parent.clone(),
-                    predicate: in_rev,
-                    subject: current_node.clone(),
-                },
-            );
-        }
+        push_triples(stmts, &parent, &parent_in_rel.take(), &current_node);
+        push_triples(stmts, &current_node, &parent_in_rev.take(), &parent);
     }
     for child in element_ref
         .children()
@@ -428,68 +320,29 @@ pub fn traverse_element<'a>(
         })
     {
         if let Some(c) = ElementRef::wrap(child) {
-            let mut replace_by_bnode = None;
-            if let Some(in_rels) = &ctx.in_rel {
-                // Triples are also 'completed' if any one of @property, @rel or @rev are present.
-                if (c.attr("property").is_some()
+            // Triples are also 'completed' if any one of @property, @rel or @rev are present.
+            let triples_completed = (ctx.in_rel.is_some() || ctx.in_rev.is_some())
+                && (c.attr("property").is_some()
                     || c.attr("rel").is_some()
                     || c.attr("rev").is_some())
-                    && (c.attr("about").is_none() && c.attr("typeof").is_none())
-                {
-                    let b_node = Node::BNode(
-                        BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
-                    );
-                    for in_rel in in_rels {
-                        push_to_vec_if_not_present(
-                            stmts,
-                            Statement {
-                                subject: current_node.clone(),
-                                predicate: in_rel.clone(),
-                                object: b_node.clone(),
-                            },
-                        );
-                    }
-                    replace_by_bnode = Some(b_node);
-                }
-            }
-            if let Some(in_revs) = &ctx.in_rev {
-                // Triples are also 'completed' if any one of @property, @rel or @rev are present.
-                if (c.attr("property").is_some()
-                    || c.attr("rel").is_some()
-                    || c.attr("rev").is_some())
-                    && (c.attr("about").is_none() && c.attr("typeof").is_none())
-                {
-                    let b_node = replace_by_bnode.unwrap_or_else(|| {
-                        Node::BNode(
-                            BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
-                        )
-                    });
-                    for in_rev in in_revs {
-                        push_to_vec_if_not_present(
-                            stmts,
-                            Statement {
-                                subject: b_node.clone(),
-                                predicate: in_rev.clone(),
-                                object: current_node.clone(),
-                            },
-                        );
-                    }
+                && (c.attr("about").is_none() && c.attr("typeof").is_none());
 
-                    replace_by_bnode = Some(b_node);
-                }
-            }
-            if let Some(b_node) = replace_by_bnode {
+            if triples_completed {
+                // Triples are also 'completed' if any one of @property, @rel or @rev are present.
+                let b_node = Node::BNode(
+                    BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
+                );
+                push_triples(stmts, &current_node, &ctx.in_rel.take(), &b_node);
+                push_triples(stmts, &b_node, &ctx.in_rev.take(), &current_node);
+
                 ctx.current_node = Some(b_node);
-                ctx.in_rel = None;
-                ctx.in_rev = None;
             }
             // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
-            if c.attr("about").is_some() || c.attr("typeof").is_some() {
+            else if c.attr("about").is_some() || c.attr("typeof").is_some() {
                 ctx.in_rel = rels.clone();
                 ctx.in_rev = revs.clone();
                 ctx.current_node = Some(current_node.clone());
             }
-
             let child_ctx = Context {
                 base: ctx.base,
                 ..Default::default()
