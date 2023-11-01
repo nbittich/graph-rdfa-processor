@@ -324,9 +324,11 @@ pub fn traverse_element<'a>(
             )?)
             .count();
 
-        let node = if child_with_rdfa_tag == 0 {
+        let node = if child_with_rdfa_tag == 0 || parent.is_none() {
             resolve_uri(ctx.base, &ctx, true)?
         } else {
+            dbg!(element_ref.parent(), elt.name());
+
             Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
         };
 
@@ -514,7 +516,7 @@ pub fn extract_literal<'a>(
         .and_then(|dt| match resolve_uri(dt, ctx, false) {
             Ok(d) => Some(Box::new(d)),
             Err(e) => {
-                eprintln!("could not parse {dt}. error {e}");
+                debug!("could not parse {dt}. error {e}");
                 None
             }
         });
@@ -645,7 +647,8 @@ pub fn resolve_uri<'a>(
                 )))
             } else {
                 debug!("could not determine base/vocab {:?}", ctx);
-                Ok(Node::Iri(Cow::Borrowed(uri)))
+                // Ok(Node::Iri(Cow::Borrowed(uri)))
+                Err("could not determine uri")
             }
         }
         Err(e) => {

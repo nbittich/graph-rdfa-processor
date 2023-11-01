@@ -90,6 +90,14 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0188"  ; "@vocab only affects predicates                                           : earl_reports_html5_0188 ")]
 #[test_case("example0189"  ; "@vocab overrides default term                                            : earl_reports_html5_0189 ")]
 #[test_case("example0190"  ; "term case insensitivity                                                  : earl_reports_html5_0190 ")]
+#[test_case("example0196"  ; "process explicit XMLLiteral                                              : earl_reports_html5_0196 ")]
+#[test_case("example0197"  ; "TERMorCURIEorAbsURI requires an absolute URI                             : earl_reports_html5_0197 ")]
+#[test_case("example0206"  ; "Usage of Initial Context                                                 : earl_reports_html5_0206 ")]
+#[test_case("example0207"  ; "Vevent using @typeof                                                     : earl_reports_html5_0207 ")]
+#[test_case("example0213"  ; "Datatype generation for a literal with XML content, version 1.1          : earl_reports_html5_0213 ")]
+#[test_case("example0214"  ; "Root element has implicit @about=\"\"                                    : earl_reports_html5_0214 ")]
+#[test_case("example0216"  ; "Proper character encoding detection in spite of large headers            : earl_reports_html5_0216 ")]
+#[test_case("example0217"  ; "@vocab causes rdfa:usesVocabulary triple to be added                     : earl_reports_html5_0217 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
