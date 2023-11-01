@@ -126,7 +126,11 @@ pub fn traverse_element<'a>(
     let predicates = property.map(|p| parse_property_or_type_of(p, &ctx));
 
     let current_node = if let Some(resource) = resource {
-        let object = Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?));
+        let object = about
+            .as_ref()
+            .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
+            .map(|a| Node::Ref(Arc::new(a.clone())))
+            .unwrap_or(Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?)));
         if let Some(predicates) = &predicates {
             let subject = about
                 .map(|a| Node::Ref(Arc::new(a)))
@@ -425,6 +429,9 @@ pub fn traverse_element<'a>(
                     ..Default::default()
                 };
                 let _ = traverse_element(&c, Some(&ctx), child_ctx, stmts)?;
+                if let Some("http://danbri.org/foaf.rdf#danbri") = c.attr("about") {
+                    dbg!(&ctx.in_rel);
+                }
             }
         }
     }
