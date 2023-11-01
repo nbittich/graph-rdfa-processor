@@ -2,8 +2,4 @@
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/title> "The trouble with Bob".
 <http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/creator> <http://test.org#me>.
 <http://test.org/alice/posts/trouble_with_bob> <http://schema.org/creator> <http://test.org#me>.
-<http://test.org/alice/posts/trouble_with_bob> <http://schema.org/articleBody> """
-        
-          The trouble with Bob is that he takes much better photos than I do:
-        
-      """.
+<http://test.org/alice/posts/trouble_with_bob> <http://schema.org/articleBody> "The trouble with Bob is that he takes much better photos than I do:".

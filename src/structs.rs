@@ -122,6 +122,8 @@ impl Display for Node<'_> {
                     } else {
                         f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
                     }
+                } else if id.is_empty() {
+                    f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, uuid))
                 } else {
                     f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
                 }

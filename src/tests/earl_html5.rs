@@ -58,6 +58,11 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0080"  ; "@about overrides @resource in incomplete triples                       : earl_reports_html5_0080")]
 #[test_case("example0083"  ; "multiple ways of handling incomplete triples                           : earl_reports_html5_0083")]
 #[test_case("example0084"  ; "handling incomplete triples, this time with both @rel and @rev         : earl_reports_html5_0084")]
+#[test_case("example0088"  ; "Interpretation of the CURIE (_:)                                       : earl_reports_html5_0088")]
+#[test_case("example0089"  ; "@src sets a new subject (@typeof)                                      : earl_reports_html5_0089")]
+#[test_case("example0091"  ; "Non-reserved, un-prefixed CURIE in @property                           : earl_reports_html5_0091")]
+#[test_case("example0093"  ; "XMLLiteral content with explicit @datatype (user-data-typed literal)   : earl_reports_html5_0093")]
+#[test_case("example0099"  ; "Preservation of white space in literals                                : earl_reports_html5_0099")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

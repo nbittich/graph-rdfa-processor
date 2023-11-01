@@ -1,6 +1,4 @@
-use std::{
-    borrow::Cow, collections::HashMap, error::Error, sync::Arc,
-};
+use std::{borrow::Cow, collections::HashMap, error::Error, sync::Arc};
 
 mod constants;
 mod structs;
@@ -306,6 +304,7 @@ pub fn traverse_element<'a>(
         node
     } else {
         let subject = src_or_href
+            .clone()
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
             .or_else(|| parent.and_then(|p| p.current_node.clone()))
             .unwrap_or(resolve_uri(ctx.base, &ctx, true)?);
@@ -325,11 +324,12 @@ pub fn traverse_element<'a>(
     };
 
     if let Some(type_ofs) = type_ofs {
+        let sub = src_or_href.unwrap_or_else(|| current_node.clone());
         for type_of in type_ofs {
             push_to_vec_if_not_present(
                 stmts,
                 Statement {
-                    subject: current_node.clone(),
+                    subject: sub.clone(),
                     predicate: NODE_NS_TYPE.clone(),
                     object: type_of,
                 },
@@ -497,13 +497,24 @@ pub fn extract_literal<'a>(
             lang: None,
         }))
     } else {
-        let texts = element_ref.text().collect::<Vec<_>>();
+        let texts = element_ref
+            .text()
+            .filter(|t| !t.trim().is_empty())
+            .collect::<Vec<_>>();
         let text = if texts.is_empty() {
             Cow::Borrowed("")
         } else if texts.len() == 1 {
-            Cow::Borrowed(texts[0])
+            let text = {
+                if texts[0].lines().filter(|l| !l.trim().is_empty()).count() == 1 {
+                    texts[0].trim()
+                } else {
+                    texts[0]
+                }
+            };
+            Cow::Borrowed(text)
         } else {
-            Cow::Owned(texts.iter().map(|t| t.to_string()).collect())
+            let text = texts.iter().map(|t| t.to_string()).join("");
+            Cow::Owned(text)
         };
         Ok(Node::Literal(Literal {
             datatype,
@@ -540,7 +551,12 @@ pub fn resolve_uri<'a>(
         Err(url::ParseError::RelativeUrlWithoutBase) => {
             if let Ok((prefix, reference)) = parse_safe_curie(uri) {
                 if prefix.trim() == "_" {
-                    return Ok(Node::RefBNode((reference, Uuid::new_v4())));
+                    let uuid = if cfg!(test) {
+                        Uuid::nil()
+                    } else {
+                        Uuid::new_v4()
+                    };
+                    return Ok(Node::RefBNode((reference.trim(), uuid)));
                 } else if prefix.trim().is_empty() && !reference.is_empty() {
                     return Ok(Node::Iri(Cow::Owned(
                         [COMMON_PREFIXES[""], reference].join(""),
