@@ -210,20 +210,12 @@ pub fn traverse_element<'a>(
         // if property is present, children become objects of current.
         let subject = Node::Ref(Arc::new(about));
 
-        let obj = if let Some(content) = element_ref.attr("content") {
-            Node::Ref(Arc::new(Node::Literal(Literal {
-                datatype: elt
-                    .attr("datatype")
-                    .and_then(|dt| resolve_uri(dt, &ctx, false).ok())
-                    .map(Box::new),
-                value: Cow::Borrowed(content),
-                lang: elt.attr("lang").or(ctx.lang),
-            })))
-        } else {
-            Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
-        };
-
-        push_triples(stmts, &subject, &predicates, &obj);
+        push_triples(
+            stmts,
+            &subject,
+            &predicates,
+            &Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+        );
 
         if let Some(src_or_href) = &src_or_href {
             push_triples(stmts, &subject, &rels, src_or_href);
@@ -373,7 +365,11 @@ pub fn extract_literal<'a>(
         .or(ctx.lang)
         .filter(|_| datatype.is_none());
 
-    if let Some(value) = elt_val.attr("href").or(elt_val.attr("src")) {
+    if let Some(value) = elt_val
+        .attr("href")
+        .or(elt_val.attr("src"))
+        .filter(|_| elt_val.attr("about").is_none())
+    {
         resolve_uri(value, ctx, true)
     } else if let Some(content) = elt_val.attr("content") {
         Ok(Node::Literal(Literal {
