@@ -86,6 +86,10 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0178"  ; "@prefix with multiple mappings                                           : earl_reports_html5_0178 ")]
 #[test_case("example0182"  ; "prefix locality                                                          : earl_reports_html5_0182 ")]
 #[test_case("example0186"  ; "@vocab after subject declaration                                         : earl_reports_html5_0186 ")]
+#[test_case("example0187"  ; "@vocab redefinition                                                      : earl_reports_html5_0187 ")]
+#[test_case("example0188"  ; "@vocab only affects predicates                                           : earl_reports_html5_0188 ")]
+#[test_case("example0189"  ; "@vocab overrides default term                                            : earl_reports_html5_0189 ")]
+#[test_case("example0190"  ; "term case insensitivity                                                  : earl_reports_html5_0190 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

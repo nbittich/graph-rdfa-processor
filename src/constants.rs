@@ -9,7 +9,7 @@ pub static RDFA_USES_VOCABULARY: &str = "http://www.w3.org/ns/rdfa#usesVocabular
 pub static RDF_XML_LITERAL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";
 pub static RDF_XSD_STRING: &str = "http://www.w3.org/2001/XMLSchema#string";
 pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-pub static RESERVED_KEYWORDS: [&str; 2] = ["license", "LICENSE"];
+pub static RESERVED_KEYWORDS: [&str; 1] = ["license"];
 lazy_static::lazy_static! {
     pub static ref NODE_RDF_XML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XML_LITERAL));
     pub static ref NODE_RDFA_USES_VOCABULARY: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_USES_VOCABULARY));
