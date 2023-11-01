@@ -1,10 +1,6 @@
-<http://www.example.org/#manu> <http://xmlns.com/foaf/0.1/name> """
-      Manu Sporny
-    """.
+<http://www.example.org/#manu> <http://xmlns.com/foaf/0.1/name> "Manu Sporny".
 <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5> <http://purl.org/dc/elements/1.1/creator> <http://www.example.org/#manu>.
 <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5> <http://purl.org/dc/elements/1.1/publisher> <http://www.example.org/#manu>.
-<http://www.example.org/#fabien> <http://xmlns.com/foaf/0.1/name> """
-      Fabien Gandon
-    """.
+<http://www.example.org/#fabien> <http://xmlns.com/foaf/0.1/name> "Fabien Gandon".
 <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5> <http://purl.org/dc/elements/1.1/creator> <http://www.example.org/#fabien>.
 <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5> <http://purl.org/dc/elements/1.1/publisher> <http://www.example.org/#fabien>.

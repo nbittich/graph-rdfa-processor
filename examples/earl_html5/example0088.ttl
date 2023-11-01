@@ -1,0 +1,3 @@
+<http://data.lblod.info/.well-known/genid#00000000-0000-0000-0000-000000000000> <http://xmlns.com/foaf/0.1/name> "Dan Brickley".
+<http://www.example.org/#somebody> <http://xmlns.com/foaf/0.1/knows> <http://data.lblod.info/.well-known/genid#00000000-0000-0000-0000-000000000000>.
+<http://data.lblod.info/.well-known/genid#00000000-0000-0000-0000-000000000000> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
