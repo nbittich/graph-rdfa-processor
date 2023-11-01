@@ -330,7 +330,7 @@ pub fn traverse_element<'a>(
                 ctx.current_node = Some(b_node);
             }
             // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
-            else if c.attr("about").is_some() || c.attr("typeof").is_some() {
+            if c.attr("about").is_some() || c.attr("typeof").is_some() {
                 ctx.in_rel = rels.clone();
                 ctx.in_rev = revs.clone();
                 ctx.current_node = Some(current_node.clone());
