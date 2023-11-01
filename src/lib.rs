@@ -161,8 +161,10 @@ pub fn traverse_element<'a>(
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
             .map(|a| Node::Ref(Arc::new(a.clone())))
             .unwrap_or(Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?)));
+        let mut curr_node = object;
         if let Some(predicates) = &predicates {
             let subject = about
+                .clone()
                 .map(|a| Node::Ref(Arc::new(a)))
                 .or_else(|| parent.and_then(|p| p.current_node.clone()))
                 .ok_or("no parent node")?;
@@ -172,17 +174,17 @@ pub fn traverse_element<'a>(
                     Statement {
                         subject: subject.clone(),
                         predicate: predicate.clone(),
-                        object: object.clone(),
+                        object: curr_node.clone(),
                     },
                 );
             }
-            if type_ofs.is_some() {
-                object
-            } else {
-                subject
+            if type_ofs.is_none() {
+                curr_node = subject;
             }
-        } else if let Some(rels) = rels.take() {
+        }
+        if let Some(rels) = rels.take() {
             let subject = about
+                .clone()
                 .map(|a| Node::Ref(Arc::new(a)))
                 .or_else(|| parent.and_then(|p| p.current_node.clone()))
                 .ok_or("no parent node")?;
@@ -192,12 +194,12 @@ pub fn traverse_element<'a>(
                     Statement {
                         subject: subject.clone(),
                         predicate: rel,
-                        object: object.clone(),
+                        object: curr_node.clone(),
                     },
                 );
             }
-            object
-        } else if let Some(revs) = revs.take() {
+        }
+        if let Some(revs) = revs.take() {
             let subject = about
                 .map(|a| Node::Ref(Arc::new(a)))
                 .or_else(|| parent.and_then(|p| p.current_node.clone()))
@@ -206,16 +208,14 @@ pub fn traverse_element<'a>(
                 push_to_vec_if_not_present(
                     stmts,
                     Statement {
-                        subject: object.clone(),
+                        subject: curr_node.clone(),
                         predicate: rev,
                         object: subject.clone(),
                     },
                 );
             }
-            object
-        } else {
-            object
         }
+        curr_node
     } else if let Some(about) = about {
         // handle about case. set the context.
         // if property is present, children become objects of current.
@@ -239,30 +239,6 @@ pub fn traverse_element<'a>(
                             }))),
                         },
                     );
-                }
-                if let (Some(src_or_href), Some(rels)) = (&src_or_href, &rels) {
-                    for rel in rels {
-                        push_to_vec_if_not_present(
-                            stmts,
-                            Statement {
-                                subject: subject.clone(),
-                                predicate: rel.clone(),
-                                object: src_or_href.clone(),
-                            },
-                        );
-                    }
-                    if let Some(revs) = &revs {
-                        for rev in revs {
-                            push_to_vec_if_not_present(
-                                stmts,
-                                Statement {
-                                    subject: src_or_href.clone(),
-                                    predicate: rev.clone(),
-                                    object: subject.clone(),
-                                },
-                            )
-                        }
-                    }
                 } else {
                     push_to_vec_if_not_present(
                         stmts,
@@ -274,16 +250,19 @@ pub fn traverse_element<'a>(
                     );
                 }
             }
-        } else if let (Some(src_or_href), Some(rels)) = (&src_or_href, &rels) {
-            for rel in rels {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: subject.clone(),
-                        predicate: rel.clone(),
-                        object: src_or_href.clone(),
-                    },
-                );
+        }
+        if let Some(src_or_href) = &src_or_href {
+            if let Some(rels) = &rels {
+                for rel in rels {
+                    push_to_vec_if_not_present(
+                        stmts,
+                        Statement {
+                            subject: subject.clone(),
+                            predicate: rel.clone(),
+                            object: src_or_href.clone(),
+                        },
+                    );
+                }
             }
             if let Some(revs) = &revs {
                 for rev in revs {
@@ -299,22 +278,37 @@ pub fn traverse_element<'a>(
             }
         }
         subject
-    } else if let (Some(src_or_href), Some(rels)) = (&src_or_href, &rels) {
+    } else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
+        let src_or_href = src_or_href.as_ref().ok_or("no src")?;
         // https://www.w3.org/TR/rdfa-core/#using-href-or-src-to-set-the-object
         let subject = parent
             .and_then(|p| p.current_node.clone())
             .unwrap_or_else(|| {
                 Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
             });
-        for rel in rels {
-            push_to_vec_if_not_present(
-                stmts,
-                Statement {
-                    subject: subject.clone(),
-                    predicate: rel.clone(),
-                    object: src_or_href.clone(),
-                },
-            );
+        if let Some(rels) = &rels {
+            for rel in rels {
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: subject.clone(),
+                        predicate: rel.clone(),
+                        object: src_or_href.clone(),
+                    },
+                );
+            }
+        }
+        if let Some(revs) = &revs {
+            for rev in revs {
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: src_or_href.clone(),
+                        predicate: rev.clone(),
+                        object: subject.clone(),
+                    },
+                );
+            }
         }
         subject
     } else if type_ofs.is_some() {
