@@ -56,7 +56,8 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0074"  ; "Relative URI in @href (with XHTML base in head)                        : earl_reports_html5_0074")]
 #[test_case("example0075"  ; "Reserved word 'license' in @rel with no explicit @about                : earl_reports_html5_0075")]
 #[test_case("example0080"  ; "@about overrides @resource in incomplete triples                       : earl_reports_html5_0080")]
-#[test_case("example0083"  ; "@about overrides @resource in incomplete triples                       : earl_reports_html5_0083")]
+#[test_case("example0083"  ; "multiple ways of handling incomplete triples                           : earl_reports_html5_0083")]
+#[test_case("example0084"  ; "handling incomplete triples, this time with both @rel and @rev         : earl_reports_html5_0084")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

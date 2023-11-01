@@ -1,4 +1,6 @@
-use std::{borrow::Cow, collections::HashMap, error::Error, sync::Arc};
+use std::{
+    borrow::Cow, collections::HashMap, error::Error, sync::Arc,
+};
 
 mod constants;
 mod structs;
@@ -335,8 +337,8 @@ pub fn traverse_element<'a>(
         }
     }
     ctx.current_node = Some(current_node.clone());
-    ctx.in_rel = rels;
-    ctx.in_rev = revs;
+    ctx.in_rel = rels.clone();
+    ctx.in_rev = revs.clone();
     if let Some(in_rels) = parent_in_rel {
         let parent = parent
             .and_then(|p| p.current_node.clone())
@@ -368,71 +370,89 @@ pub fn traverse_element<'a>(
             );
         }
     }
-    if element_ref.has_children() {
-        for child in element_ref.children() {
-            if let Some(c) = ElementRef::wrap(child) {
-                if let Some(in_rels) = &ctx.in_rel {
-                    // Triples are also 'completed' if any one of @property, @rel or @rev are present.
-                    // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
-                    if (c.attr("property").is_some()
-                        || c.attr("rel").is_some()
-                        || c.attr("rev").is_some())
-                        && (c.attr("about").is_none() && c.attr("typeof").is_none())
-                    {
-                        let b_node = Node::BNode(
-                            BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
+    for child in element_ref
+        .children()
+        // to skip when there are no attributes, see e.g earl_html5/example0084.html
+        .flat_map(|c| {
+            if c.value()
+                .as_element()
+                .filter(|e| e.attrs().count() == 0)
+                .is_some()
+            {
+                c.children().collect_vec().into_iter()
+            } else {
+                vec![c].into_iter()
+            }
+        })
+    {
+        if let Some(c) = ElementRef::wrap(child) {
+            let mut replace_by_bnode = None;
+            if let Some(in_rels) = &ctx.in_rel {
+                // Triples are also 'completed' if any one of @property, @rel or @rev are present.
+                if (c.attr("property").is_some()
+                    || c.attr("rel").is_some()
+                    || c.attr("rev").is_some())
+                    && (c.attr("about").is_none() && c.attr("typeof").is_none())
+                {
+                    let b_node = Node::BNode(
+                        BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
+                    );
+                    for in_rel in in_rels {
+                        push_to_vec_if_not_present(
+                            stmts,
+                            Statement {
+                                subject: current_node.clone(),
+                                predicate: in_rel.clone(),
+                                object: b_node.clone(),
+                            },
                         );
-                        for in_rel in in_rels {
-                            push_to_vec_if_not_present(
-                                stmts,
-                                Statement {
-                                    subject: current_node.clone(),
-                                    predicate: in_rel.clone(),
-                                    object: b_node.clone(),
-                                },
-                            );
-                        }
-                        ctx.current_node = Some(b_node);
-                        ctx.in_rel = None;
-                        ctx.in_rev = None;
                     }
-                }
-                if let Some(in_revs) = &ctx.in_rev {
-                    // Triples are also 'completed' if any one of @property, @rel or @rev are present.
-                    // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
-                    if (c.attr("property").is_some()
-                        || c.attr("rel").is_some()
-                        || c.attr("rev").is_some())
-                        && (c.attr("about").is_none() && c.attr("typeof").is_none())
-                    {
-                        let b_node = Node::BNode(
-                            BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
-                        );
-                        for in_rev in in_revs {
-                            push_to_vec_if_not_present(
-                                stmts,
-                                Statement {
-                                    subject: b_node.clone(),
-                                    predicate: in_rev.clone(),
-                                    object: current_node.clone(),
-                                },
-                            );
-                        }
-                        ctx.current_node = Some(b_node);
-                        ctx.in_rel = None;
-                        ctx.in_rev = None;
-                    }
-                }
-
-                let child_ctx = Context {
-                    base: ctx.base,
-                    ..Default::default()
-                };
-                let _ = traverse_element(&c, Some(&ctx), child_ctx, stmts)?;
-                if let Some("http://danbri.org/foaf.rdf#danbri") = c.attr("about") {
-                    dbg!(&ctx.in_rel);
+                    replace_by_bnode = Some(b_node);
                 }
             }
+            if let Some(in_revs) = &ctx.in_rev {
+                // Triples are also 'completed' if any one of @property, @rel or @rev are present.
+                if (c.attr("property").is_some()
+                    || c.attr("rel").is_some()
+                    || c.attr("rev").is_some())
+                    && (c.attr("about").is_none() && c.attr("typeof").is_none())
+                {
+                    let b_node = replace_by_bnode.unwrap_or_else(|| {
+                        Node::BNode(
+                            BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
+                        )
+                    });
+                    for in_rev in in_revs {
+                        push_to_vec_if_not_present(
+                            stmts,
+                            Statement {
+                                subject: b_node.clone(),
+                                predicate: in_rev.clone(),
+                                object: current_node.clone(),
+                            },
+                        );
+                    }
+
+                    replace_by_bnode = Some(b_node);
+                }
+            }
+            if let Some(b_node) = replace_by_bnode {
+                ctx.current_node = Some(b_node);
+                ctx.in_rel = None;
+                ctx.in_rev = None;
+            }
+            // However, unlike the situation when @about or @typeof are present, all predicates are attached to one bnode
+            if c.attr("about").is_some() || c.attr("typeof").is_some() {
+                ctx.in_rel = rels.clone();
+                ctx.in_rev = revs.clone();
+                ctx.current_node = Some(current_node.clone());
+            }
+
+            let child_ctx = Context {
+                base: ctx.base,
+                ..Default::default()
+            };
+            let _ = traverse_element(&c, Some(&ctx), child_ctx, stmts)?;
         }
     }
     Ok(ctx.current_node.clone())
