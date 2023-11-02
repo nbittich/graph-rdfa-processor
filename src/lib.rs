@@ -98,6 +98,27 @@ fn push_triples<'a>(
     }
 }
 
+// skip when there are no rdfa attributes, see e.g examples/earl_html5/example0084.html
+fn get_children<'a>(
+    element_ref: &ElementRef<'a>,
+) -> Result<Vec<ego_tree::NodeRef<'a, scraper::Node>>, &'static str> {
+    let mut res = vec![];
+    for c in element_ref.children() {
+        if c.value()
+            .as_element()
+            .filter(|e| e.attrs().count() == 0)
+            .is_some()
+        {
+            let child_ref = ElementRef::wrap(c).ok_or("not an element ref")?;
+            res.append(&mut get_children(&child_ref)?);
+        } else {
+            res.push(c);
+        }
+    }
+
+    Ok(res)
+}
+
 pub fn traverse_element<'a>(
     element_ref: &ElementRef<'a>,
     parent: Option<&Context<'a>>,
@@ -296,21 +317,7 @@ pub fn traverse_element<'a>(
         push_triples(stmts, &parent, &parent_in_rel.take(), &current_node);
         push_triples(stmts, &current_node, &parent_in_rev.take(), &parent);
     }
-    for child in element_ref
-        .children()
-        // to skip when there are no attributes, see e.g earl_html5/example0084.html
-        .flat_map(|c| {
-            if c.value()
-                .as_element()
-                .filter(|e| e.attrs().count() == 0)
-                .is_some()
-            {
-                c.children().collect_vec().into_iter()
-            } else {
-                vec![c].into_iter()
-            }
-        })
-    {
+    for child in get_children(element_ref)? {
         if let Some(c) = ElementRef::wrap(child) {
             // Triples are also 'completed' if any one of @property, @rel or @rev are present.
             let triples_completed = (ctx.in_rel.is_some() || ctx.in_rev.is_some())

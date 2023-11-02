@@ -279,6 +279,7 @@ dependencies = [
 name = "graph-rdfa-processor"
 version = "0.1.0"
 dependencies = [
+ "ego-tree",
  "env_logger",
  "itertools",
  "lazy_static",
