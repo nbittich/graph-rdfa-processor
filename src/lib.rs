@@ -26,7 +26,7 @@ impl<'a> RdfaGraph<'a> {
         initial_context: Context<'a>,
     ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
         let mut triples = vec![];
-        traverse_element(input, None, initial_context, &mut triples)?;
+        traverse_element(input, None, initial_context, &mut triples, &mut vec![])?;
 
         triples = copy_pattern(triples)?;
         // copy patterns
@@ -198,6 +198,7 @@ pub fn traverse_element<'a>(
     parent: Option<&Context<'a>>,
     mut ctx: Context<'a>,
     stmts: &mut Vec<Statement<'a>>,
+    in_list_stmts: &mut Vec<Statement<'a>>,
 ) -> Result<Option<Node<'a>>, Box<dyn Error>> {
     let elt = element_ref.value();
 
@@ -294,7 +295,7 @@ pub fn traverse_element<'a>(
                     Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
                 };
                 for rel in parent_in_list {
-                    push_triples_inlist(stmts, &subject, rel, &obj);
+                    push_triples_inlist(in_list_stmts, &subject, rel, &obj);
                 }
             }
             subject
@@ -314,7 +315,7 @@ pub fn traverse_element<'a>(
                 if element_ref.children().count() != 0 {
                     ctx.in_list = rels.take();
                 } else {
-                    push_triples(stmts, &subject, &rels.take(), &*NODE_RDF_NIL);
+                    push_triples(in_list_stmts, &subject, &rels.take(), &NODE_RDF_NIL);
                 }
             }
             if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
@@ -329,7 +330,7 @@ pub fn traverse_element<'a>(
                     Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
                 };
                 for rel in rels {
-                    push_triples_inlist(stmts, &subject, rel, &obj);
+                    push_triples_inlist(in_list_stmts, &subject, rel, &obj);
                 }
             }
             if let Some(predicates) = predicates {
@@ -339,7 +340,7 @@ pub fn traverse_element<'a>(
                     Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
                 };
                 for predicate in predicates {
-                    push_triples_inlist(stmts, &subject, predicate, &obj);
+                    push_triples_inlist(in_list_stmts, &subject, predicate, &obj);
                 }
             }
 
@@ -482,9 +483,14 @@ pub fn traverse_element<'a>(
                 base: ctx.base,
                 ..Default::default()
             };
-            let _ = traverse_element(&c, Some(&ctx), child_ctx, stmts)?;
+
+            let node = traverse_element(&c, Some(&ctx), child_ctx, stmts, in_list_stmts)?;
+            if node != ctx.current_node {
+                stmts.append(in_list_stmts);
+            }
         }
     }
+
     Ok(ctx.current_node.clone())
 }
 pub fn extract_literal<'a>(
