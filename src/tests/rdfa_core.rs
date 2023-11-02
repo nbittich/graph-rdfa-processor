@@ -23,8 +23,9 @@ const INPUT_OUTPUT_DIR: &str = "examples/rdfa_core";
 #[test_case("example117"  ; "8.3.2.2 Using @href or @src to set the object      : rdfa_core_117 ")]
 #[test_case("example123"  ; "8.4 List Generation                                : rdfa_core_123 ")]
 #[test_case("example124"  ; "8.4 List Generation                                : rdfa_core_124 ")]
+#[test_case("example126"  ; "8.4 List Generation                                : rdfa_core_126 ")]
+#[test_case("example126b" ; "8.4 List Generation                                : rdfa_core_126b")]
 #[test_case("example127"  ; "8.4 List Generation                                : rdfa_core_127 ")]
-#[test_case("example127b"  ; "8.4 List Generation                               : rdfa_core_127b")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(test_name, INPUT_OUTPUT_DIR, "http://test.org")

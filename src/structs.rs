@@ -19,6 +19,7 @@ pub struct Context<'a> {
     pub lang: Option<&'a str>,
     pub in_rel: Option<Vec<Node<'a>>>,
     pub in_rev: Option<Vec<Node<'a>>>,
+    pub in_list: Option<Vec<Node<'a>>>,
     pub current_node: Option<Node<'a>>,
     pub prefixes: HashMap<&'a str, &'a str>,
 }
