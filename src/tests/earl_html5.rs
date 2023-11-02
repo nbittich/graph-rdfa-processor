@@ -101,6 +101,9 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0218"  ; "@inlist to create empty list                                             : earl_reports_html5_0218 ")]
 #[test_case("example0219"  ; "@inlist with literal                                                     : earl_reports_html5_0219 ")]
 #[test_case("example0220"  ; "@inlist with IRI                                                         : earl_reports_html5_0220 ")]
+#[test_case("example0221"  ; "@inlist with hetrogenious membership                                     : earl_reports_html5_0221 ")]
+#[test_case("example0224"  ; "@inlist hanging @rel                                                     : earl_reports_html5_0224 ")]
+#[test_case("example0225"  ; "@inlist on different elements with same subject                          : earl_reports_html5_0225 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

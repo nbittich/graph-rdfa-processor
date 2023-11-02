@@ -1,0 +1,6 @@
+<http://data.lblod.info/.well-known/genid#1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "Foo".
+<http://data.lblod.info/.well-known/genid#1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://data.lblod.info/.well-known/genid#2>.
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/foo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> <http://data.lblod.info/.well-known/genid#1>.
+<http://data.lblod.info/.well-known/genid#2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> "Bar".
+<http://data.lblod.info/.well-known/genid#2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil>.
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/foo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> <http://data.lblod.info/.well-known/genid#2>.
