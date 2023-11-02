@@ -273,7 +273,7 @@ pub fn traverse_element<'a>(
         .or_else(|| elt.attr("src"))
         .and_then(|v| resolve_uri(v, &ctx, true).ok());
 
-    let type_ofs = elt
+    let mut type_ofs = elt
         .attr("typeof")
         .map(|t| parse_property_or_type_of(t, &ctx, true));
 
@@ -395,6 +395,22 @@ pub fn traverse_element<'a>(
             push_triples(stmts, src_or_href, &revs, &subject);
 
             subject
+        } else if type_ofs.is_some() && rels.is_some() {
+            let base = resolve_uri(ctx.base, &ctx, true)?;
+            let b_node = make_bnode();
+            for to in type_ofs.take().into_iter().flatten() {
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: b_node.clone(),
+                        predicate: NODE_NS_TYPE.clone(),
+                        object: to,
+                    },
+                )
+            }
+            push_triples(stmts, &base, &rels.take(), &b_node);
+
+            b_node
         } else if type_ofs.is_some() {
             let child_with_rdfa_tag = element_ref
                 .select(&Selector::parse(
@@ -412,6 +428,7 @@ pub fn traverse_element<'a>(
             let subject = parent
                 .and_then(|p| p.current_node.clone())
                 .unwrap_or_else(make_bnode);
+
             push_triples(stmts, &subject, &predicates, &node);
 
             node

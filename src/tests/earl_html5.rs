@@ -104,6 +104,10 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0221"  ; "@inlist with hetrogenious membership                                     : earl_reports_html5_0221 ")]
 #[test_case("example0224"  ; "@inlist hanging @rel                                                     : earl_reports_html5_0224 ")]
 #[test_case("example0225"  ; "@inlist on different elements with same subject                          : earl_reports_html5_0225 ")]
+#[test_case("example0228"  ; "alternate for test 0040: @rev - @src/@resource test                      : earl_reports_html5_0228 ")]
+#[test_case("example0229"  ; "img[@src] test with omitted @about                                       : earl_reports_html5_0229 ")]
+#[test_case("example0231"  ; "Set image license information                                            : earl_reports_html5_0231 ")]
+#[test_case("example0232"  ; "@typeof with @rel present, no @href, @resource, or @about                : earl_reports_html5_0232 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
