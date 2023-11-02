@@ -26,6 +26,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/rdfa_core";
 #[test_case("example126"  ; "8.4 List Generation                                : rdfa_core_126 ")]
 #[test_case("example126b" ; "8.4 List Generation                                : rdfa_core_126b")]
 #[test_case("example127"  ; "8.4 List Generation                                : rdfa_core_127 ")]
+#[test_case("example129"  ; "8.4 List Generation                                : rdfa_core_129 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(test_name, INPUT_OUTPUT_DIR, "http://test.org")

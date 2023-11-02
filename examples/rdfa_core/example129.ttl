@@ -1,0 +1,2 @@
+<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://example.org/>.
+<http://test.org> <http://example.org/prop> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil>.
