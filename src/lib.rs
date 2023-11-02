@@ -309,8 +309,13 @@ pub fn traverse_element<'a>(
                 && predicates.is_none()
                 && resource.is_none()
                 && about.is_none()
+            // empty list
             {
-                ctx.in_list = rels.take();
+                if element_ref.children().count() != 0 {
+                    ctx.in_list = rels.take();
+                } else {
+                    push_triples(stmts, &subject, &rels.take(), &*NODE_RDF_NIL);
+                }
             }
             if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
                 in_rel = true;
