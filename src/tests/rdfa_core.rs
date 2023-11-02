@@ -21,6 +21,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/rdfa_core";
 #[test_case("example113"  ; "8.3.1.3 XML Literals                               : rdfa_core_113")]
 #[test_case("example118"  ; "8.3.2.2 Using @href or @src to set the object      : rdfa_core_118")]
 #[test_case("example117"  ; "8.3.2.2 Using @href or @src to set the object      : rdfa_core_117")]
+#[test_case("example123"  ; "8.4 List Generation                                : rdfa_core_123")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(test_name, INPUT_OUTPUT_DIR, "http://test.org")

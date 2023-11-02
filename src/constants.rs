@@ -9,9 +9,16 @@ pub static RDFA_USES_VOCABULARY: &str = "http://www.w3.org/ns/rdfa#usesVocabular
 pub static RDF_XML_LITERAL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";
 pub static RDF_XSD_STRING: &str = "http://www.w3.org/2001/XMLSchema#string";
 pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+pub static RDF_FIRST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
+pub static RDF_REST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
+pub static RDF_NIL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+
 pub static RESERVED_KEYWORDS: [&str; 1] = ["license"];
 lazy_static::lazy_static! {
     pub static ref NODE_RDF_XML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XML_LITERAL));
+    pub static ref NODE_RDF_FIRST: Node<'static> = Node::Iri(Cow::Borrowed(RDF_FIRST));
+    pub static ref NODE_RDF_REST: Node<'static> = Node::Iri(Cow::Borrowed(RDF_REST));
+    pub static ref NODE_RDF_NIL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_NIL));
     pub static ref NODE_RDFA_USES_VOCABULARY: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_USES_VOCABULARY));
     pub static ref NODE_RDF_XSD_STRING: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XSD_STRING));
     pub static ref NODE_RDFA_PATTERN_TYPE: Node<'static> = Node::Iri(Cow::Borrowed(RDFA_PATTERN_TYPE));

@@ -15,7 +15,7 @@ use scraper::{ElementRef, Selector};
 use url::Url;
 use uuid::Uuid;
 
-use crate::constants::NODE_RDF_XML_LITERAL;
+use crate::constants::{NODE_RDF_FIRST, NODE_RDF_NIL, NODE_RDF_REST, NODE_RDF_XML_LITERAL};
 use structs::{Context, Literal, Node, Statement};
 
 pub use structs::RdfaGraph;
@@ -34,7 +34,7 @@ impl<'a> RdfaGraph<'a> {
         Ok(RdfaGraph(triples))
     }
 }
-
+#[inline]
 pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, Box<dyn Error>> {
     let (pattern_type, pattern): (Vec<Statement>, Vec<Statement>) = triples
         .into_iter()
@@ -73,11 +73,13 @@ pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, B
     Ok(triples)
 }
 
+#[inline]
 fn push_to_vec_if_not_present<T: PartialEq>(array: &mut Vec<T>, value: T) {
     if !array.contains(&value) {
         array.push(value);
     }
 }
+#[inline]
 fn push_triples<'a>(
     stmts: &mut Vec<Statement<'a>>,
     subject: &Node<'a>,
@@ -98,7 +100,40 @@ fn push_triples<'a>(
     }
 }
 
+#[inline]
+fn find_pos_last_node_in_inlist<'a>(
+    stmts: &Vec<Statement<'a>>,
+    root_subject: &Node<'a>,
+    predicate: &Node<'a>,
+) -> Option<usize> {
+    fn find_res_nil<'a>(stmts: &Vec<Statement<'a>>, subject: &Node<'a>) -> Option<usize> {
+        let node = stmts
+            .iter()
+            .enumerate()
+            .find(|(_, stmt)| &stmt.subject == subject && stmt.predicate == *NODE_RDF_REST);
+
+        if let Some((pos, stmt)) = node {
+            if stmt.object == *NODE_RDF_NIL {
+                Some(pos)
+            } else {
+                find_res_nil(stmts, &stmt.object)
+            }
+        } else {
+            None
+        }
+    }
+    let root = stmts
+        .iter()
+        .find(|stmt| &stmt.subject == root_subject && &stmt.predicate == predicate);
+    if let Some(Statement { object, .. }) = root {
+        find_res_nil(stmts, object)
+    } else {
+        None
+    }
+}
+
 // skip when there are no rdfa attributes, see e.g examples/earl_html5/example0084.html
+#[inline]
 fn get_children<'a>(
     element_ref: &ElementRef<'a>,
 ) -> Result<Vec<ego_tree::NodeRef<'a, scraper::Node>>, &'static str> {
@@ -119,6 +154,10 @@ fn get_children<'a>(
     Ok(res)
 }
 
+#[inline]
+fn make_bnode<'a>() -> Node<'a> {
+    Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+}
 pub fn traverse_element<'a>(
     element_ref: &ElementRef<'a>,
     parent: Option<&Context<'a>>,
@@ -203,7 +242,49 @@ pub fn traverse_element<'a>(
 
     let predicates = property.map(|p| parse_property_or_type_of(p, &ctx, false));
 
-    let current_node = if let Some(resource) = resource {
+    let current_node = if elt.attr("inlist").is_some() {
+        let obj = Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?));
+        let subject = parent
+            .and_then(|p| p.current_node.clone())
+            .ok_or("no parent node")?;
+        if let Some(predicates) = predicates {
+            for predicate in predicates {
+                let b_node = make_bnode();
+
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: b_node.clone(),
+                        predicate: NODE_RDF_FIRST.clone(),
+                        object: obj.clone(),
+                    },
+                );
+
+                if let Some(node) = find_pos_last_node_in_inlist(stmts, &subject, &predicate)
+                    .and_then(|pos| stmts.get_mut(pos))
+                {
+                    node.object = b_node.clone();
+                } else {
+                    // push the root of the list
+                    stmts.push(Statement {
+                        subject: subject.clone(),
+                        predicate,
+                        object: b_node.clone(),
+                    });
+                }
+                push_to_vec_if_not_present(
+                    stmts,
+                    Statement {
+                        subject: b_node,
+                        predicate: NODE_RDF_REST.clone(),
+                        object: NODE_RDF_NIL.clone(),
+                    },
+                );
+            }
+        }
+
+        subject
+    } else if let Some(resource) = resource {
         let object = about
             .as_ref()
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
@@ -248,9 +329,7 @@ pub fn traverse_element<'a>(
         // https://www.w3.org/TR/rdfa-core/#using-href-or-src-to-set-the-object
         let subject = parent
             .and_then(|p| p.current_node.clone())
-            .unwrap_or_else(|| {
-                Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
-            });
+            .unwrap_or_else(make_bnode);
         push_triples(stmts, &subject, &rels, src_or_href);
         push_triples(stmts, src_or_href, &revs, &subject);
 
@@ -266,14 +345,12 @@ pub fn traverse_element<'a>(
         let node = if child_with_rdfa_tag || parent.is_none() {
             resolve_uri(ctx.base, &ctx, true)?
         } else {
-            Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+            make_bnode()
         };
 
         let subject = parent
             .and_then(|p| p.current_node.clone())
-            .unwrap_or_else(|| {
-                Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
-            });
+            .unwrap_or_else(make_bnode);
         push_triples(stmts, &subject, &predicates, &node);
 
         node
@@ -328,9 +405,7 @@ pub fn traverse_element<'a>(
 
             if triples_completed {
                 // Triples are also 'completed' if any one of @property, @rel or @rev are present.
-                let b_node = Node::BNode(
-                    BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst),
-                );
+                let b_node = make_bnode();
                 push_triples(stmts, &current_node, &ctx.in_rel.take(), &b_node);
                 push_triples(stmts, &b_node, &ctx.in_rev.take(), &current_node);
 

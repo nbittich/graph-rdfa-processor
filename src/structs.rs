@@ -5,7 +5,6 @@ use std::{
     sync::Arc,
 };
 
-use log::error;
 use uuid::Uuid;
 
 use crate::constants::{BNODE_ID_GENERATOR, DEFAULT_WELL_KNOWN_PREFIX, NODE_RDF_XSD_STRING};
@@ -36,7 +35,6 @@ pub enum Node<'a> {
     Iri(Cow<'a, str>),
     Literal(Literal<'a>),
     Ref(Arc<Node<'a>>),
-    List(Vec<Node<'a>>),
     BNode(u64),
     RefBNode((&'a str, Uuid)),
 }
@@ -58,7 +56,6 @@ impl Node<'_> {
                     && l.lang.filter(|lan| lan.is_empty()).is_none()
             }
             Node::Ref(r) => r.is_empty(),
-            Node::List(list) => list.iter().all(|l| l.is_empty()),
             Node::BNode(_) => false,
             Node::RefBNode((s, _)) => s.is_empty(),
         }
@@ -73,7 +70,6 @@ impl PartialEq for Node<'_> {
             (Self::Ref(l0), Self::Ref(r0)) => l0 == r0,
             (Self::Ref(l0), rhs) => l0.as_ref() == rhs,
             (lhs, Self::Ref(r0)) => lhs == r0.as_ref(),
-            (Self::List(l0), Self::List(r0)) => l0 == r0,
             (Self::BNode(l0), Self::BNode(r0)) => l0 == r0,
             (Self::RefBNode(l0), Self::RefBNode(r0)) => l0 == r0,
             _ => false,
@@ -127,10 +123,6 @@ impl Display for Node<'_> {
                 } else {
                     f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
                 }
-            }
-            e => {
-                error!("fixme! format for {e:?} not implemented");
-                Err(std::fmt::Error)
             }
         }
     }
