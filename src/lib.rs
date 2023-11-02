@@ -99,8 +99,43 @@ fn push_triples<'a>(
         }
     }
 }
+fn push_triples_inlist<'a>(
+    stmts: &mut Vec<Statement<'a>>,
+    subject: &Node<'a>,
+    predicate: Node<'a>,
+    obj: &Node<'a>,
+) {
+    let b_node = make_bnode();
+    push_to_vec_if_not_present(
+        stmts,
+        Statement {
+            subject: b_node.clone(),
+            predicate: NODE_RDF_FIRST.clone(),
+            object: obj.clone(),
+        },
+    );
 
-#[inline]
+    if let Some(node) =
+        find_pos_last_node_in_inlist(stmts, subject, &predicate).and_then(|pos| stmts.get_mut(pos))
+    {
+        node.object = b_node.clone();
+    } else {
+        // push the root of the list
+        stmts.push(Statement {
+            subject: subject.clone(),
+            predicate,
+            object: b_node.clone(),
+        });
+    }
+    push_to_vec_if_not_present(
+        stmts,
+        Statement {
+            subject: b_node,
+            predicate: NODE_RDF_REST.clone(),
+            object: NODE_RDF_NIL.clone(),
+        },
+    );
+}
 fn find_pos_last_node_in_inlist<'a>(
     stmts: &Vec<Statement<'a>>,
     root_subject: &Node<'a>,
@@ -243,43 +278,34 @@ pub fn traverse_element<'a>(
     let predicates = property.map(|p| parse_property_or_type_of(p, &ctx, false));
 
     let current_node = if elt.attr("inlist").is_some() {
-        let obj = Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?));
+        let mut in_rel = false;
         let subject = parent
             .and_then(|p| p.current_node.clone())
             .ok_or("no parent node")?;
+
+        if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
+            in_rel = true;
+            let obj = if let Some(resource) = resource
+                .and_then(|r| resolve_uri(r, &ctx, true).ok())
+                .map(|n| Node::Ref(Arc::new(n)))
+                .or_else(|| src_or_href.clone())
+            {
+                resource
+            } else {
+                Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
+            };
+            for rel in rels {
+                push_triples_inlist(stmts, &subject, rel, &obj);
+            }
+        }
         if let Some(predicates) = predicates {
+            let obj = if let (Some(resource), false) = (resource, in_rel) {
+                Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?))
+            } else {
+                Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
+            };
             for predicate in predicates {
-                let b_node = make_bnode();
-
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: b_node.clone(),
-                        predicate: NODE_RDF_FIRST.clone(),
-                        object: obj.clone(),
-                    },
-                );
-
-                if let Some(node) = find_pos_last_node_in_inlist(stmts, &subject, &predicate)
-                    .and_then(|pos| stmts.get_mut(pos))
-                {
-                    node.object = b_node.clone();
-                } else {
-                    // push the root of the list
-                    stmts.push(Statement {
-                        subject: subject.clone(),
-                        predicate,
-                        object: b_node.clone(),
-                    });
-                }
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: b_node,
-                        predicate: NODE_RDF_REST.clone(),
-                        object: NODE_RDF_NIL.clone(),
-                    },
-                );
+                push_triples_inlist(stmts, &subject, predicate, &obj);
             }
         }
 
