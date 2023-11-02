@@ -279,7 +279,7 @@ pub fn traverse_element<'a>(
     let predicates = property.map(|p| parse_property_or_type_of(p, &ctx, false));
 
     let current_node =
-        if rels.is_none() && predicates.iter().any(|p| !p.is_empty()) && parent_in_list.is_some() {
+        if rels.is_none() && !predicates.iter().any(|p| p.is_empty()) && parent_in_list.is_some() {
             let subject = parent
                 .and_then(|p| p.current_node.clone())
                 .ok_or("no parent node")?;
