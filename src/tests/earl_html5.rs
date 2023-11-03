@@ -114,6 +114,12 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0248"  ; "multiple ways of handling incomplete triples (with @rev)                              : earl_reports_html5_0248 ")]
 #[test_case("example0249"  ; "multiple ways of handling incomplete triples (with @rel and @rev);                    : earl_reports_html5_0249 ")]
 #[test_case("example0250"  ; "Checking the right behaviour of @typeof with @about, in presence of @property         : earl_reports_html5_0250 ")]
+#[test_case("example0251"  ; "lang                                                                                  : earl_reports_html5_0251 ")]
+#[test_case("example0252"  ; "lang inheritance                                                                      : earl_reports_html5_0252 ")]
+#[test_case("example0253"  ; "plain literal with datatype=\"\" and lang preservation                                : earl_reports_html5_0253 ")]
+#[test_case("example0254"  ; "@datatype=\"\" generates plain literal in presence of child nodes                     : earl_reports_html5_0254 ")]
+#[test_case("example0255"  ; "lang=\"\" clears language setting                                                     : earl_reports_html5_0255 ")]
+#[test_case("example0257"  ; "element with @property and no child nodes generates empty plain literal               : earl_reports_html5_0257 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

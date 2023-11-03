@@ -529,7 +529,7 @@ pub fn extract_literal<'a>(
         .attr("lang")
         .or_else(|| elt_val.attr("xml:lang"))
         .or(ctx.lang)
-        .filter(|_| datatype.is_none());
+        .filter(|s| datatype.is_none() && !s.is_empty());
 
     if let Some(value) = elt_val
         .attr("href")
