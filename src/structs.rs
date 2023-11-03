@@ -5,9 +5,18 @@ use std::{
     sync::Arc,
 };
 
+use regex::Regex;
 use uuid::Uuid;
 
-use crate::constants::{BNODE_ID_GENERATOR, DEFAULT_WELL_KNOWN_PREFIX, NODE_RDF_XSD_STRING};
+use crate::constants::{
+    BNODE_ID_GENERATOR, DATETIME_TYPES, DEFAULT_WELL_KNOWN_PREFIX, NODE_RDF_XSD_STRING,
+};
+#[macro_export]
+macro_rules! iri {
+    ($name:literal) => {
+        Node::Iri(Cow::Borrowed($name))
+    };
+}
 
 #[derive(Debug)]
 pub struct RdfaGraph<'a>(pub Vec<Statement<'a>>);
@@ -22,6 +31,12 @@ pub struct Context<'a> {
     pub in_list: Option<Vec<Node<'a>>>,
     pub current_node: Option<Node<'a>>,
     pub prefixes: HashMap<&'a str, &'a str>,
+}
+
+#[derive(Debug)]
+pub struct DataTypeFromPattern<'a> {
+    pub pattern: &'a str,
+    pub datatype: Node<'a>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -149,5 +164,55 @@ impl Display for RdfaGraph<'_> {
                 .collect::<Vec<String>>()
                 .join("\n"),
         )
+    }
+}
+#[allow(unused)]
+impl<'a> DataTypeFromPattern<'a> {
+    pub fn test(&self, value: &'a str) -> Option<Node<'a>> {
+        let re = Regex::new(self.pattern).ok()?;
+        if re.find(value).filter(|r| r.len() == value.len()).is_some() {
+            Some(self.datatype.clone())
+        } else {
+            None
+        }
+    }
+    pub fn date_time_from_pattern(value: &'a str) -> Option<Node<'a>> {
+        for dtp in DATETIME_TYPES {
+            if let v @ Some(_) = dtp.test(value) {
+                return v;
+            }
+        }
+        None
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::DataTypeFromPattern;
+
+    use crate::Cow;
+    use crate::Node;
+
+    #[test]
+    fn test_date() {
+        let res = DataTypeFromPattern::date_time_from_pattern("2022-09-10");
+        assert_eq!(Some(iri!("http://www.w3.org/2001/XMLSchema#date")), res);
+
+        let res = DataTypeFromPattern::date_time_from_pattern("00:00:00");
+        assert_eq!(Some(iri!("http://www.w3.org/2001/XMLSchema#time")), res);
+        let res = DataTypeFromPattern::date_time_from_pattern("2012-03-18T00:00:00Z");
+        assert_eq!(Some(iri!("http://www.w3.org/2001/XMLSchema#dateTime")), res);
+
+        let res = DataTypeFromPattern::date_time_from_pattern("2022");
+        assert_eq!(Some(iri!("http://www.w3.org/2001/XMLSchema#gYear")), res);
+
+        let res = DataTypeFromPattern::date_time_from_pattern("2022-09");
+        assert_eq!(
+            Some(iri!("http://www.w3.org/2001/XMLSchema#gYearMonth")),
+            res
+        );
+
+        let res = DataTypeFromPattern::date_time_from_pattern("PT2H30M45.5S");
+        assert_eq!(Some(iri!("http://www.w3.org/2001/XMLSchema#duration")), res);
     }
 }

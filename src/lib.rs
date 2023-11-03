@@ -16,9 +16,8 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::constants::{NODE_RDF_FIRST, NODE_RDF_NIL, NODE_RDF_REST, NODE_RDF_XML_LITERAL};
-use structs::{Context, Literal, Node, Statement};
-
 pub use structs::RdfaGraph;
+use structs::{Context, DataTypeFromPattern, Literal, Node, Statement};
 
 impl<'a> RdfaGraph<'a> {
     pub fn parse(
@@ -593,6 +592,18 @@ pub fn extract_literal<'a>(
         Ok(Node::Literal(Literal {
             value: Cow::Owned(element_ref.inner_html()),
             datatype,
+            lang: None,
+        }))
+    } else if elt_val.name() == "time" || elt_val.attr("datetime").is_some() {
+        let content = elt_val
+            .attr("datetime")
+            .or_else(|| element_ref.text().last())
+            .ok_or("no datetime")?;
+
+        Ok(Node::Literal(Literal {
+            datatype: datatype
+                .or_else(|| DataTypeFromPattern::date_time_from_pattern(content).map(Box::new)),
+            value: Cow::Borrowed(content),
             lang: None,
         }))
     } else {

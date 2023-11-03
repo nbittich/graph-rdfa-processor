@@ -1,6 +1,6 @@
 use std::{borrow::Cow, collections::HashMap, sync::atomic::AtomicU64};
 
-use crate::Node;
+use crate::{structs::DataTypeFromPattern, Node};
 pub static BNODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
 pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
@@ -14,6 +14,39 @@ pub static RDF_REST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
 pub static RDF_NIL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
 
 pub static RESERVED_KEYWORDS: [&str; 3] = ["license", "describedby", "role"];
+
+pub static DATETIME_TYPES: [&DataTypeFromPattern; 6] = [
+  &DataTypeFromPattern{
+    pattern:
+      "-?P(?:[0-9]+Y)?(?:[0-9]+M)?(?:[0-9]+D)?(?:T(?:[0-9]+H)?(?:[0-9]+M)?(?:[0-9]+(?:.[0-9]+)?S)?)?",
+    datatype: crate::iri!("http://www.w3.org/2001/XMLSchema#duration"),
+  },
+  &DataTypeFromPattern{
+    pattern:
+      r#"-?(?:[1-9][0-9][0-9][0-9]|0[1-9][0-9][0-9]|00[1-9][0-9]|000[1-9])-[0-9][0-9]-[0-9][0-9]T(?:[0-1][0-9]|2[0-4]):[0-5][0-9]:[0-5][0-9](?:\.[0-9]+)?(?:Z|[+\-][0-9][0-9]:[0-9][0-9])?"#,
+    datatype: crate::iri!("http://www.w3.org/2001/XMLSchema#dateTime"),
+  },
+  &DataTypeFromPattern{
+    pattern:
+      "-?(?:[1-9][0-9][0-9][0-9]|0[1-9][0-9][0-9]|00[1-9][0-9]|000[1-9])-[0-9][0-9]-[0-9][0-9](?:Z|[+-][0-9][0-9]:[0-9][0-9])?",
+    datatype: crate::iri!("http://www.w3.org/2001/XMLSchema#date"),
+  },
+  &DataTypeFromPattern{
+    pattern:
+      "(?:[0-1][0-9]|2[0-4]):[0-5][0-9]:[0-5][0-9](?:.[0-9]+)?(?:Z|[+-][0-9][0-9]:[0-9][0-9])?",
+    datatype: crate::iri!("http://www.w3.org/2001/XMLSchema#time"),
+  },
+  &DataTypeFromPattern{
+    pattern:
+      "-?(?:[1-9][0-9][0-9][0-9]|0[1-9][0-9][0-9]|00[1-9][0-9]|000[1-9])-[0-9][0-9]",
+    datatype: crate::iri!("http://www.w3.org/2001/XMLSchema#gYearMonth"),
+  },
+  &DataTypeFromPattern{
+    pattern: "-?[1-9][0-9][0-9][0-9]|0[1-9][0-9][0-9]|00[1-9][0-9]|000[1-9]",
+    datatype: crate::iri!("http://www.w3.org/2001/XMLSchema#gYear"),
+  },
+];
+
 lazy_static::lazy_static! {
     pub static ref NODE_RDF_XML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XML_LITERAL));
     pub static ref NODE_RDF_FIRST: Node<'static> = Node::Iri(Cow::Borrowed(RDF_FIRST));
