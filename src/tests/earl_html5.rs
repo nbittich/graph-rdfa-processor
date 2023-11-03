@@ -129,6 +129,8 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0266"  ; "@property without @content or @datatype, typed object set by @href and @typeof        : earl_reports_html5_0266 ")]
 #[test_case("example0267"  ; "@property without @content or @datatype, typed object set by @resource and @typeof    : earl_reports_html5_0267 ")]
 #[test_case("example0268"  ; "@property without @content or @datatype, typed object set by @src and @typeof         : earl_reports_html5_0268 ")]
+#[test_case("example0269"  ; "Use of @property in HEAD without explicit subject                                     : earl_reports_html5_0269 ")]
+#[test_case("example0271"  ; "Use of @property in HEAD with explicit parent subject via @about                      : earl_reports_html5_0271 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
