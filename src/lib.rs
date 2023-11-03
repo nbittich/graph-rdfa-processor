@@ -283,6 +283,13 @@ pub fn traverse_element<'a>(
         if rels.is_none() && !predicates.iter().any(|p| p.is_empty()) && parent_in_list.is_some() {
             let subject = parent
                 .and_then(|p| p.current_node.clone())
+                .or_else(|| {
+                    if parent.is_none() {
+                        resolve_uri(ctx.base, &ctx, true).ok()
+                    } else {
+                        None
+                    }
+                })
                 .ok_or("no parent node")?;
             if let Some(parent_in_list) = parent_in_list.take() {
                 let obj = if let Some(resource) = resource
@@ -303,6 +310,13 @@ pub fn traverse_element<'a>(
             let mut in_rel = false;
             let subject = parent
                 .and_then(|p| p.current_node.clone())
+                .or_else(|| {
+                    if parent.is_none() {
+                        resolve_uri(ctx.base, &ctx, true).ok()
+                    } else {
+                        None
+                    }
+                })
                 .ok_or("no parent node")?;
 
             if rels.is_some()
@@ -356,6 +370,13 @@ pub fn traverse_element<'a>(
                 .clone()
                 .map(|a| Node::Ref(Arc::new(a)))
                 .or_else(|| parent.and_then(|p| p.current_node.clone()))
+                .or_else(|| {
+                    if parent.is_none() {
+                        resolve_uri(ctx.base, &ctx, true).ok()
+                    } else {
+                        None
+                    }
+                })
                 .ok_or("no parent node")?;
 
             push_triples(stmts, &subject, &predicates, &curr_node);
@@ -468,6 +489,13 @@ pub fn traverse_element<'a>(
     if parent_in_rel.is_some() || parent_in_rev.is_some() {
         let parent = parent
             .and_then(|p| p.current_node.clone())
+            .or_else(|| {
+                if parent.is_none() {
+                    resolve_uri(ctx.base, &ctx, true).ok()
+                } else {
+                    None
+                }
+            })
             .ok_or("in_rel: no parent node")?;
         push_triples(stmts, &parent, &parent_in_rel.take(), &current_node);
         push_triples(stmts, &current_node, &parent_in_rev.take(), &parent);

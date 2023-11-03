@@ -121,6 +121,9 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0255"  ; "lang=\"\" clears language setting                                                     : earl_reports_html5_0255 ")]
 #[test_case("example0257"  ; "element with @property and no child nodes generates empty plain literal               : earl_reports_html5_0257 ")]
 #[test_case("example0259"  ; "XML+RDFa Initial Context                                                              : earl_reports_html5_0259 ")]
+#[test_case("example0261"  ; "White space preservation in XMLLiteral                                                : earl_reports_html5_0261 ")]
+#[test_case("example0262"  ; "Predicate with @property, with white spaces before and after the attribute value      : earl_reports_html5_0262 ")]
+#[test_case("example0263"  ; "@property appearing on the html element yields the base as the subjects               : earl_reports_html5_0263 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
