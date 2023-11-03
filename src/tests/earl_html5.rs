@@ -111,6 +111,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0233"  ; "@typeof with @rel and @resource present, no @about                       : earl_reports_html5_0233 ")]
 #[test_case("example0246"  ; "hanging @rel creates multiple triples, @typeof permutation               : earl_reports_html5_0246 ")]
 #[test_case("example0247"  ; "Multiple incomplete triples                                              : earl_reports_html5_0247 ")]
+#[test_case("example0248"  ; "multiple ways of handling incomplete triples (with @rev)                 : earl_reports_html5_0248 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
