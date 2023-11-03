@@ -13,7 +13,7 @@ pub static RDF_FIRST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
 pub static RDF_REST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
 pub static RDF_NIL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
 
-pub static RESERVED_KEYWORDS: [&str; 1] = ["license"];
+pub static RESERVED_KEYWORDS: [&str; 3] = ["license", "describedby", "role"];
 lazy_static::lazy_static! {
     pub static ref NODE_RDF_XML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XML_LITERAL));
     pub static ref NODE_RDF_FIRST: Node<'static> = Node::Iri(Cow::Borrowed(RDF_FIRST));
@@ -27,7 +27,6 @@ lazy_static::lazy_static! {
     pub static  ref COMMON_PREFIXES: HashMap<&'static str, &'static str> =
         HashMap::from([
             ("", "http://www.w3.org/1999/xhtml/vocab#"),
-            // w3c
             ("gradl", "http://www.w3.org/2003/g/data-view#"),
             ("ma","http://www.w3.org/ns/ma-ont#"),
             ("owl","http://www.w3.org/2002/07/owl#"),
@@ -43,7 +42,8 @@ lazy_static::lazy_static! {
             ("xhv","http://www.w3.org/1999/xhtml/vocab#"),
             ("xml","http://www.w3.org/XML/1998/namespace"),
             ("xsd","http://www.w3.org/2001/XMLSchema#"),
-            // non-rec w3c
+            ("prov","http://www.w3.org/ns/prov#"),
+            ("rr","http://www.w3.org/ns/r2rml#"),
             ("sd","http://www.w3.org/ns/sparql-service-description#"),
             ("org","http://www.w3.org/ns/org#"),
             ("gldp","http://www.w3.org/ns/people#"),
@@ -52,7 +52,6 @@ lazy_static::lazy_static! {
             ("earl","http://www.w3.org/ns/earl#"),
             ("ht","http://www.w3.org/2006/http#"),
             ("ptr","http://www.w3.org/2009/pointers#"),
-            // widely used
             ("cc","http://creativecommons.org/ns#"),
             ("ctag","http://commontag.org/ns#"),
             ("dc","http://purl.org/dc/terms/"),
@@ -61,12 +60,14 @@ lazy_static::lazy_static! {
             ("gr","http://purl.org/goodrelations/v1#"),
             ("ical","http://www.w3.org/2002/12/cal/icaltzd#"),
             ("og","http://ogp.me/ns#"),
+            ("qb", "http://purl.org/linked-data/cube#"),
+            ("csvw", "http://www.w3.org/ns/csvw#"),
             ("rev","http://purl.org/stuff/rev#"),
+            ("grddl", "http://www.w3.org/2003/g/data-view#"),
             ("sioc","http://rdfs.org/sioc/ns#"),
             ("v","http://rdf.data-vocabulary.org/#"),
             ("vcard","http://www.w3.org/2006/vcard/ns#"),
             ("schema","http://schema.org/"),
-            // terms
             ("describedby","http://www.w3.org/2007/05/powder-s#describedby"),
             ("license","http://www.w3.org/1999/xhtml/vocab#license"),
             ("role","http://www.w3.org/1999/xhtml/vocab#role"),

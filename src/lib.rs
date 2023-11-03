@@ -651,8 +651,8 @@ pub fn resolve_uri<'a>(
                 .iter()
                 .any(|w| uri.eq_ignore_ascii_case(w))
             {
-                Ok(Node::Iri(Cow::Owned(
-                    [COMMON_PREFIXES[""], &uri.to_lowercase()].join(""),
+                Ok(Node::Iri(Cow::Borrowed(
+                    COMMON_PREFIXES[uri.to_lowercase().as_str()],
                 )))
             } else {
                 debug!("could not determine base/vocab {:?}", ctx);

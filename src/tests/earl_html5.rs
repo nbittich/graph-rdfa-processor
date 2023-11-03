@@ -120,6 +120,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0254"  ; "@datatype=\"\" generates plain literal in presence of child nodes                     : earl_reports_html5_0254 ")]
 #[test_case("example0255"  ; "lang=\"\" clears language setting                                                     : earl_reports_html5_0255 ")]
 #[test_case("example0257"  ; "element with @property and no child nodes generates empty plain literal               : earl_reports_html5_0257 ")]
+#[test_case("example0259"  ; "XML+RDFa Initial Context                                                              : earl_reports_html5_0259 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
