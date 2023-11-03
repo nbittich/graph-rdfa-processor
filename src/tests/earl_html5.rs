@@ -124,6 +124,11 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0261"  ; "White space preservation in XMLLiteral                                                : earl_reports_html5_0261 ")]
 #[test_case("example0262"  ; "Predicate with @property, with white spaces before and after the attribute value      : earl_reports_html5_0262 ")]
 #[test_case("example0263"  ; "@property appearing on the html element yields the base as the subjects               : earl_reports_html5_0263 ")]
+#[test_case("example0264"  ; "@property appearing on the head element gets the subject from parent                  : earl_reports_html5_0264 ")]
+#[test_case("example0265"  ; "@property appearing on the head element gets the subject from parent                  : earl_reports_html5_0265 ")]
+#[test_case("example0266"  ; "@property without @content or @datatype, typed object set by @href and @typeof        : earl_reports_html5_0266 ")]
+#[test_case("example0267"  ; "@property without @content or @datatype, typed object set by @resource and @typeof    : earl_reports_html5_0267 ")]
+#[test_case("example0268"  ; "@property without @content or @datatype, typed object set by @src and @typeof         : earl_reports_html5_0268 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

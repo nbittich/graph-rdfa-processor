@@ -268,7 +268,7 @@ pub fn traverse_element<'a>(
         .attr("rev")
         .map(|r| parse_property_or_type_of(r, &ctx, true));
 
-    let src_or_href = elt
+    let mut src_or_href = elt
         .attr("href")
         .or_else(|| elt.attr("src"))
         .and_then(|v| resolve_uri(v, &ctx, true).ok());
@@ -407,15 +407,29 @@ pub fn traverse_element<'a>(
             }
             subject
         } else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
-            let src_or_href = src_or_href.as_ref().ok_or("no src")?;
-            // https://www.w3.org/TR/rdfa-core/#using-href-or-src-to-set-the-object
+            let src_or_href = src_or_href.take().ok_or("no src")?;
             let subject = parent
                 .and_then(|p| p.current_node.clone())
                 .unwrap_or_else(make_bnode);
-            push_triples(stmts, &subject, &rels, src_or_href);
-            push_triples(stmts, src_or_href, &revs, &subject);
 
+            // https://www.w3.org/TR/rdfa-core/#using-href-or-src-to-set-the-object
+            push_triples(stmts, &subject, &rels, &src_or_href);
+            push_triples(stmts, &src_or_href, &revs, &subject);
             subject
+        } else if src_or_href.is_some()
+            && elt.attr("content").is_none()
+            && elt.attr("datatype").is_none()
+            && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
+            && type_ofs.is_some()
+        {
+            let src_or_href = src_or_href.take().ok_or("no src")?;
+
+            let subject = parent
+                .and_then(|p| p.current_node.clone())
+                .unwrap_or_else(make_bnode);
+
+            push_triples(stmts, &subject, &predicates, &src_or_href);
+            src_or_href
         } else if type_ofs.is_some() && rels.is_some() {
             let base = resolve_uri(ctx.base, &ctx, true)?;
             let b_node = make_bnode();
