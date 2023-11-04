@@ -145,6 +145,12 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0284"  ; "time element not matching datatype but with explicit @datatype                        : earl_reports_html5_0284 ")]
 #[test_case("example0287"  ; "time element with @datetime an xsd:dateTime with TZ offset                            : earl_reports_html5_0287 ")]
 #[test_case("example0287b" ; "time element with @datetime an xsd:dateTime with TZ offset                            : earl_reports_html5_0287b")]
+#[test_case("example0289"  ; "@href becomes subject when @property and @content are present                         : earl_reports_html5_0289 ")]
+#[test_case("example0290"  ; "@href becomes subject when @property and @datatype are present                        : earl_reports_html5_0290 ")]
+#[test_case("example0291"  ; "@href as subject overridden by @about                                                 : earl_reports_html5_0291 ")]
+#[test_case("example0292"  ; "@about overriding @href as subject is used as parent resource                         : earl_reports_html5_0292 ")]
+#[test_case("example0293"  ; "Testing the ':' character usage in a CURIE                                            : earl_reports_html5_0293 ")]
+#[test_case("example0296"  ; "@property does set parent object without @typeof                                      : earl_reports_html5_0296 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

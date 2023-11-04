@@ -429,6 +429,18 @@ pub fn traverse_element<'a>(
 
             push_triples(stmts, &subject, &predicates, &src_or_href);
             src_or_href
+        } else if src_or_href.is_some()
+            && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
+            && (elt.attr("content").is_some() || elt.attr("datatype").is_some())
+        {
+            let src_or_href = src_or_href.take().ok_or("no src")?;
+            push_triples(
+                stmts,
+                &src_or_href,
+                &predicates,
+                &extract_literal(element_ref, &ctx)?,
+            );
+            src_or_href
         } else if type_ofs.is_some() && rels.is_some() {
             let base = resolve_uri(ctx.base, &ctx, true)?;
             let b_node = make_bnode();
@@ -572,11 +584,11 @@ pub fn extract_literal<'a>(
         .or(ctx.lang)
         .filter(|s| datatype.is_none() && !s.is_empty());
 
-    if let Some(value) = elt_val
-        .attr("href")
-        .or(elt_val.attr("src"))
-        .filter(|_| elt_val.attr("about").is_none())
-    {
+    if let Some(value) = elt_val.attr("href").or(elt_val.attr("src")).filter(|_| {
+        elt_val.attr("about").is_none()
+            && !(elt_val.attr("property").is_some()
+                && (elt_val.attr("content").is_some() || elt_val.attr("datatype").is_some()))
+    }) {
         resolve_uri(value, ctx, true)
     } else if let Some(content) = elt_val.attr("content") {
         Ok(Node::Literal(Literal {
@@ -649,10 +661,16 @@ pub fn resolve_uri<'a>(
             if uri.starts_with("mail") || uri.starts_with("tel") {
                 Ok(Node::Iri(Cow::Borrowed(uri)))
             } else if let Some(value) = ctx.prefixes.get(iri.scheme()) {
-                let iri = uri.replace(':', "").trim().replacen(iri.scheme(), value, 1);
+                let iri = uri
+                    .replacen(':', "", 1)
+                    .trim()
+                    .replacen(iri.scheme(), value, 1);
                 Ok(Node::Iri(Cow::Owned(iri)))
             } else if let Some(value) = COMMON_PREFIXES.get(iri.scheme()) {
-                let iri = uri.replace(':', "").trim().replacen(iri.scheme(), value, 1);
+                let iri = uri
+                    .replacen(':', "", 1)
+                    .trim()
+                    .replacen(iri.scheme(), value, 1);
                 Ok(Node::Iri(Cow::Owned(iri)))
             } else {
                 Ok(Node::Iri(Cow::Owned(uri.to_string())))
