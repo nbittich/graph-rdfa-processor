@@ -49,6 +49,7 @@ pub struct Literal<'a> {
 #[derive(Debug, Clone, Eq, PartialOrd, Ord, Hash)]
 pub enum Node<'a> {
     Iri(Cow<'a, str>),
+    TermIri(Cow<'a, str>),
     Literal(Literal<'a>),
     Ref(Arc<Node<'a>>),
     BNode(u64),
@@ -66,6 +67,7 @@ impl Node<'_> {
     pub fn is_empty(&self) -> bool {
         match self {
             Node::Iri(iri) => iri.is_empty(),
+            Node::TermIri(iri) => iri.is_empty(),
             Node::Literal(l) => {
                 l.value.is_empty()
                     && l.datatype.as_ref().filter(|li| !li.is_empty()).is_none()
@@ -82,6 +84,9 @@ impl PartialEq for Node<'_> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Iri(l0), Self::Iri(r0)) => l0 == r0,
+            (Self::Iri(l0), Self::TermIri(r0)) => l0 == r0,
+            (Self::TermIri(l0), Self::TermIri(r0)) => l0 == r0,
+            (Self::TermIri(l0), Self::Iri(r0)) => l0 == r0,
             (Self::Literal(l0), Self::Literal(r0)) => l0 == r0,
             (Self::Ref(l0), Self::Ref(r0)) => l0 == r0,
             (Self::Ref(l0), rhs) => l0.as_ref() == rhs,
@@ -96,7 +101,7 @@ impl PartialEq for Node<'_> {
 impl Display for Node<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Node::Iri(iri) => f.write_str(&format!("<{}>", iri)),
+            Node::Iri(iri) | Node::TermIri(iri) => f.write_str(&format!("<{}>", iri)),
             Node::Ref(iri) => f.write_str(&format!("{}", iri)),
             Node::Literal(Literal {
                 datatype,

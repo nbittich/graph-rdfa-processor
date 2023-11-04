@@ -155,6 +155,12 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0298"  ; "@about=[] with @typeof does not create a new object                                   : earl_reports_html5_0298 ")]
 #[test_case("example0299"  ; "@resource=[] with @href or @src uses @href or @src (@rel)                             : earl_reports_html5_0299 ")]
 #[test_case("example0300"  ; "@resource=[] with @href or @src uses @href or @src (@property                         : earl_reports_html5_0300 ")]
+#[test_case("example0301"  ; "@property with @typeof creates a typed_resource for chaining                          : earl_reports_html5_0301 ")]
+#[test_case("example0302"  ; "@typeof with different content types                                                  : earl_reports_html5_0302 ")]
+#[test_case("example0303"  ; "For HTML+RDFa, remove term elements of @rel/@rev when on same element as @property    : earl_reports_html5_0303 ")]
+#[test_case("example0311"  ; "Ensure no triples are generated when @property is empty                               : earl_reports_html5_0311 ")]
+#[test_case("example0312"  ; "Mute plain @rel if @property is present                                               : earl_reports_html5_0312 ")]
+#[test_case("example0315"  ; "@property and @typeof with incomplete triples                                         : earl_reports_html5_0315 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

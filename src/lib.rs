@@ -201,7 +201,7 @@ pub fn traverse_element<'a, 'b>(
     stmts: &'b mut Vec<Statement<'a>>,
     in_list_stmts: &mut Vec<Statement<'a>>,
 ) -> Result<Option<Node<'a>>, Box<dyn Error>> {
-    let elt = RdfaElement::new(element_ref)?;
+    let mut elt = RdfaElement::new(element_ref)?;
 
     ctx.vocab = elt.vocab.or_else(|| parent.as_ref().and_then(|p| p.vocab));
 
@@ -259,232 +259,273 @@ pub fn traverse_element<'a, 'b>(
         .property
         .map(|p| parse_property_or_type_of(p, &ctx, false));
 
-    let current_node =
-        if rels.is_none() && !predicates.iter().any(|p| p.is_empty()) && parent_in_list.is_some() {
-            let subject = parent
-                .and_then(|p| p.current_node.clone())
-                .or_else(|| {
-                    if parent.is_none() {
-                        resolve_uri(ctx.base, &ctx, true).ok()
-                    } else {
-                        None
-                    }
-                })
-                .ok_or("no parent node")?;
-            if let Some(parent_in_list) = parent_in_list.take() {
-                let obj = if let Some(resource) = resource
-                    .and_then(|r| resolve_uri(r, &ctx, true).ok())
-                    .map(|n| Node::Ref(Arc::new(n)))
-                    .or_else(|| src_or_href.clone())
-                {
-                    resource
+    let current_node = if rels.is_none()
+        && !predicates.iter().any(|p| p.is_empty())
+        && parent_in_list.is_some()
+    {
+        let subject = parent
+            .and_then(|p| p.current_node.clone())
+            .or_else(|| {
+                if parent.is_none() {
+                    resolve_uri(ctx.base, &ctx, true).ok()
                 } else {
-                    Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
-                };
-                for rel in parent_in_list {
-                    push_triples_inlist(in_list_stmts, &subject, rel, &obj);
+                    None
                 }
-            }
-            subject
-        } else if elt.is_inlist() {
-            let mut in_rel = false;
-            let subject = parent
-                .and_then(|p| p.current_node.clone())
-                .or_else(|| {
-                    if parent.is_none() {
-                        resolve_uri(ctx.base, &ctx, true).ok()
-                    } else {
-                        None
-                    }
-                })
-                .ok_or("no parent node")?;
-
-            if rels.is_some()
-                && src_or_href.is_none()
-                && predicates.is_none()
-                && resource.is_none()
-                && about.is_none()
-            // empty list
+            })
+            .ok_or("no parent node")?;
+        if let Some(parent_in_list) = parent_in_list.take() {
+            let obj = if let Some(resource) = resource
+                .and_then(|r| resolve_uri(r, &ctx, true).ok())
+                .map(|n| Node::Ref(Arc::new(n)))
+                .or_else(|| src_or_href.clone())
             {
-                if element_ref.children().count() != 0 {
-                    ctx.in_list = rels.take();
-                } else {
-                    push_triples(in_list_stmts, &subject, &rels.take(), &NODE_RDF_NIL);
-                }
-            }
-            if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
-                in_rel = true;
-                let obj = if let Some(resource) = resource
-                    .and_then(|r| resolve_uri(r, &ctx, true).ok())
-                    .map(|n| Node::Ref(Arc::new(n)))
-                    .or_else(|| src_or_href.clone())
-                {
-                    resource
-                } else {
-                    Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
-                };
-                for rel in rels {
-                    push_triples_inlist(in_list_stmts, &subject, rel, &obj);
-                }
-            }
-            if let Some(predicates) = predicates {
-                let obj = if let (Some(resource), false) = (resource, in_rel) {
-                    Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?))
-                } else {
-                    Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
-                };
-                for predicate in predicates {
-                    push_triples_inlist(in_list_stmts, &subject, predicate, &obj);
-                }
-            }
-
-            subject
-        } else if let Some(resource) = resource {
-            let object = about
-                .as_ref()
-                .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
-                .map(|a| Node::Ref(Arc::new(a.clone())))
-                .unwrap_or(Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?)));
-            let mut curr_node = object;
-            let subject = about
-                .clone()
-                .map(|a| Node::Ref(Arc::new(a)))
-                .or_else(|| parent.and_then(|p| p.current_node.clone()))
-                .or_else(|| {
-                    if parent.is_none() {
-                        resolve_uri(ctx.base, &ctx, true).ok()
-                    } else {
-                        None
-                    }
-                })
-                .ok_or("no parent node")?;
-
-            push_triples(stmts, &subject, &predicates, &curr_node);
-
-            if predicates.is_some() && type_ofs.is_none() {
-                curr_node = subject;
+                resource
             } else {
-                push_triples(stmts, &subject, &rels.take(), &curr_node);
-                push_triples(stmts, &curr_node, &revs.take(), &subject);
-            }
-
-            curr_node
-        } else if let Some(about) = about {
-            // handle about case. set the context.
-            // if property is present, children become objects of current.
-            let is_empty = elt
-                .about
-                .filter(|a| !a.trim().is_empty() && is_empty_curie(a))
-                .is_some();
-            let subject = if !is_empty {
-                Node::Ref(Arc::new(about))
-            } else {
-                resolve_uri(ctx.base, &ctx, true)?
+                Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
             };
-
-            push_triples(
-                stmts,
-                &subject,
-                &predicates,
-                &Node::Ref(Arc::new(extract_literal(&elt, &ctx)?)),
-            );
-
-            if let Some(src_or_href) = &src_or_href {
-                push_triples(stmts, &subject, &rels, src_or_href);
-                push_triples(stmts, src_or_href, &revs, &subject);
+            for rel in parent_in_list {
+                push_triples_inlist(in_list_stmts, &subject, rel, &obj);
             }
-            if is_empty {
-                make_bnode()
-            } else {
-                subject
-            }
-        } else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
-            let src_or_href = src_or_href.take().ok_or("no src")?;
-            let subject = parent
-                .and_then(|p| p.current_node.clone())
-                .unwrap_or_else(make_bnode);
+        }
+        subject
+    } else if elt.is_inlist() {
+        let mut in_rel = false;
+        let subject = parent
+            .and_then(|p| p.current_node.clone())
+            .or_else(|| {
+                if parent.is_none() {
+                    resolve_uri(ctx.base, &ctx, true).ok()
+                } else {
+                    None
+                }
+            })
+            .ok_or("no parent node")?;
 
-            // https://www.w3.org/TR/rdfa-core/#using-href-or-src-to-set-the-object
-            push_triples(stmts, &subject, &rels, &src_or_href);
-            push_triples(stmts, &src_or_href, &revs, &subject);
-            subject
-        } else if src_or_href.is_some()
-            && elt.has_no_content_and_no_datatype()
-            && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
-            && type_ofs.is_some()
+        if rels.is_some()
+            && src_or_href.is_none()
+            && predicates.is_none()
+            && resource.is_none()
+            && about.is_none()
+        // empty list
         {
-            let src_or_href = src_or_href.take().ok_or("no src")?;
-
-            let subject = parent
-                .and_then(|p| p.current_node.clone())
-                .unwrap_or_else(make_bnode);
-
-            push_triples(stmts, &subject, &predicates, &src_or_href);
-            src_or_href
-        } else if src_or_href.is_some()
-            && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
-            && elt.has_content_or_datatype()
-        {
-            let src_or_href = src_or_href.take().ok_or("no src")?;
-            push_triples(
-                stmts,
-                &src_or_href,
-                &predicates,
-                &extract_literal(&elt, &ctx)?,
-            );
-            src_or_href
-        } else if type_ofs.is_some() && rels.is_some() {
-            let base = resolve_uri(ctx.base, &ctx, true)?;
-            let b_node = make_bnode();
-            for to in type_ofs.take().into_iter().flatten() {
-                push_to_vec_if_not_present(
-                    stmts,
-                    Statement {
-                        subject: b_node.clone(),
-                        predicate: NODE_NS_TYPE.clone(),
-                        object: to,
-                    },
-                )
-            }
-            push_triples(stmts, &base, &rels.take(), &b_node);
-
-            b_node
-        } else if type_ofs.is_some() {
-            let child_with_rdfa_tag = element_ref
-                .select(&Selector::parse(
-                    "[href], [src], [resource], [typeof], [property]",
-                )?)
-                .count()
-                == 0;
-
-            let node = if child_with_rdfa_tag || parent.is_none() {
-                resolve_uri(ctx.base, &ctx, true)?
+            if element_ref.children().count() != 0 {
+                ctx.in_list = rels.take();
             } else {
-                make_bnode()
+                push_triples(in_list_stmts, &subject, &rels.take(), &NODE_RDF_NIL);
+            }
+        }
+        if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
+            in_rel = true;
+            let obj = if let Some(resource) = resource
+                .and_then(|r| resolve_uri(r, &ctx, true).ok())
+                .map(|n| Node::Ref(Arc::new(n)))
+                .or_else(|| src_or_href.clone())
+            {
+                resource
+            } else {
+                Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
             };
+            for rel in rels {
+                push_triples_inlist(in_list_stmts, &subject, rel, &obj);
+            }
+        }
+        if let Some(predicates) = predicates {
+            let obj = if let (Some(resource), false) = (resource, in_rel) {
+                Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?))
+            } else {
+                Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
+            };
+            for predicate in predicates {
+                push_triples_inlist(in_list_stmts, &subject, predicate, &obj);
+            }
+        }
 
-            let subject = parent
-                .and_then(|p| p.current_node.clone())
-                .unwrap_or_else(make_bnode);
+        subject
+    } else if let Some(resource) = resource {
+        let object = about
+            .as_ref()
+            .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
+            .map(|a| Node::Ref(Arc::new(a.clone())))
+            .unwrap_or(Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?)));
+        let mut curr_node = object;
+        let subject = about
+            .clone()
+            .map(|a| Node::Ref(Arc::new(a)))
+            .or_else(|| parent.and_then(|p| p.current_node.clone()))
+            .or_else(|| {
+                if parent.is_none() {
+                    resolve_uri(ctx.base, &ctx, true).ok()
+                } else {
+                    None
+                }
+            })
+            .ok_or("no parent node")?;
 
-            push_triples(stmts, &subject, &predicates, &node);
+        push_triples(stmts, &subject, &predicates, &curr_node);
 
-            node
+        if predicates.is_some() && type_ofs.is_none() {
+            curr_node = subject;
         } else {
-            let subject = src_or_href
-                .clone()
-                .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
-                .or_else(|| parent.and_then(|p| p.current_node.clone()))
-                .unwrap_or(resolve_uri(ctx.base, &ctx, true)?);
-            push_triples(
-                stmts,
-                &subject,
-                &predicates,
-                &Node::Ref(Arc::new(extract_literal(&elt, &ctx)?)),
-            );
+            push_triples(stmts, &subject, &rels.take(), &curr_node);
+            push_triples(stmts, &curr_node, &revs.take(), &subject);
+        }
 
-            subject
+        curr_node
+    } else if let Some(about) = about {
+        // handle about case. set the context.
+        // if property is present, children become objects of current.
+        let is_empty = elt
+            .about
+            .filter(|a| !a.trim().is_empty() && is_empty_curie(a))
+            .is_some();
+        let subject = if !is_empty {
+            Node::Ref(Arc::new(about))
+        } else {
+            resolve_uri(ctx.base, &ctx, true)?
         };
+
+        push_triples(
+            stmts,
+            &subject,
+            &predicates,
+            &Node::Ref(Arc::new(extract_literal(&elt, &ctx)?)),
+        );
+
+        if let Some(src_or_href) = &src_or_href {
+            push_triples(stmts, &subject, &rels, src_or_href);
+            push_triples(stmts, src_or_href, &revs, &subject);
+        }
+        if is_empty {
+            make_bnode()
+        } else {
+            subject
+        }
+    } else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
+        let src_or_href = src_or_href.take().ok_or("no src")?;
+        let subject = parent
+            .and_then(|p| p.current_node.clone())
+            .unwrap_or_else(make_bnode);
+
+        // test 0303, this becomes dumber and dumber
+        let mut has_term = false;
+        let mut emit_triple = false;
+        if elt.has_property() {
+            rels = rels.take().map(|rs| {
+                rs.into_iter()
+                    .filter(|r| {
+                        let m = matches!(r, Node::Ref(r) if matches!(r.as_ref(), Node::TermIri(_)));
+                        if m {
+                            has_term = true;
+                        } else {
+                            emit_triple = true;
+                        }
+                        !m
+                    })
+                    .collect_vec()
+            });
+            revs = revs.take().map(|rs| {
+                rs.into_iter()
+                    .filter(|r| {
+                        let m = matches!(r, Node::Ref(r) if matches!(r.as_ref(), Node::TermIri(_)));
+                        if m {
+                            has_term = true;
+                        } else {
+                            emit_triple = true;
+                        }
+                        !m
+                    })
+                    .collect_vec()
+            });
+        }
+
+        push_triples(stmts, &subject, &rels, &src_or_href);
+        push_triples(stmts, &src_or_href, &revs, &subject);
+
+        if has_term {
+            if emit_triple {
+                elt.src.take();
+                elt.href.take();
+            }
+            push_triples(stmts, &subject, &predicates, &extract_literal(&elt, &ctx)?);
+        }
+        subject
+    } else if src_or_href.is_some()
+        && elt.has_no_content_and_no_datatype()
+        && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
+        && type_ofs.is_some()
+    {
+        let src_or_href = src_or_href.take().ok_or("no src")?;
+
+        let subject = parent
+            .and_then(|p| p.current_node.clone())
+            .unwrap_or_else(make_bnode);
+
+        push_triples(stmts, &subject, &predicates, &src_or_href);
+        src_or_href
+    } else if src_or_href.is_some()
+        && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
+        && elt.has_content_or_datatype()
+    {
+        let src_or_href = src_or_href.take().ok_or("no src")?;
+        push_triples(
+            stmts,
+            &src_or_href,
+            &predicates,
+            &extract_literal(&elt, &ctx)?,
+        );
+        src_or_href
+    } else if type_ofs.is_some() && rels.is_some() {
+        let base = resolve_uri(ctx.base, &ctx, true)?;
+        let b_node = make_bnode();
+        for to in type_ofs.take().into_iter().flatten() {
+            push_to_vec_if_not_present(
+                stmts,
+                Statement {
+                    subject: b_node.clone(),
+                    predicate: NODE_NS_TYPE.clone(),
+                    object: to,
+                },
+            )
+        }
+        push_triples(stmts, &base, &rels.take(), &b_node);
+
+        b_node
+    } else if type_ofs.is_some() {
+        let child_with_rdfa_tag = element_ref
+            .select(&Selector::parse(
+                "[href], [src], [resource], [typeof], [property]",
+            )?)
+            .count()
+            == 0;
+
+        let node = if child_with_rdfa_tag || parent.is_none() {
+            resolve_uri(ctx.base, &ctx, true)?
+        } else {
+            make_bnode()
+        };
+
+        let subject = parent
+            .and_then(|p| p.current_node.clone())
+            .unwrap_or_else(make_bnode);
+
+        push_triples(stmts, &subject, &predicates, &node);
+
+        node
+    } else {
+        let subject = src_or_href
+            .clone()
+            .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
+            .or_else(|| parent.and_then(|p| p.current_node.clone()))
+            .unwrap_or(resolve_uri(ctx.base, &ctx, true)?);
+        push_triples(
+            stmts,
+            &subject,
+            &predicates,
+            &Node::Ref(Arc::new(extract_literal(&elt, &ctx)?)),
+        );
+
+        subject
+    };
 
     if let Some(type_ofs) = type_ofs {
         let sub = src_or_href.unwrap_or_else(|| current_node.clone());
@@ -663,7 +704,7 @@ pub fn resolve_uri<'a>(
                     };
                     return Ok(Node::RefBNode((reference.trim(), uuid)));
                 } else if prefix.is_empty() && !reference.is_empty() {
-                    return Ok(Node::Iri(Cow::Owned(
+                    return Ok(Node::TermIri(Cow::Owned(
                         [COMMON_PREFIXES[""], reference].join(""),
                     )));
                 } else if let Some(prefix) = ctx
@@ -689,16 +730,16 @@ pub fn resolve_uri<'a>(
                 } else {
                     "/"
                 };
-                Ok(Node::Iri(Cow::Owned(
+                Ok(Node::TermIri(Cow::Owned(
                     [ctx.base, trailing_white_space, uri].join(""),
                 )))
             } else if let Some(vocab) = ctx.vocab {
-                Ok(Node::Iri(Cow::Owned([vocab, uri].join(""))))
+                Ok(Node::TermIri(Cow::Owned([vocab, uri].join(""))))
             } else if RESERVED_KEYWORDS
                 .iter()
                 .any(|w| uri.eq_ignore_ascii_case(w))
             {
-                Ok(Node::Iri(Cow::Borrowed(
+                Ok(Node::TermIri(Cow::Borrowed(
                     COMMON_PREFIXES[uri.to_lowercase().as_str()],
                 )))
             } else {

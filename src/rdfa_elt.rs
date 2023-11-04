@@ -111,4 +111,8 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
             .filter(|t| !t.trim().is_empty())
             .collect()
     }
+
+    pub(crate) fn has_rel_or_rev(&self) -> bool {
+        self.rel.is_some() || self.rev.is_some()
+    }
 }
