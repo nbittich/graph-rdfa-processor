@@ -207,7 +207,7 @@ pub fn traverse_element<'a, 'b>(
 
     ctx.base = elt.base.unwrap_or(ctx.base);
 
-    if let Some(vocab) = ctx.vocab {
+    if let Some(vocab) = ctx.vocab.filter(|v| !v.is_empty()) {
         push_to_vec_if_not_present(
             stmts,
             Statement {
@@ -216,6 +216,8 @@ pub fn traverse_element<'a, 'b>(
                 object: resolve_uri(vocab, &ctx, false)?,
             },
         )
+    } else {
+        ctx.vocab = None;
     }
     ctx.prefixes = elt
         .prefix
@@ -452,6 +454,7 @@ pub fn traverse_element<'a, 'b>(
     } else if elt.has_property()
         && type_ofs.is_some()
         && (parent_in_rel.is_some() || parent_in_rev.is_some())
+        && !elt.has_content_or_datatype()
     {
         let subject = make_bnode();
         let node = src_or_href.take().unwrap_or_else(make_bnode);

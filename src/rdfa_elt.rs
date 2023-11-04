@@ -28,7 +28,7 @@ pub struct RdfaElement<'a, 'b> {
 impl<'a, 'b> RdfaElement<'a, 'b> {
     pub fn new(element_ref: &'b ElementRef<'a>) -> Result<Self, Box<dyn Error>> {
         let element = element_ref.value();
-        let vocab = element.attr("vocab");
+        let vocab = element.attr("vocab").map(|v| v.trim());
         let base = element_ref
             .select(&Selector::parse("base")?)
             .next()
