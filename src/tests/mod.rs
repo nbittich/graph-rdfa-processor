@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use scraper::Html;
+use tortank::turtle::turtle_doc::TurtleDoc;
 
 use crate::{constants::BNODE_ID_GENERATOR, Context, RdfaGraph};
 
@@ -47,5 +48,13 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     // trick to keep the whitespaces at the right place
     // uncomment line below and comment the last line if test doesn't work
     //std::fs::write(path_to_ttl, graph);
-    assert_eq!(ttl, graph);
+
+    let ttl = TurtleDoc::try_from((ttl, None)).unwrap();
+    let graph = TurtleDoc::try_from((graph.as_str(), None)).unwrap();
+    let diff = ttl.difference(&graph).unwrap();
+    if !diff.is_empty() {
+        println!("============ Difference ============");
+        println!("{diff}");
+    }
+    assert!(diff.is_empty());
 }
