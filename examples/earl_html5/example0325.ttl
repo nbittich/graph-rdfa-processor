@@ -1,0 +1,15 @@
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://example.org/>
+   rdfa:usesVocabulary schema: .
+<http://example.org/#foo>
+   rdf:type schema:;
+   schema:refers-to _:1 .
+<http://example.org/#bar>
+   rdf:type schema:;
+   schema:refers-to _:1 .
+_:1 
+   rdf:type schema:;
+   schema:name "Amanda" .

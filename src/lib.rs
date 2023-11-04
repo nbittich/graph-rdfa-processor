@@ -253,9 +253,16 @@ pub fn traverse_element<'a, 'b>(
         .src_or_href()
         .and_then(|v| resolve_uri(v, &ctx, true).ok());
 
-    let mut type_ofs = elt
-        .type_of
-        .map(|t| parse_property_or_type_of(t, &ctx, true));
+    let mut type_ofs = elt.type_of.and_then(|t| {
+        if t.trim().is_empty() {
+            // use vocab
+            resolve_uri(ctx.vocab.unwrap_or(ctx.base), &ctx, true)
+                .ok()
+                .map(|v| vec![v])
+        } else {
+            Some(parse_property_or_type_of(t, &ctx, true))
+        }
+    });
 
     let predicates = elt
         .property
