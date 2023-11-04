@@ -161,6 +161,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0311"  ; "Ensure no triples are generated when @property is empty                               : earl_reports_html5_0311 ")]
 #[test_case("example0312"  ; "Mute plain @rel if @property is present                                               : earl_reports_html5_0312 ")]
 #[test_case("example0315"  ; "@property and @typeof with incomplete triples                                         : earl_reports_html5_0315 ")]
+#[test_case("example0316"  ; "@property and @typeof with incomplete triples (href variant)                          : earl_reports_html5_0316 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

@@ -449,6 +449,17 @@ pub fn traverse_element<'a, 'b>(
             push_triples(stmts, &subject, &predicates, &extract_literal(&elt, &ctx)?);
         }
         subject
+    } else if elt.has_property()
+        && type_ofs.is_some()
+        && (parent_in_rel.is_some() || parent_in_rev.is_some())
+    {
+        let subject = make_bnode();
+        let node = src_or_href.take().unwrap_or_else(make_bnode);
+        for to in type_ofs.take().iter().flatten() {
+            push_triples(stmts, &node, &Some(vec![NODE_NS_TYPE.clone()]), to);
+        }
+        push_triples(stmts, &subject, &predicates, &node);
+        subject
     } else if src_or_href.is_some()
         && elt.has_no_content_and_no_datatype()
         && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
@@ -490,18 +501,6 @@ pub fn traverse_element<'a, 'b>(
         push_triples(stmts, &base, &rels.take(), &b_node);
 
         b_node
-    } else if elt.has_property()
-        && type_ofs.is_some()
-        && (parent_in_rel.is_some() || parent_in_rev.is_some())
-    {
-        let subject = make_bnode();
-        let node = make_bnode();
-
-        for to in type_ofs.take().iter().flatten() {
-            push_triples(stmts, &node, &Some(vec![NODE_NS_TYPE.clone()]), to);
-        }
-        push_triples(stmts, &subject, &predicates, &node);
-        subject
     } else if type_ofs.is_some() {
         let child_with_rdfa_tag = element_ref
             .select(&Selector::parse(
