@@ -1,0 +1,12 @@
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://example.com/>
+   rdfa:usesVocabulary schema: .
+<http://example.com/#referencing>
+   rdf:type schema:Person;
+   schema:name "Bella" .
+<http://example.com/#unreferenced>
+   rdf:type rdfa:Pattern;
+   schema:name "Lola" .

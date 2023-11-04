@@ -169,6 +169,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0323"  ; "Multiple references to rdfa:Pattern                                                   : earl_reports_html5_0323 ")]
 #[test_case("example0324"  ; "Multiple references to rdfa:Pattern                                                   : earl_reports_html5_0324 ")]
 #[test_case("example0325"  ; "Multiple references to rdfa:Pattern creating a resource                               : earl_reports_html5_0325 ")]
+#[test_case("example0326"  ; "rdfa:Pattern removed only if referenced                                               : earl_reports_html5_0326 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

@@ -49,6 +49,21 @@ pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, B
         .into_iter()
         .partition(|stmt| pattern_predicate.iter().any(|s| s.subject == stmt.object));
 
+    // remove only if pattern referenced
+    let (mut unreferenced_pattern_predicate, pattern_predicate): (Vec<Statement>, Vec<Statement>) =
+        pattern_predicate
+            .into_iter()
+            .partition(|stmt| pattern_subject.iter().all(|s| s.object != stmt.subject));
+
+    let (mut unreferenced_pattern_type, _): (Vec<Statement>, Vec<Statement>) =
+        pattern_type.into_iter().partition(|stmt| {
+            unreferenced_pattern_predicate
+                .iter()
+                .any(|s| s.subject == stmt.subject)
+        });
+    triples.append(&mut unreferenced_pattern_predicate);
+    triples.append(&mut unreferenced_pattern_type);
+
     for Statement {
         subject, object, ..
     } in pattern_subject
@@ -71,6 +86,7 @@ pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, B
             )
         }
     }
+
     Ok(triples)
 }
 
