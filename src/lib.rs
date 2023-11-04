@@ -1,6 +1,7 @@
 use std::{borrow::Cow, collections::HashMap, error::Error, sync::Arc};
 
 mod constants;
+mod rdfa_elt;
 mod structs;
 #[cfg(test)]
 mod tests;
@@ -11,6 +12,7 @@ use constants::{
 };
 use itertools::Itertools;
 use log::{debug, error};
+use rdfa_elt::RdfaElement;
 use scraper::{ElementRef, Selector};
 use url::Url;
 use uuid::Uuid;
@@ -192,28 +194,18 @@ fn get_children<'a>(
 fn make_bnode<'a>() -> Node<'a> {
     Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
 }
-pub fn traverse_element<'a>(
-    element_ref: &ElementRef<'a>,
-    parent: Option<&Context<'a>>,
+pub fn traverse_element<'a, 'b>(
+    element_ref: &'b ElementRef<'a>,
+    parent: Option<&'b Context<'a>>,
     mut ctx: Context<'a>,
-    stmts: &mut Vec<Statement<'a>>,
+    stmts: &'b mut Vec<Statement<'a>>,
     in_list_stmts: &mut Vec<Statement<'a>>,
 ) -> Result<Option<Node<'a>>, Box<dyn Error>> {
-    let elt = element_ref.value();
+    let elt = RdfaElement::new(element_ref)?;
 
-    ctx.vocab = elt
-        .attr("vocab")
-        .or_else(|| parent.as_ref().and_then(|p| p.vocab));
+    ctx.vocab = elt.vocab.or_else(|| parent.as_ref().and_then(|p| p.vocab));
 
-    ctx.base = element_ref
-        .select(&Selector::parse("base")?)
-        .next()
-        .and_then(|e| e.attr("href"))
-        .map(|b| {
-            let pos_fragment = b.chars().position(|p| p == '#').unwrap_or(b.len());
-            &b[0..pos_fragment]
-        })
-        .unwrap_or(ctx.base);
+    ctx.base = elt.base.unwrap_or(ctx.base);
 
     if let Some(vocab) = ctx.vocab {
         push_to_vec_if_not_present(
@@ -225,12 +217,12 @@ pub fn traverse_element<'a>(
             },
         )
     }
+    ctx.prefixes = elt
+        .prefix
+        .map(parse_prefixes)
+        .or_else(|| parent.map(|p| p.prefixes.clone()))
+        .unwrap_or(ctx.prefixes);
 
-    if let Some(prefix) = elt.attr("prefix") {
-        ctx.prefixes = parse_prefixes(prefix);
-    } else if let Some(parent) = parent {
-        ctx.prefixes = parent.prefixes.clone();
-    }
     let is_empty_curie = |s: &str| {
         let mut s = s.trim();
         if s.starts_with('[') {
@@ -239,44 +231,33 @@ pub fn traverse_element<'a>(
         if s.ends_with(']') {
             s = &s[0..s.len() - 1];
         }
-        s.trim().is_empty()
+        s.is_empty()
     };
 
-    let resource = elt.attr("resource").filter(|r| !is_empty_curie(r));
+    let resource = elt.resource.filter(|r| !is_empty_curie(r));
 
-    ctx.lang = elt
-        .attr("lang")
-        .or_else(|| elt.attr("xml:lang"))
-        .or_else(|| parent.and_then(|p| p.lang));
+    ctx.lang = elt.lang.or_else(|| parent.and_then(|p| p.lang));
 
-    let about = elt
-        .attr("about")
-        .and_then(|a| resolve_uri(a, &ctx, true).ok());
+    let about = elt.about.and_then(|a| resolve_uri(a, &ctx, true).ok());
 
-    let property = elt.attr("property");
-
-    let mut rels = elt
-        .attr("rel")
-        .map(|r| parse_property_or_type_of(r, &ctx, true));
+    let mut rels = elt.rel.map(|r| parse_property_or_type_of(r, &ctx, true));
+    let mut revs = elt.rev.map(|r| parse_property_or_type_of(r, &ctx, true));
 
     let mut parent_in_rel = parent.and_then(|c| c.in_rel.clone());
     let mut parent_in_rev = parent.and_then(|c| c.in_rev.clone());
     let mut parent_in_list = parent.and_then(|c| c.in_list.clone());
 
-    let mut revs = elt
-        .attr("rev")
-        .map(|r| parse_property_or_type_of(r, &ctx, true));
-
     let mut src_or_href = elt
-        .attr("href")
-        .or_else(|| elt.attr("src"))
+        .src_or_href()
         .and_then(|v| resolve_uri(v, &ctx, true).ok());
 
     let mut type_ofs = elt
-        .attr("typeof")
+        .type_of
         .map(|t| parse_property_or_type_of(t, &ctx, true));
 
-    let predicates = property.map(|p| parse_property_or_type_of(p, &ctx, false));
+    let predicates = elt
+        .property
+        .map(|p| parse_property_or_type_of(p, &ctx, false));
 
     let current_node =
         if rels.is_none() && !predicates.iter().any(|p| p.is_empty()) && parent_in_list.is_some() {
@@ -298,14 +279,14 @@ pub fn traverse_element<'a>(
                 {
                     resource
                 } else {
-                    Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
+                    Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
                 };
                 for rel in parent_in_list {
                     push_triples_inlist(in_list_stmts, &subject, rel, &obj);
                 }
             }
             subject
-        } else if elt.attr("inlist").is_some() {
+        } else if elt.is_inlist() {
             let mut in_rel = false;
             let subject = parent
                 .and_then(|p| p.current_node.clone())
@@ -340,7 +321,7 @@ pub fn traverse_element<'a>(
                 {
                     resource
                 } else {
-                    Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
+                    Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
                 };
                 for rel in rels {
                     push_triples_inlist(in_list_stmts, &subject, rel, &obj);
@@ -350,7 +331,7 @@ pub fn traverse_element<'a>(
                 let obj = if let (Some(resource), false) = (resource, in_rel) {
                     Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?))
                 } else {
-                    Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?))
+                    Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
                 };
                 for predicate in predicates {
                     push_triples_inlist(in_list_stmts, &subject, predicate, &obj);
@@ -391,20 +372,32 @@ pub fn traverse_element<'a>(
         } else if let Some(about) = about {
             // handle about case. set the context.
             // if property is present, children become objects of current.
-            let subject = Node::Ref(Arc::new(about));
+            let is_empty = elt
+                .about
+                .filter(|a| !a.trim().is_empty() && is_empty_curie(a))
+                .is_some();
+            let subject = if !is_empty {
+                Node::Ref(Arc::new(about))
+            } else {
+                resolve_uri(ctx.base, &ctx, true)?
+            };
 
             push_triples(
                 stmts,
                 &subject,
                 &predicates,
-                &Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+                &Node::Ref(Arc::new(extract_literal(&elt, &ctx)?)),
             );
 
             if let Some(src_or_href) = &src_or_href {
                 push_triples(stmts, &subject, &rels, src_or_href);
                 push_triples(stmts, src_or_href, &revs, &subject);
             }
-            subject
+            if is_empty {
+                make_bnode()
+            } else {
+                subject
+            }
         } else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
             let src_or_href = src_or_href.take().ok_or("no src")?;
             let subject = parent
@@ -416,8 +409,7 @@ pub fn traverse_element<'a>(
             push_triples(stmts, &src_or_href, &revs, &subject);
             subject
         } else if src_or_href.is_some()
-            && elt.attr("content").is_none()
-            && elt.attr("datatype").is_none()
+            && elt.has_no_content_and_no_datatype()
             && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
             && type_ofs.is_some()
         {
@@ -431,14 +423,14 @@ pub fn traverse_element<'a>(
             src_or_href
         } else if src_or_href.is_some()
             && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
-            && (elt.attr("content").is_some() || elt.attr("datatype").is_some())
+            && elt.has_content_or_datatype()
         {
             let src_or_href = src_or_href.take().ok_or("no src")?;
             push_triples(
                 stmts,
                 &src_or_href,
                 &predicates,
-                &extract_literal(element_ref, &ctx)?,
+                &extract_literal(&elt, &ctx)?,
             );
             src_or_href
         } else if type_ofs.is_some() && rels.is_some() {
@@ -488,7 +480,7 @@ pub fn traverse_element<'a>(
                 stmts,
                 &subject,
                 &predicates,
-                &Node::Ref(Arc::new(extract_literal(element_ref, &ctx)?)),
+                &Node::Ref(Arc::new(extract_literal(&elt, &ctx)?)),
             );
 
             subject
@@ -564,13 +556,11 @@ pub fn traverse_element<'a>(
     Ok(ctx.current_node.clone())
 }
 pub fn extract_literal<'a>(
-    element_ref: &ElementRef<'a>,
+    rdfa_el: &RdfaElement<'a, '_>,
     ctx: &Context<'a>,
 ) -> Result<Node<'a>, &'static str> {
-    let elt_val = element_ref.value();
-    let datatype = elt_val
-        .attr("datatype")
-        .filter(|dt| !dt.is_empty())
+    let datatype = rdfa_el
+        .datatype
         .and_then(|dt| match resolve_uri(dt, ctx, false) {
             Ok(d) => Some(Box::new(d)),
             Err(e) => {
@@ -578,19 +568,13 @@ pub fn extract_literal<'a>(
                 None
             }
         });
-    let lang = elt_val
-        .attr("lang")
-        .or_else(|| elt_val.attr("xml:lang"))
-        .or(ctx.lang)
-        .filter(|s| datatype.is_none() && !s.is_empty());
+    let lang = ctx.lang.filter(|s| datatype.is_none() && !s.is_empty());
 
-    if let Some(value) = elt_val.attr("href").or(elt_val.attr("src")).filter(|_| {
-        elt_val.attr("about").is_none()
-            && !(elt_val.attr("property").is_some()
-                && (elt_val.attr("content").is_some() || elt_val.attr("datatype").is_some()))
+    if let Some(value) = rdfa_el.src_or_href().filter(|_| {
+        !rdfa_el.has_about() && !rdfa_el.has_property() || rdfa_el.has_no_content_and_no_datatype()
     }) {
         resolve_uri(value, ctx, true)
-    } else if let Some(content) = elt_val.attr("content") {
+    } else if let Some(content) = rdfa_el.content {
         Ok(Node::Literal(Literal {
             datatype,
             value: Cow::Borrowed(content),
@@ -602,16 +586,11 @@ pub fn extract_literal<'a>(
         .is_some()
     {
         Ok(Node::Literal(Literal {
-            value: Cow::Owned(element_ref.inner_html()),
+            value: Cow::Owned(rdfa_el.element_ref.inner_html()),
             datatype,
             lang: None,
         }))
-    } else if elt_val.name() == "time" || elt_val.attr("datetime").is_some() {
-        let content = elt_val
-            .attr("datetime")
-            .or_else(|| element_ref.text().last())
-            .ok_or("no datetime")?;
-
+    } else if let Some(content) = rdfa_el.get_time() {
         Ok(Node::Literal(Literal {
             datatype: datatype
                 .or_else(|| DataTypeFromPattern::date_time_from_pattern(content).map(Box::new)),
@@ -619,10 +598,7 @@ pub fn extract_literal<'a>(
             lang: None,
         }))
     } else {
-        let texts = element_ref
-            .text()
-            .filter(|t| !t.trim().is_empty())
-            .collect::<Vec<_>>();
+        let texts = rdfa_el.texts();
         let text = if texts.is_empty() {
             Cow::Borrowed("")
         } else if texts.len() == 1 {

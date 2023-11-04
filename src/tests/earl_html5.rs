@@ -151,6 +151,10 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0292"  ; "@about overriding @href as subject is used as parent resource                         : earl_reports_html5_0292 ")]
 #[test_case("example0293"  ; "Testing the ':' character usage in a CURIE                                            : earl_reports_html5_0293 ")]
 #[test_case("example0296"  ; "@property does set parent object without @typeof                                      : earl_reports_html5_0296 ")]
+#[test_case("example0297"  ; "@about=[] with @typeof does not create a new subject                                  : earl_reports_html5_0297 ")]
+#[test_case("example0298"  ; "@about=[] with @typeof does not create a new object                                   : earl_reports_html5_0298 ")]
+#[test_case("example0299"  ; "@resource=[] with @href or @src uses @href or @src (@rel)                             : earl_reports_html5_0299 ")]
+#[test_case("example0300"  ; "@resource=[] with @href or @src uses @href or @src (@property                         : earl_reports_html5_0300 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
