@@ -1,0 +1,12 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+_:1 
+   rdf:type schema:Person;
+   schema:name "Amanda";
+   foaf:name "Amanda" .
+_:2 
+   rdf:type foaf:Person;
+   schema:name "Amanda";
+   foaf:name "Amanda" .

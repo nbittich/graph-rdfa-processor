@@ -3,7 +3,10 @@ use std::path::PathBuf;
 use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
 
-use crate::{constants::BNODE_ID_GENERATOR, Context, RdfaGraph};
+use crate::{
+    constants::{self, BNODE_ID_GENERATOR},
+    Context, RdfaGraph,
+};
 
 mod earl_html5;
 mod rdfa_core;
@@ -49,8 +52,13 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     // uncomment line below and comment the last line if test doesn't work
     //std::fs::write(path_to_ttl, graph);
 
-    let ttl = TurtleDoc::try_from((ttl, None)).unwrap();
-    let graph = TurtleDoc::try_from((graph.as_str(), None)).unwrap();
+    let ttl =
+        TurtleDoc::try_from((ttl, Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
+    let graph = TurtleDoc::try_from((
+        graph.as_str(),
+        Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()),
+    ))
+    .unwrap();
     let diff = ttl.difference(&graph).unwrap();
     if !diff.is_empty() {
         println!("============ Difference ============");

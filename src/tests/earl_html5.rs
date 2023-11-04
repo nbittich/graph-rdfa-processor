@@ -164,6 +164,10 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0316"  ; "@property and @typeof with incomplete triples (href variant)                          : earl_reports_html5_0316 ")]
 #[test_case("example0317"  ; "@datatype inhibits new @property behavior                                             : earl_reports_html5_0317 ")]
 #[test_case("example0318"  ; "Setting @vocab to empty strings removes default vocabulary                            : earl_reports_html5_0318 ")]
+#[test_case("example0321"  ; "rdfa:copy to rdfa:Pattern                                                             : earl_reports_html5_0321 ")]
+#[test_case("example0322"  ; "rdfa:copy for additional property value                                               : earl_reports_html5_0322 ")]
+#[test_case("example0323"  ; "Multiple references to rdfa:Pattern                                                   : earl_reports_html5_0323 ")]
+#[test_case("example0324"  ; "Multiple references to rdfa:Pattern                                                   : earl_reports_html5_0324 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
