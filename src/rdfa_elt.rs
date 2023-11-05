@@ -1,5 +1,6 @@
 use std::error::Error;
 
+use itertools::Itertools;
 use scraper::{node::Element, ElementRef, Selector};
 
 #[derive(Debug, Clone, Copy)]
@@ -106,10 +107,16 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
         }
     }
     pub fn texts(&self) -> Vec<&'a str> {
-        self.element_ref
+        let texts = self
+            .element_ref
             .text()
             .filter(|t| !t.trim().is_empty())
-            .collect()
+            .collect_vec();
+        if texts.len() == 1 || !texts.iter().any(|t| t.lines().count() > 1) {
+            texts
+        } else {
+            self.element_ref.text().collect()
+        }
     }
 
     pub(crate) fn has_rel_or_rev(&self) -> bool {

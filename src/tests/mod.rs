@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf};
 
 use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
@@ -33,6 +33,7 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     println!("============ HTML ============");
     println!("{html}");
     let ttl = std::fs::read_to_string(&path_to_ttl).unwrap();
+
     let ttl = ttl.trim_end();
     println!("============ Expected result ============");
     println!("{ttl}");
@@ -50,7 +51,7 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
 
     // trick to keep the whitespaces at the right place
     // uncomment line below and comment the last line if test doesn't work
-    //std::fs::write(path_to_ttl, graph);
+    //std::fs::write(path_to_ttl, &graph);
 
     let ttl =
         TurtleDoc::try_from((ttl, Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
@@ -60,6 +61,7 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     ))
     .unwrap();
     let diff = ttl.difference(&graph).unwrap();
+    //  diff = diff.add(graph.difference(&ttl).unwrap());
     if !diff.is_empty() {
         println!("============ Difference ============");
         println!("{diff}");

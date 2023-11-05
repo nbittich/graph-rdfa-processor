@@ -170,6 +170,14 @@ const INPUT_OUTPUT_DIR: &str = "examples/earl_html5";
 #[test_case("example0324"  ; "Multiple references to rdfa:Pattern                                                   : earl_reports_html5_0324 ")]
 #[test_case("example0325"  ; "Multiple references to rdfa:Pattern creating a resource                               : earl_reports_html5_0325 ")]
 #[test_case("example0326"  ; "rdfa:Pattern removed only if referenced                                               : earl_reports_html5_0326 ")]
+#[test_case("example0327"  ; "rdfa:Pattern chaining                                                                 : earl_reports_html5_0327 ")]
+#[test_case("example0328"  ; "@content overrides the content of the time element.                                   : earl_reports_html5_0328 ")]
+#[test_case("example0329"  ; "Recursive triple generation                                                           : earl_reports_html5_0329 ")]
+#[test_case("example0330"  ; "@datatype overrides inherited @lang                                                   : earl_reports_html5_0330 ")]
+#[test_case("example0331"  ; "@datatype overrides inherited @lang, with @content                                    : earl_reports_html5_0331 ")]
+#[test_case("example0332"  ; "Empty @datatype doesn't override inherited @lang, with @content                       : earl_reports_html5_0332 ")]
+#[test_case("example0333"  ; "@content overrides @datetime (with @datatype specified)                               : earl_reports_html5_0333 ")]
+#[test_case("example0334"  ; "@resource changes the current subject for the nested elements                         : earl_reports_html5_0334 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

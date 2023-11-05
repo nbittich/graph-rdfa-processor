@@ -1,0 +1,6 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+<http://example.org/foaf#me>
+   foaf:name "JohnDoe";
+   foaf:givenName "John";
+   foaf:familyName "Doe" .

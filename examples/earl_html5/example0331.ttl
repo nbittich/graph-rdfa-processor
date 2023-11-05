@@ -1,0 +1,4 @@
+@prefix dc: <http://purl.org/dc/terms/> .
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5>
+   dc:language "af"^^dc:RFC5646 .

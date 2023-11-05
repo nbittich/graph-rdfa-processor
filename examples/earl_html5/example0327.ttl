@@ -1,0 +1,11 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+
+_:1 
+   rdf:type schema:Person;
+   schema:name "Amanda";
+   schema:band _:2 .
+_:2 
+   rdf:type schema:MusicGroup;
+   schema:name "Jazz Band";
+   schema:size "12" .
