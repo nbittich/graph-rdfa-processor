@@ -1,4 +1,4 @@
-use std::{path::PathBuf};
+use std::path::PathBuf;
 
 use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
