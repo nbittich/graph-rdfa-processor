@@ -78,7 +78,7 @@ pub fn traverse_element<'a, 'b>(
 
     ctx.lang = elt.lang.or_else(|| parent.and_then(|p| p.lang));
 
-    let about = elt.about.and_then(|a| resolve_uri(a, &ctx, true).ok());
+    let mut about = elt.about.and_then(|a| resolve_uri(a, &ctx, true).ok());
 
     let mut rels = elt.rel.map(|r| parse_property_or_type_of(r, &ctx, true));
     let mut revs = elt.rev.map(|r| parse_property_or_type_of(r, &ctx, true));
@@ -119,6 +119,7 @@ pub fn traverse_element<'a, 'b>(
             .ok_or("no parent")
     };
 
+    // END SETUP
     let current_node = if let Some(parent_in_list) = parent_in_list.take() {
         let subject = get_parent_subject(&ctx)?;
         let obj = if let Some(resource) = resource
@@ -187,7 +188,7 @@ pub fn traverse_element<'a, 'b>(
             .unwrap_or(Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?)));
         let mut curr_node = object;
         let subject = about
-            .clone()
+            .take()
             .map(|a| Ok(Node::Ref(Arc::new(a))))
             .unwrap_or_else(|| get_parent_subject(&ctx))?;
 
@@ -221,9 +222,9 @@ pub fn traverse_element<'a, 'b>(
             &Node::Ref(Arc::new(extract_literal(&elt, &ctx)?)),
         );
 
-        if let Some(src_or_href) = &src_or_href {
-            push_triples(stmts, &subject, &rels, src_or_href);
-            push_triples(stmts, src_or_href, &revs, &subject);
+        if let Some(src_or_href) = src_or_href.take() {
+            push_triples(stmts, &subject, &rels, &src_or_href);
+            push_triples(stmts, &src_or_href, &revs, &subject);
         }
         if is_empty {
             make_bnode()
@@ -290,7 +291,7 @@ pub fn traverse_element<'a, 'b>(
         push_triples(stmts, &subject, &predicates, &node);
         subject
     } else if src_or_href.is_some()
-        && elt.has_no_content_and_no_datatype()
+        && !elt.has_content_or_datatype()
         && elt.has_property()
         && type_ofs.is_some()
     {
@@ -432,7 +433,7 @@ pub fn extract_literal<'a>(
     let lang = ctx.lang.filter(|s| datatype.is_none() && !s.is_empty());
 
     if let Some(value) = rdfa_el.src_or_href().filter(|_| {
-        !rdfa_el.has_about() && !rdfa_el.has_property() || rdfa_el.has_no_content_and_no_datatype()
+        !rdfa_el.has_about() && !rdfa_el.has_property() || !rdfa_el.has_content_or_datatype()
     }) {
         resolve_uri(value, ctx, true)
     } else if let Some(content) = rdfa_el.content {

@@ -84,9 +84,6 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
     pub fn is_inlist(&self) -> bool {
         self.inlist.is_some()
     }
-    pub fn has_no_content_and_no_datatype(&self) -> bool {
-        self.content.is_none() && self.datatype.is_none()
-    }
 
     pub fn has_content_or_datatype(&self) -> bool {
         self.content.is_some() || self.datatype.is_some()
