@@ -291,7 +291,7 @@ pub fn traverse_element<'a, 'b>(
         subject
     } else if src_or_href.is_some()
         && elt.has_no_content_and_no_datatype()
-        && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
+        && elt.has_property()
         && type_ofs.is_some()
     {
         let src_or_href = src_or_href.take().ok_or("no src")?;
@@ -300,10 +300,7 @@ pub fn traverse_element<'a, 'b>(
 
         push_triples(stmts, &subject, &predicates, &src_or_href);
         src_or_href
-    } else if src_or_href.is_some()
-        && predicates.as_ref().filter(|ps| !ps.is_empty()).is_some()
-        && elt.has_content_or_datatype()
-    {
+    } else if src_or_href.is_some() && elt.has_property() && elt.has_content_or_datatype() {
         let src_or_href = src_or_href.take().ok_or("no src")?;
         push_triples(
             stmts,
