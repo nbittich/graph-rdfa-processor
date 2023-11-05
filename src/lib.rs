@@ -310,40 +310,42 @@ pub fn traverse_element<'a, 'b>(
             &extract_literal(&elt, &ctx)?,
         );
         src_or_href
-    } else if type_ofs.is_some() && rels.is_some() {
-        let base = resolve_uri(ctx.base, &ctx, true)?;
-        let b_node = make_bnode();
-        for to in type_ofs.take().into_iter().flatten() {
-            stmts.push(Statement {
-                subject: b_node.clone(),
-                predicate: NODE_NS_TYPE.clone(),
-                object: to,
-            })
-        }
-        push_triples(stmts, &base, &rels.take(), &b_node);
-
-        b_node
     } else if type_ofs.is_some() {
-        let child_with_rdfa_tag = element_ref
-            .select(&Selector::parse(
-                "[href], [src], [resource], [typeof], [property]",
-            )?)
-            .count()
-            == 0;
+        if rels.is_some() {
+            let base = resolve_uri(ctx.base, &ctx, true)?;
+            let b_node = make_bnode();
+            for to in type_ofs.take().into_iter().flatten() {
+                stmts.push(Statement {
+                    subject: b_node.clone(),
+                    predicate: NODE_NS_TYPE.clone(),
+                    object: to,
+                })
+            }
+            push_triples(stmts, &base, &rels.take(), &b_node);
 
-        let node = if let Some(src_or_href) = src_or_href.take() {
-            src_or_href
-        } else if child_with_rdfa_tag || parent.is_none() {
-            resolve_uri(ctx.base, &ctx, true)?
+            b_node
         } else {
-            make_bnode()
-        };
+            let child_with_rdfa_tag = element_ref
+                .select(&Selector::parse(
+                    "[href], [src], [resource], [typeof], [property]",
+                )?)
+                .count()
+                == 0;
 
-        let subject = get_parent_subject(&ctx).ok().unwrap_or_else(make_bnode);
+            let node = if let Some(src_or_href) = src_or_href.take() {
+                src_or_href
+            } else if child_with_rdfa_tag || parent.is_none() {
+                resolve_uri(ctx.base, &ctx, true)?
+            } else {
+                make_bnode()
+            };
 
-        push_triples(stmts, &subject, &predicates, &node);
+            let subject = get_parent_subject(&ctx).ok().unwrap_or_else(make_bnode);
 
-        node
+            push_triples(stmts, &subject, &predicates, &node);
+
+            node
+        }
     } else {
         let subject = src_or_href
             .take()
@@ -377,9 +379,11 @@ pub fn traverse_element<'a, 'b>(
         push_triples(stmts, &parent, &parent_in_rel.take(), &current_node);
         push_triples(stmts, &current_node, &parent_in_rev.take(), &parent);
     }
+
     ctx.current_node = Some(current_node.clone());
     ctx.in_rel = rels.clone();
     ctx.in_rev = revs.clone();
+
     for child in get_children(element_ref)? {
         if let Some(c) = ElementRef::wrap(child) {
             // Triples are also 'completed' if any one of @property, @rel or @rev are present.
