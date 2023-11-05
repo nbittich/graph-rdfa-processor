@@ -35,181 +35,6 @@ impl<'a> RdfaGraph<'a> {
         Ok(RdfaGraph(triples))
     }
 }
-#[inline]
-pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, Box<dyn Error>> {
-    let (pattern_type, pattern): (Vec<Statement>, Vec<Statement>) = triples
-        .into_iter()
-        .partition(|stmt| stmt.object == *NODE_RDFA_PATTERN_TYPE);
-
-    let (pattern_predicate, pattern): (Vec<Statement>, Vec<Statement>) = pattern
-        .into_iter()
-        .partition(|stmt| pattern_type.iter().any(|s| s.subject == stmt.subject));
-
-    let (pattern_subject, mut triples): (Vec<Statement>, Vec<Statement>) = pattern
-        .into_iter()
-        .partition(|stmt| pattern_predicate.iter().any(|s| s.subject == stmt.object));
-
-    // remove only if pattern referenced
-    let (mut unreferenced_pattern_predicate, pattern_predicate): (Vec<Statement>, Vec<Statement>) =
-        pattern_predicate
-            .into_iter()
-            .partition(|stmt| pattern_subject.iter().all(|s| s.object != stmt.subject));
-
-    let (mut unreferenced_pattern_type, _): (Vec<Statement>, Vec<Statement>) =
-        pattern_type.into_iter().partition(|stmt| {
-            unreferenced_pattern_predicate
-                .iter()
-                .any(|s| s.subject == stmt.subject)
-        });
-    triples.append(&mut unreferenced_pattern_predicate);
-    triples.append(&mut unreferenced_pattern_type);
-
-    for Statement {
-        subject, object, ..
-    } in pattern_subject
-    {
-        for Statement {
-            predicate,
-            object: obj,
-            ..
-        } in pattern_predicate
-            .iter()
-            .filter(|stmt| object == stmt.subject)
-        {
-            push_to_vec_if_not_present(
-                &mut triples,
-                Statement {
-                    subject: subject.clone(),
-                    predicate: predicate.clone(),
-                    object: obj.clone(),
-                },
-            )
-        }
-    }
-
-    Ok(triples)
-}
-
-#[inline]
-fn push_to_vec_if_not_present<T: PartialEq>(array: &mut Vec<T>, value: T) {
-    if !array.contains(&value) {
-        array.push(value);
-    }
-}
-#[inline]
-fn push_triples<'a>(
-    stmts: &mut Vec<Statement<'a>>,
-    subject: &Node<'a>,
-    predicates: &Option<Vec<Node<'a>>>,
-    object: &Node<'a>,
-) {
-    if let Some(predicate) = predicates {
-        for predicate in predicate {
-            push_to_vec_if_not_present(
-                stmts,
-                Statement {
-                    subject: subject.clone(),
-                    predicate: predicate.clone(),
-                    object: object.clone(),
-                },
-            );
-        }
-    }
-}
-fn push_triples_inlist<'a>(
-    stmts: &mut Vec<Statement<'a>>,
-    subject: &Node<'a>,
-    predicate: Node<'a>,
-    obj: &Node<'a>,
-) {
-    let b_node = make_bnode();
-    push_to_vec_if_not_present(
-        stmts,
-        Statement {
-            subject: b_node.clone(),
-            predicate: NODE_RDF_FIRST.clone(),
-            object: obj.clone(),
-        },
-    );
-
-    if let Some(node) =
-        find_pos_last_node_in_inlist(stmts, subject, &predicate).and_then(|pos| stmts.get_mut(pos))
-    {
-        node.object = b_node.clone();
-    } else {
-        // push the root of the list
-        stmts.push(Statement {
-            subject: subject.clone(),
-            predicate,
-            object: b_node.clone(),
-        });
-    }
-    push_to_vec_if_not_present(
-        stmts,
-        Statement {
-            subject: b_node,
-            predicate: NODE_RDF_REST.clone(),
-            object: NODE_RDF_NIL.clone(),
-        },
-    );
-}
-fn find_pos_last_node_in_inlist<'a>(
-    stmts: &Vec<Statement<'a>>,
-    root_subject: &Node<'a>,
-    predicate: &Node<'a>,
-) -> Option<usize> {
-    fn find_res_nil<'a>(stmts: &Vec<Statement<'a>>, subject: &Node<'a>) -> Option<usize> {
-        let node = stmts
-            .iter()
-            .enumerate()
-            .find(|(_, stmt)| &stmt.subject == subject && stmt.predicate == *NODE_RDF_REST);
-
-        if let Some((pos, stmt)) = node {
-            if stmt.object == *NODE_RDF_NIL {
-                Some(pos)
-            } else {
-                find_res_nil(stmts, &stmt.object)
-            }
-        } else {
-            None
-        }
-    }
-    let root = stmts
-        .iter()
-        .find(|stmt| &stmt.subject == root_subject && &stmt.predicate == predicate);
-    if let Some(Statement { object, .. }) = root {
-        find_res_nil(stmts, object)
-    } else {
-        None
-    }
-}
-
-// skip when there are no rdfa attributes, see e.g examples/earl_html5/example0084.html
-#[inline]
-fn get_children<'a>(
-    element_ref: &ElementRef<'a>,
-) -> Result<Vec<ego_tree::NodeRef<'a, scraper::Node>>, &'static str> {
-    let mut res = vec![];
-    for c in element_ref.children() {
-        if c.value()
-            .as_element()
-            .filter(|e| e.attrs().count() == 0)
-            .is_some()
-        {
-            let child_ref = ElementRef::wrap(c).ok_or("not an element ref")?;
-            res.append(&mut get_children(&child_ref)?);
-        } else {
-            res.push(c);
-        }
-    }
-
-    Ok(res)
-}
-
-#[inline]
-fn make_bnode<'a>() -> Node<'a> {
-    Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
-}
 pub fn traverse_element<'a, 'b>(
     element_ref: &'b ElementRef<'a>,
     parent: Option<&'b Context<'a>>,
@@ -224,14 +49,11 @@ pub fn traverse_element<'a, 'b>(
     ctx.base = elt.base.unwrap_or(ctx.base);
 
     if let Some(vocab) = ctx.vocab.filter(|v| !v.is_empty()) {
-        push_to_vec_if_not_present(
-            stmts,
-            Statement {
-                subject: resolve_uri(ctx.base, &ctx, true)?,
-                predicate: NODE_RDFA_USES_VOCABULARY.clone(),
-                object: resolve_uri(vocab, &ctx, false)?,
-            },
-        )
+        stmts.push(Statement {
+            subject: resolve_uri(ctx.base, &ctx, true)?,
+            predicate: NODE_RDFA_USES_VOCABULARY.clone(),
+            object: resolve_uri(vocab, &ctx, false)?,
+        })
     } else {
         ctx.vocab = None;
     }
@@ -284,47 +106,38 @@ pub fn traverse_element<'a, 'b>(
         .property
         .map(|p| parse_property_or_type_of(p, &ctx, false));
 
-    let current_node = if rels.is_none()
-        && !predicates.iter().any(|p| p.is_empty())
-        && parent_in_list.is_some()
-    {
-        let subject = parent
+    let get_parent_subject = |ctx: &Context<'a>| {
+        parent
             .and_then(|p| p.current_node.clone())
             .or_else(|| {
                 if parent.is_none() {
-                    resolve_uri(ctx.base, &ctx, true).ok()
+                    resolve_uri(ctx.base, ctx, true).ok()
                 } else {
                     None
                 }
             })
-            .ok_or("no parent node")?;
-        if let Some(parent_in_list) = parent_in_list.take() {
-            let obj = if let Some(resource) = resource
-                .and_then(|r| resolve_uri(r, &ctx, true).ok())
-                .map(|n| Node::Ref(Arc::new(n)))
-                .or_else(|| src_or_href.clone())
-            {
-                resource
-            } else {
-                Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
-            };
-            for rel in parent_in_list {
-                push_triples_inlist(in_list_stmts, &subject, rel, &obj);
-            }
+            .ok_or("no parent")
+    };
+
+    let current_node = if let Some(parent_in_list) = parent_in_list.take() {
+        let subject = get_parent_subject(&ctx)?;
+        let obj = if let Some(resource) = resource
+            .and_then(|r| resolve_uri(r, &ctx, true).ok())
+            .map(|n| Node::Ref(Arc::new(n)))
+            .or_else(|| src_or_href.clone())
+        {
+            resource
+        } else {
+            Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
+        };
+        for rel in parent_in_list {
+            push_triples_inlist(in_list_stmts, &subject, rel, &obj);
         }
         subject
     } else if elt.is_inlist() {
         let mut in_rel = false;
-        let subject = parent
-            .and_then(|p| p.current_node.clone())
-            .or_else(|| {
-                if parent.is_none() {
-                    resolve_uri(ctx.base, &ctx, true).ok()
-                } else {
-                    None
-                }
-            })
-            .ok_or("no parent node")?;
+
+        let subject = get_parent_subject(&ctx)?;
 
         if rels.is_some()
             && src_or_href.is_none()
@@ -375,16 +188,8 @@ pub fn traverse_element<'a, 'b>(
         let mut curr_node = object;
         let subject = about
             .clone()
-            .map(|a| Node::Ref(Arc::new(a)))
-            .or_else(|| parent.and_then(|p| p.current_node.clone()))
-            .or_else(|| {
-                if parent.is_none() {
-                    resolve_uri(ctx.base, &ctx, true).ok()
-                } else {
-                    None
-                }
-            })
-            .ok_or("no parent node")?;
+            .map(|a| Ok(Node::Ref(Arc::new(a))))
+            .unwrap_or_else(|| get_parent_subject(&ctx))?;
 
         push_triples(stmts, &subject, &predicates, &curr_node);
 
@@ -427,9 +232,7 @@ pub fn traverse_element<'a, 'b>(
         }
     } else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
         let src_or_href = src_or_href.take().ok_or("no src")?;
-        let subject = parent
-            .and_then(|p| p.current_node.clone())
-            .unwrap_or_else(make_bnode);
+        let subject = get_parent_subject(&ctx).ok().unwrap_or_else(make_bnode);
 
         // test 0303, this becomes dumber and dumber
         let mut has_term = false;
@@ -493,9 +296,7 @@ pub fn traverse_element<'a, 'b>(
     {
         let src_or_href = src_or_href.take().ok_or("no src")?;
 
-        let subject = parent
-            .and_then(|p| p.current_node.clone())
-            .unwrap_or_else(make_bnode);
+        let subject = get_parent_subject(&ctx).ok().unwrap_or_else(make_bnode);
 
         push_triples(stmts, &subject, &predicates, &src_or_href);
         src_or_href
@@ -515,14 +316,11 @@ pub fn traverse_element<'a, 'b>(
         let base = resolve_uri(ctx.base, &ctx, true)?;
         let b_node = make_bnode();
         for to in type_ofs.take().into_iter().flatten() {
-            push_to_vec_if_not_present(
-                stmts,
-                Statement {
-                    subject: b_node.clone(),
-                    predicate: NODE_NS_TYPE.clone(),
-                    object: to,
-                },
-            )
+            stmts.push(Statement {
+                subject: b_node.clone(),
+                predicate: NODE_NS_TYPE.clone(),
+                object: to,
+            })
         }
         push_triples(stmts, &base, &rels.take(), &b_node);
 
@@ -552,8 +350,8 @@ pub fn traverse_element<'a, 'b>(
         let subject = src_or_href
             .clone()
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
-            .or_else(|| parent.and_then(|p| p.current_node.clone()))
-            .unwrap_or(resolve_uri(ctx.base, &ctx, true)?);
+            .map(Ok)
+            .unwrap_or_else(|| get_parent_subject(&ctx))?;
         push_triples(
             stmts,
             &subject,
@@ -567,35 +365,24 @@ pub fn traverse_element<'a, 'b>(
     if let Some(type_ofs) = type_ofs {
         let sub = src_or_href.unwrap_or_else(|| current_node.clone());
         for type_of in type_ofs {
-            push_to_vec_if_not_present(
-                stmts,
-                Statement {
-                    subject: sub.clone(),
-                    predicate: NODE_NS_TYPE.clone(),
-                    object: type_of,
-                },
-            )
+            stmts.push(Statement {
+                subject: sub.clone(),
+                predicate: NODE_NS_TYPE.clone(),
+                object: type_of,
+            })
         }
     }
-    ctx.current_node = Some(current_node.clone());
-    ctx.in_rel = rels.clone();
-    ctx.in_rev = revs.clone();
 
     if parent_in_rel.is_some() || parent_in_rev.is_some() {
-        let parent = parent
-            .and_then(|p| p.current_node.clone())
-            .or_else(|| {
-                if parent.is_none() {
-                    resolve_uri(ctx.base, &ctx, true).ok()
-                } else {
-                    None
-                }
-            })
+        let parent = get_parent_subject(&ctx)
+            .ok()
             .ok_or("in_rel: no parent node")?;
         push_triples(stmts, &parent, &parent_in_rel.take(), &current_node);
         push_triples(stmts, &current_node, &parent_in_rev.take(), &parent);
     }
-
+    ctx.current_node = Some(current_node.clone());
+    ctx.in_rel = rels.clone();
+    ctx.in_rev = revs.clone();
     for child in get_children(element_ref)? {
         if let Some(c) = ElementRef::wrap(child) {
             // Triples are also 'completed' if any one of @property, @rel or @rev are present.
@@ -828,4 +615,163 @@ fn parse_property_or_type_of<'a>(
         .filter(|node| allow_b_node || !matches!(node, Node::BNode(_) | Node::RefBNode(_)))
         .map(|n| Node::Ref(Arc::new(n)))
         .collect_vec()
+}
+
+fn push_triples_inlist<'a>(
+    stmts: &mut Vec<Statement<'a>>,
+    subject: &Node<'a>,
+    predicate: Node<'a>,
+    obj: &Node<'a>,
+) {
+    let b_node = make_bnode();
+    stmts.push(Statement {
+        subject: b_node.clone(),
+        predicate: NODE_RDF_FIRST.clone(),
+        object: obj.clone(),
+    });
+
+    if let Some(node) =
+        find_pos_last_node_in_inlist(stmts, subject, &predicate).and_then(|pos| stmts.get_mut(pos))
+    {
+        node.object = b_node.clone();
+    } else {
+        // push the root of the list
+        stmts.push(Statement {
+            subject: subject.clone(),
+            predicate,
+            object: b_node.clone(),
+        });
+    }
+    stmts.push(Statement {
+        subject: b_node,
+        predicate: NODE_RDF_REST.clone(),
+        object: NODE_RDF_NIL.clone(),
+    });
+}
+fn find_pos_last_node_in_inlist<'a>(
+    stmts: &Vec<Statement<'a>>,
+    root_subject: &Node<'a>,
+    predicate: &Node<'a>,
+) -> Option<usize> {
+    fn find_res_nil<'a>(stmts: &Vec<Statement<'a>>, subject: &Node<'a>) -> Option<usize> {
+        let node = stmts
+            .iter()
+            .enumerate()
+            .find(|(_, stmt)| &stmt.subject == subject && stmt.predicate == *NODE_RDF_REST);
+
+        if let Some((pos, stmt)) = node {
+            if stmt.object == *NODE_RDF_NIL {
+                Some(pos)
+            } else {
+                find_res_nil(stmts, &stmt.object)
+            }
+        } else {
+            None
+        }
+    }
+    let root = stmts
+        .iter()
+        .find(|stmt| &stmt.subject == root_subject && &stmt.predicate == predicate);
+    if let Some(Statement { object, .. }) = root {
+        find_res_nil(stmts, object)
+    } else {
+        None
+    }
+}
+
+// skip when there are no rdfa attributes, see e.g examples/earl_html5/example0084.html
+#[inline]
+fn get_children<'a>(
+    element_ref: &ElementRef<'a>,
+) -> Result<Vec<ego_tree::NodeRef<'a, scraper::Node>>, &'static str> {
+    let mut res = vec![];
+    for c in element_ref.children() {
+        if c.value()
+            .as_element()
+            .filter(|e| e.attrs().count() == 0)
+            .is_some()
+        {
+            let child_ref = ElementRef::wrap(c).ok_or("not an element ref")?;
+            res.append(&mut get_children(&child_ref)?);
+        } else {
+            res.push(c);
+        }
+    }
+
+    Ok(res)
+}
+
+#[inline]
+fn make_bnode<'a>() -> Node<'a> {
+    Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+}
+
+#[inline]
+pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, Box<dyn Error>> {
+    let (pattern_type, pattern): (Vec<Statement>, Vec<Statement>) = triples
+        .into_iter()
+        .partition(|stmt| stmt.object == *NODE_RDFA_PATTERN_TYPE);
+
+    let (pattern_predicate, pattern): (Vec<Statement>, Vec<Statement>) = pattern
+        .into_iter()
+        .partition(|stmt| pattern_type.iter().any(|s| s.subject == stmt.subject));
+
+    let (pattern_subject, mut triples): (Vec<Statement>, Vec<Statement>) = pattern
+        .into_iter()
+        .partition(|stmt| pattern_predicate.iter().any(|s| s.subject == stmt.object));
+
+    // remove only if pattern referenced
+    let (mut unreferenced_pattern_predicate, pattern_predicate): (Vec<Statement>, Vec<Statement>) =
+        pattern_predicate
+            .into_iter()
+            .partition(|stmt| pattern_subject.iter().all(|s| s.object != stmt.subject));
+
+    let (mut unreferenced_pattern_type, _): (Vec<Statement>, Vec<Statement>) =
+        pattern_type.into_iter().partition(|stmt| {
+            unreferenced_pattern_predicate
+                .iter()
+                .any(|s| s.subject == stmt.subject)
+        });
+    triples.append(&mut unreferenced_pattern_predicate);
+    triples.append(&mut unreferenced_pattern_type);
+
+    for Statement {
+        subject, object, ..
+    } in pattern_subject
+    {
+        for Statement {
+            predicate,
+            object: obj,
+            ..
+        } in pattern_predicate
+            .iter()
+            .filter(|stmt| object == stmt.subject)
+        {
+            triples.push(Statement {
+                subject: subject.clone(),
+                predicate: predicate.clone(),
+                object: obj.clone(),
+            })
+        }
+    }
+
+    Ok(triples)
+}
+
+#[inline]
+fn push_triples<'a>(
+    stmts: &mut Vec<Statement<'a>>,
+    subject: &Node<'a>,
+    predicates: &Option<Vec<Node<'a>>>,
+    object: &Node<'a>,
+) {
+    if let Some(predicate) = predicates {
+        for predicate in predicate {
+            stmts.push(Statement {
+                subject: subject.clone(),
+                predicate: predicate.clone(),
+                object: object.clone(),
+            });
+        }
+    }
 }
