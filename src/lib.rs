@@ -330,22 +330,22 @@ pub fn traverse_element<'a, 'b>(
             .count()
             == 0;
 
-        let node = if child_with_rdfa_tag || parent.is_none() {
+        let node = if let Some(src_or_href) = src_or_href.take() {
+            src_or_href
+        } else if child_with_rdfa_tag || parent.is_none() {
             resolve_uri(ctx.base, &ctx, true)?
         } else {
             make_bnode()
         };
 
-        let subject = parent
-            .and_then(|p| p.current_node.clone())
-            .unwrap_or_else(make_bnode);
+        let subject = get_parent_subject(&ctx).ok().unwrap_or_else(make_bnode);
 
         push_triples(stmts, &subject, &predicates, &node);
 
         node
     } else {
         let subject = src_or_href
-            .clone()
+            .take()
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
             .map(Ok)
             .unwrap_or_else(|| get_parent_subject(&ctx))?;
@@ -360,10 +360,9 @@ pub fn traverse_element<'a, 'b>(
     };
 
     if let Some(type_ofs) = type_ofs {
-        let sub = src_or_href.unwrap_or_else(|| current_node.clone());
         for type_of in type_ofs {
             stmts.push(Statement {
-                subject: sub.clone(),
+                subject: current_node.clone(),
                 predicate: NODE_NS_TYPE.clone(),
                 object: type_of,
             })
