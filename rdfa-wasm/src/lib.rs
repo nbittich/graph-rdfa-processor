@@ -1,14 +1,7 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use graph_rdfa_processor::RdfaGraph;
+use wasm_bindgen::prelude::*;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[wasm_bindgen]
+pub fn html_to_rdfa(html: &str, base: &str) -> String {
+    RdfaGraph::parse_str(html, base).unwrap()
 }

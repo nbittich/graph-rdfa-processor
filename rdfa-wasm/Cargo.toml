@@ -14,5 +14,6 @@ license.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
+getrandom = { version = "0.2.10", features = ["js"] }
 graph-rdfa-processor.workspace = true
 wasm-bindgen.workspace = true
