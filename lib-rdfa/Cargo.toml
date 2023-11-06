@@ -1,0 +1,27 @@
+[package]
+name = "graph-rdfa-processor"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+description = "Graph RDFa processor"
+authors = { workspace = true }
+repository = { workspace = true }
+readme = { workspace = true }
+rust-version = { workspace = true }
+documentation = { workspace = true }
+
+[dependencies]
+log = { workspace = true }
+itertools = { workspace = true }
+lazy_static = { workspace = true }
+scraper = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+regex = { workspace = true }
+ego-tree = { workspace = true }
+
+[dev-dependencies]
+serial_test = { workspace = true }
+test-case = { workspace = true }
+env_logger = { workspace = true }
+tortank = { workspace = true }
