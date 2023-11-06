@@ -764,7 +764,7 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "graph-rdfa-processor"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ego-tree",
  "env_logger",
@@ -1351,7 +1351,7 @@ dependencies = [
 
 [[package]]
 name = "rdfa-wasm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "wasm-pack",
 ]
