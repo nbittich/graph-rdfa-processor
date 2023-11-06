@@ -33,8 +33,19 @@ impl<'a> RdfaGraph<'a> {
 
         Ok(RdfaGraph(triples.into_iter().collect()))
     }
+    // temporary thing
+    pub fn parse_str(html: &'a str, base: &'a str) -> Result<String, Box<dyn Error>> {
+        let document = scraper::Html::parse_document(html);
+        let root = document.root_element();
+
+        let root_ctx = Context {
+            base,
+            ..Default::default()
+        };
+        RdfaGraph::parse(&root, root_ctx).map(|g| g.to_string())
+    }
 }
-pub fn traverse_element<'a, 'b>(
+fn traverse_element<'a, 'b>(
     element_ref: &'b ElementRef<'a>,
     parent: Option<&'b Context<'a>>,
     mut ctx: Context<'a>,
@@ -417,7 +428,7 @@ pub fn traverse_element<'a, 'b>(
 
     Ok(ctx.current_node.clone())
 }
-pub fn extract_literal<'a>(
+fn extract_literal<'a>(
     rdfa_el: &RdfaElement<'a, '_>,
     ctx: &Context<'a>,
 ) -> Result<Node<'a>, &'static str> {
@@ -484,7 +495,7 @@ pub fn extract_literal<'a>(
     }
 }
 
-pub fn resolve_uri<'a>(
+fn resolve_uri<'a>(
     uri: &'a str,
     ctx: &Context<'a>,
     is_resource: bool,
@@ -704,7 +715,7 @@ fn make_bnode<'a>() -> Node<'a> {
 }
 
 #[inline]
-pub fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, Box<dyn Error>> {
+fn copy_pattern(triples: Vec<Statement<'_>>) -> Result<Vec<Statement<'_>>, Box<dyn Error>> {
     let (pattern_type, pattern): (Vec<Statement>, Vec<Statement>) = triples
         .into_iter()
         .partition(|stmt| stmt.object == *NODE_RDFA_PATTERN_TYPE);
