@@ -16,6 +16,22 @@
       await init();
       form.classList.remove("d-none");
 
+      const text_area = document.querySelector("#html");
+      text_area.value = `<!DOCTYPE html>
+<html prefix="foaf: http://xmlns.com/foaf/0.1/">
+  <head>
+		<title>Test 0083</title>    
+  </head>
+  <body>
+	<div about="http://www.example.org/#somebody" rel="foaf:knows">
+	    <p property="foaf:name">Ivan Herman</p>
+		<p rel="foaf:mailbox" resource="mailto:ivan@w3.org">mailto:ivan@w3.org</p>
+		<p about="http://danbri.org/foaf.rdf#danbri" typeof="foaf:Person" property="foaf:name">Dan Brickley</p>
+	</div>
+  </body>
+</html>
+`;
+
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         const data = new FormData(e.target);
