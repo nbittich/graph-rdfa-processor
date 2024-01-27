@@ -1,3 +1,3 @@
 # build:
 
-wasm-pack build --release
+`wasm-pack build --release --target web`
