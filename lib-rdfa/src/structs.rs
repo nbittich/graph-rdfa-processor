@@ -101,7 +101,7 @@ impl Node<'_> {
     fn as_ntriple_string(&self, well_known_prefix: Option<&str>) -> String {
         match self {
             Node::Iri(iri) | Node::TermIri(iri) => format!("<{}>", iri),
-            Node::Ref(iri) => iri.as_ntriple_string(well_known_prefix).to_string(),
+            Node::Ref(iri) => iri.as_ntriple_string(well_known_prefix),
             Node::Literal(Literal {
                 datatype,
                 lang,
