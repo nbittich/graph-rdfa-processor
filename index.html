@@ -9,7 +9,16 @@
     integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
   <script type="module">
     import init, {html_to_rdfa} from "./rdfa-wasm/pkg/rdfa_wasm.js";
+    function copyToClipBoard(e) {
+      e.preventDefault();
+      const out = document.querySelector("pre");
+      out.select();
+      out.setSelectionRange(0, 99999); // For mobile devices
 
+      navigator.clipboard.writeText(out.innerText);
+
+      alert("Copied to clipboard");
+    }
     async function run() {
       const form = document.querySelector("form");
       form.classList.add("d-none");
@@ -124,11 +133,16 @@
         </div>
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-outline-danger">Submit</button>
+          <button class="btn btn-primary" id="copy" onclick="copyToClipBoard">
+            Copy Output
+          </button>
         </div>
       </form>
     </div>
-    <div class="col-8 pt-5 bg-light border">
-      <pre id="out"></pre>
+    <div class="col-8">
+      <div class="bg-light border h-100">
+        <pre class="p-2" id="out"></pre>
+      </div>
     </div>
   </div>
 </body>
