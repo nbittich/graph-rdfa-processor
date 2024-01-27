@@ -12,7 +12,7 @@ use graph_rdfa_processor::RdfaGraph;
         <p about="http://danbri.org/foaf.rdf#danbri" typeof="foaf:Person" property="foaf:name">Dan Brickley</p>
 	  </div>
     "#;
-    let base = "http://example.com"
+    let base = "http://example.com";
     let well_known_prefix = Some("http://example.org/.well_known");
 
     RdfaGraph::parse_str(html, base, well_known_prefix).unwrap()
@@ -30,7 +30,7 @@ use graph_rdfa_processor::RdfaGraph;
             <p about="http://danbri.org/foaf.rdf#danbri" typeof="foaf:Person" property="foaf:name">Dan Brickley</p>
 	      </div>
       `;
-      let base = "http://example.com"
+      let base = "http://example.com";
       let well_known_prefix = "http://example.org/.well_known";
       let res = html_to_rdfa(html, base, well_known_prefix);
 
