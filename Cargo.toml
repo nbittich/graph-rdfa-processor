@@ -3,7 +3,7 @@ members = ["lib-rdfa", "rdfa-wasm"]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.3"
+version = "0.1.2"
 authors = ["Nordine Bittich"]
 description = "Graph rdfa Processor"
 documentation = "https://github.com/nbittich/graph-rdfa-processor"
@@ -23,13 +23,13 @@ regex = "1.10.3"
 ego-tree = "0.6.2"
 # some tests must run sequentially. 
 # if library is broken, alternative is: cargo test -- --test-threads 1
+graph-rdfa-processor = { version = "0.1.3" }
+
 serial_test = "3.0.0"
 test-case = "3.3.1"
 env_logger = "0.11.1"
 tortank = "0.20.0"
 wasm-bindgen = "0.2.90"
-graph-rdfa-processor = { path = "./lib-rdfa" }
-
 [profile.release]
 opt-level = 'z'   # Optimize for size.
 lto = true        # Link Time Optimization (LTO)
