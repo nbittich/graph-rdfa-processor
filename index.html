@@ -9,16 +9,7 @@
     integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
   <script type="module">
     import init, {html_to_rdfa} from "./rdfa-wasm/pkg/rdfa_wasm.js";
-    function copyToClipBoard(e) {
-      e.preventDefault();
-      const out = document.querySelector("pre");
-      out.select();
-      out.setSelectionRange(0, 99999); // For mobile devices
 
-      navigator.clipboard.writeText(out.innerText);
-
-      alert("Copied to clipboard");
-    }
     async function run() {
       const form = document.querySelector("form");
       form.classList.add("d-none");
@@ -85,6 +76,18 @@
         a.click();
       };
     }
+    const copyToClipboardBtn = document.querySelector("#copyToClipboard");
+    copyToClipboardBtn.onclick = function (e) {
+      e.preventDefault();
+      const out = document.querySelector("pre");
+      out.select();
+      out.setSelectionRange(0, 99999); // For mobile devices
+
+      navigator.clipboard.writeText(out.innerText);
+
+      alert("Copied to clipboard");
+    };
+
     run();
   </script>
 </head>
@@ -101,7 +104,7 @@
       <form action="" id="rdfaForm">
         <div class="mb-2 align-items-center">
           <div class="col-auto">
-            <label for="base" class="col-form-label">Base</label>
+            <label for="base" class="col-form-label fw-bold">Base</label>
           </div>
           <div class="col-auto">
             <input required type="url" id="base" name="base" class="form-control" aria-describedby="base url"
@@ -110,7 +113,7 @@
         </div>
         <div class="mb-2 align-items-center">
           <div class="col-auto">
-            <label for="base" class="col-form-label">Well Known prefix</label>
+            <label for="base" class="col-form-label fw-bold">Well Known prefix</label>
           </div>
           <div class="col-auto">
             <input required type="url" id="wellKnownPrefix" name="wellKnownPrefix" class="form-control"
@@ -124,7 +127,7 @@
 
         <div class="mb-2 align-items-center">
           <div class="col-auto">
-            <label for="html" class="col-form-label">Html</label>
+            <label for="html" class="col-form-label fw-bold">Html</label>
           </div>
           <div class="col-auto">
             <textarea required rows="18" id="html" name="html" class="form-control"
@@ -133,7 +136,7 @@
         </div>
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-outline-danger">Submit</button>
-          <button class="btn btn-primary" id="copy" onclick="copyToClipBoard">
+          <button class="btn btn-primary" id="copyToClipboard">
             Copy Output
           </button>
         </div>
