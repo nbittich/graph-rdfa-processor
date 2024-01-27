@@ -80,8 +80,6 @@
     copyToClipboardBtn.onclick = function (e) {
       e.preventDefault();
       const out = document.querySelector("pre");
-      out.select();
-      out.setSelectionRange(0, 99999); // For mobile devices
 
       navigator.clipboard.writeText(out.innerText);
 
