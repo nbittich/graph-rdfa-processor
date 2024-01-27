@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{ops::Add, path::PathBuf};
 
 use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
@@ -60,8 +60,8 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
         Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()),
     ))
     .unwrap();
-    let diff = ttl.difference(&graph).unwrap();
-    //  diff = diff.add(graph.difference(&ttl).unwrap());
+    let mut diff = ttl.difference(&graph).unwrap();
+    diff = diff.add(graph.difference(&ttl).unwrap());
     if !diff.is_empty() {
         println!("============ Difference ============");
         println!("{diff}");

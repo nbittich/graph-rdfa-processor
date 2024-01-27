@@ -19,11 +19,15 @@ macro_rules! iri {
 }
 
 #[derive(Debug)]
-pub struct RdfaGraph<'a>(pub HashSet<Statement<'a>>);
+pub struct RdfaGraph<'a> {
+    pub well_known_prefix: Option<&'a str>,
+    pub statements: HashSet<Statement<'a>>,
+}
 
 #[derive(Debug, Default, Clone)]
 pub struct Context<'a> {
     pub base: &'a str,
+    pub well_known_prefix: Option<&'a str>,
     pub vocab: Option<&'a str>,
     pub lang: Option<&'a str>,
     pub in_rel: Option<Vec<Node<'a>>>,
@@ -63,6 +67,22 @@ pub struct Statement<'a> {
     pub object: Node<'a>,
 }
 
+impl Statement<'_> {
+    fn as_ntriple_string(&self, well_known_prefix: Option<&str>) -> String {
+        let Statement {
+            subject,
+            predicate,
+            object,
+        } = self;
+        format!(
+            r#"{} {} {}."#,
+            subject.as_ntriple_string(well_known_prefix),
+            predicate.as_ntriple_string(well_known_prefix),
+            object.as_ntriple_string(well_known_prefix)
+        )
+    }
+}
+
 impl Node<'_> {
     pub fn is_empty(&self) -> bool {
         match self {
@@ -76,6 +96,77 @@ impl Node<'_> {
             Node::Ref(r) => r.is_empty(),
             Node::BNode(_) => false,
             Node::RefBNode((s, _)) => s.is_empty(),
+        }
+    }
+    fn as_ntriple_string(&self, well_known_prefix: Option<&str>) -> String {
+        match self {
+            Node::Iri(iri) | Node::TermIri(iri) => format!("<{}>", iri),
+            Node::Ref(iri) => format!("{}", iri.as_ntriple_string(well_known_prefix)),
+            Node::Literal(Literal {
+                datatype,
+                lang,
+                value,
+            }) => {
+                let mut s = if value
+                    .as_ref()
+                    .chars()
+                    .any(|c| c.is_ascii_control() || c.is_control())
+                {
+                    format!(r#""""{value}""""#)
+                } else {
+                    format!(r#""{value}""#)
+                };
+
+                if let Some(datatype) = datatype
+                    .as_ref()
+                    .filter(|dt| dt.as_ref() != &*NODE_RDF_XSD_STRING)
+                {
+                    s.push_str(&format!(
+                        r#"^^{}"#,
+                        datatype.as_ntriple_string(well_known_prefix)
+                    ));
+                } else if let Some(lang) = lang {
+                    s.push_str(&format!(r#"@{lang}"#));
+                }
+                s
+            }
+            Node::BNode(id) => {
+                // todo maybe this should use the base?
+                format!(
+                    "<{}{}>",
+                    well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
+                    id
+                )
+            }
+            Node::RefBNode((id, uuid)) => {
+                if let Ok(v) = id.parse::<u64>() {
+                    if v <= BNODE_ID_GENERATOR.load(std::sync::atomic::Ordering::SeqCst) {
+                        format!(
+                            "<{}{}>",
+                            well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
+                            uuid
+                        )
+                    } else {
+                        format!(
+                            "<{}{}>",
+                            well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
+                            id
+                        )
+                    }
+                } else if id.is_empty() {
+                    format!(
+                        "<{}{}>",
+                        well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
+                        uuid
+                    )
+                } else {
+                    format!(
+                        "<{}{}>",
+                        well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
+                        id
+                    )
+                }
+            }
         }
     }
 }
@@ -98,75 +189,14 @@ impl PartialEq for Node<'_> {
     }
 }
 
-impl Display for Node<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Node::Iri(iri) | Node::TermIri(iri) => f.write_str(&format!("<{}>", iri)),
-            Node::Ref(iri) => f.write_str(&format!("{}", iri)),
-            Node::Literal(Literal {
-                datatype,
-                lang,
-                value,
-            }) => {
-                let mut s = if value
-                    .as_ref()
-                    .chars()
-                    .any(|c| c.is_ascii_control() || c.is_control())
-                {
-                    format!(r#""""{value}""""#)
-                } else {
-                    format!(r#""{value}""#)
-                };
-
-                if let Some(datatype) = datatype
-                    .as_ref()
-                    .filter(|dt| dt.as_ref() != &*NODE_RDF_XSD_STRING)
-                {
-                    s.push_str(&format!(r#"^^{datatype}"#));
-                } else if let Some(lang) = lang {
-                    s.push_str(&format!(r#"@{lang}"#));
-                }
-                f.write_str(&s)
-            }
-            Node::BNode(id) => {
-                // todo maybe this should use the base?
-                f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
-            }
-            Node::RefBNode((id, uuid)) => {
-                if let Ok(v) = id.parse::<u64>() {
-                    if v <= BNODE_ID_GENERATOR.load(std::sync::atomic::Ordering::SeqCst) {
-                        f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, uuid))
-                    } else {
-                        f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
-                    }
-                } else if id.is_empty() {
-                    f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, uuid))
-                } else {
-                    f.write_str(&format!("<{}{}>", DEFAULT_WELL_KNOWN_PREFIX, id))
-                }
-            }
-        }
-    }
-}
-
-impl Display for Statement<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let Statement {
-            subject,
-            predicate,
-            object,
-        } = self;
-        f.write_str(&format!(r#"{subject} {predicate} {object}."#))
-    }
-}
 impl Display for RdfaGraph<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(
             &self
-                .0
+                .statements
                 .iter()
-                .map(Statement::to_string)
-                .collect::<Vec<String>>()
+                .map(|s| s.as_ntriple_string(self.well_known_prefix))
+                .collect::<Vec<_>>()
                 .join("\n"),
         )
     }

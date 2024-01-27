@@ -28,7 +28,7 @@ test-case = "3.3.1"
 env_logger = "0.11.1"
 tortank = "0.20.0"
 wasm-bindgen = "0.2.90"
-graph-rdfa-processor = "0.1.2"
+graph-rdfa-processor = { path = "./lib-rdfa" }
 
 [profile.release]
 opt-level = 'z'   # Optimize for size.

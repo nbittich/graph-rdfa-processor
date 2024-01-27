@@ -27,19 +27,28 @@ impl<'a> RdfaGraph<'a> {
         initial_context: Context<'a>,
     ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
         let mut triples = vec![];
+        let well_known_prefix = initial_context.well_known_prefix.clone();
         traverse_element(input, None, initial_context, &mut triples, &mut vec![])?;
 
         triples = copy_pattern(triples)?;
 
-        Ok(RdfaGraph(triples.into_iter().collect()))
+        Ok(RdfaGraph {
+            statements: triples.into_iter().collect(),
+            well_known_prefix,
+        })
     }
     // temporary thing
-    pub fn parse_str(html: &'a str, base: &'a str) -> Result<String, Box<dyn Error>> {
+    pub fn parse_str(
+        html: &'a str,
+        base: &'a str,
+        well_known_prefix: Option<&'a str>,
+    ) -> Result<String, Box<dyn Error>> {
         let document = scraper::Html::parse_document(html);
         let root = document.root_element();
 
         let root_ctx = Context {
             base,
+            well_known_prefix,
             ..Default::default()
         };
         RdfaGraph::parse(&root, root_ctx).map(|g| g.to_string())

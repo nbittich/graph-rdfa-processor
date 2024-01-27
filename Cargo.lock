@@ -388,7 +388,7 @@ version = "0.1.2"
 dependencies = [
  "ego-tree",
  "env_logger",
- "itertools 0.12.0",
+ "itertools",
  "lazy_static",
  "log",
  "regex",
@@ -396,22 +396,6 @@ dependencies = [
  "serial_test",
  "test-case",
  "tortank",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "graph-rdfa-processor"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a40adbf551dc0d0f9f246290b93b00a4745e08c3cc4f42025e41cd8d923d5187"
-dependencies = [
- "ego-tree",
- "itertools 0.11.0",
- "lazy_static",
- "log",
- "regex",
- "scraper",
  "url",
  "uuid",
 ]
@@ -473,15 +457,6 @@ checksum = "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
 dependencies = [
  "unicode-bidi",
  "unicode-normalization",
-]
-
-[[package]]
-name = "itertools"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
-dependencies = [
- "either",
 ]
 
 [[package]]
@@ -785,7 +760,7 @@ name = "rdfa-wasm"
 version = "0.1.2"
 dependencies = [
  "getrandom",
- "graph-rdfa-processor 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "graph-rdfa-processor",
  "wasm-bindgen",
 ]
 
