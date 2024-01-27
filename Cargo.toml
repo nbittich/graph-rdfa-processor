@@ -3,7 +3,7 @@ members = ["lib-rdfa", "rdfa-wasm"]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Nordine Bittich"]
 description = "Graph rdfa Processor"
 documentation = "https://github.com/nbittich/graph-rdfa-processor"

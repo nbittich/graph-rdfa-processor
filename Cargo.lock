@@ -384,7 +384,7 @@ dependencies = [
 
 [[package]]
 name = "graph-rdfa-processor"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "ego-tree",
  "env_logger",
@@ -773,10 +773,10 @@ dependencies = [
 
 [[package]]
 name = "rdfa-wasm"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "getrandom",
- "graph-rdfa-processor 0.1.3",
+ "graph-rdfa-processor 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen",
 ]
 
