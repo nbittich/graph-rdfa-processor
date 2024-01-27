@@ -8,7 +8,7 @@ authors = ["Nordine Bittich"]
 description = "Graph rdfa Processor"
 documentation = "https://github.com/nbittich/graph-rdfa-processor"
 repository = "https://github.com/nbittich/graph-rdfa-processor"
-rust-version = "1.73"
+rust-version = "1.75"
 edition = "2021"
 license = "MIT"
 

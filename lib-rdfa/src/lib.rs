@@ -27,7 +27,7 @@ impl<'a> RdfaGraph<'a> {
         initial_context: Context<'a>,
     ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
         let mut triples = vec![];
-        let well_known_prefix = initial_context.well_known_prefix.clone();
+        let well_known_prefix = initial_context.well_known_prefix;
         traverse_element(input, None, initial_context, &mut triples, &mut vec![])?;
 
         triples = copy_pattern(triples)?;
@@ -543,7 +543,7 @@ fn resolve_uri<'a>(
                     } else {
                         Uuid::new_v4()
                     };
-                    return Ok(Node::RefBNode((reference.trim(), uuid)));
+                    return Ok(Node::RefBlank((reference.trim(), uuid)));
                 } else if prefix.is_empty() && !reference.is_empty() {
                     return Ok(Node::TermIri(Cow::Owned(
                         [COMMON_PREFIXES[""], reference].join(""),
@@ -629,7 +629,7 @@ fn parse_property_or_type_of<'a>(
 ) -> Vec<Node<'a>> {
     s.split_whitespace()
         .filter_map(|uri| resolve_uri(uri, ctx, false).ok())
-        .filter(|node| allow_b_node || !matches!(node, Node::BNode(_) | Node::RefBNode(_)))
+        .filter(|node| allow_b_node || !matches!(node, Node::Blank(_) | Node::RefBlank(_)))
         .map(|n| Node::Ref(Arc::new(n)))
         .collect_vec()
 }
@@ -720,7 +720,7 @@ fn get_children<'a>(
 
 #[inline]
 fn make_bnode<'a>() -> Node<'a> {
-    Node::BNode(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+    Node::Blank(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
 }
 
 #[inline]

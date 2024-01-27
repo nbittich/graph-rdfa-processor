@@ -56,8 +56,8 @@ pub enum Node<'a> {
     TermIri(Cow<'a, str>),
     Literal(Literal<'a>),
     Ref(Arc<Node<'a>>),
-    BNode(u64),
-    RefBNode((&'a str, Uuid)),
+    Blank(u64),
+    RefBlank((&'a str, Uuid)),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -94,14 +94,14 @@ impl Node<'_> {
                     && l.lang.filter(|lan| lan.is_empty()).is_none()
             }
             Node::Ref(r) => r.is_empty(),
-            Node::BNode(_) => false,
-            Node::RefBNode((s, _)) => s.is_empty(),
+            Node::Blank(_) => false,
+            Node::RefBlank((s, _)) => s.is_empty(),
         }
     }
     fn as_ntriple_string(&self, well_known_prefix: Option<&str>) -> String {
         match self {
             Node::Iri(iri) | Node::TermIri(iri) => format!("<{}>", iri),
-            Node::Ref(iri) => format!("{}", iri.as_ntriple_string(well_known_prefix)),
+            Node::Ref(iri) => iri.as_ntriple_string(well_known_prefix).to_string(),
             Node::Literal(Literal {
                 datatype,
                 lang,
@@ -130,7 +130,7 @@ impl Node<'_> {
                 }
                 s
             }
-            Node::BNode(id) => {
+            Node::Blank(id) => {
                 // todo maybe this should use the base?
                 format!(
                     "<{}{}>",
@@ -138,7 +138,7 @@ impl Node<'_> {
                     id
                 )
             }
-            Node::RefBNode((id, uuid)) => {
+            Node::RefBlank((id, uuid)) => {
                 if let Ok(v) = id.parse::<u64>() {
                     if v <= BNODE_ID_GENERATOR.load(std::sync::atomic::Ordering::SeqCst) {
                         format!(
@@ -182,8 +182,8 @@ impl PartialEq for Node<'_> {
             (Self::Ref(l0), Self::Ref(r0)) => l0 == r0,
             (Self::Ref(l0), rhs) => l0.as_ref() == rhs,
             (lhs, Self::Ref(r0)) => lhs == r0.as_ref(),
-            (Self::BNode(l0), Self::BNode(r0)) => l0 == r0,
-            (Self::RefBNode(l0), Self::RefBNode(r0)) => l0 == r0,
+            (Self::Blank(l0), Self::Blank(r0)) => l0 == r0,
+            (Self::RefBlank(l0), Self::RefBlank(r0)) => l0 == r0,
             _ => false,
         }
     }
