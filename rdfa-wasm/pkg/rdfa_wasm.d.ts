@@ -3,15 +3,16 @@
 /**
 * @param {string} html
 * @param {string} base
+* @param {string} well_known_prefix
 * @returns {string}
 */
-export function html_to_rdfa(html: string, base: string): string;
+export function html_to_rdfa(html: string, base: string, well_known_prefix: string): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly html_to_rdfa: (a: number, b: number, c: number, d: number, e: number) => void;
+  readonly html_to_rdfa: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_export_0: (a: number, b: number) => number;
   readonly __wbindgen_export_1: (a: number, b: number, c: number, d: number) => number;

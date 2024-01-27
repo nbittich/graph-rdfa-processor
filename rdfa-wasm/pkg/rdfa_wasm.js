@@ -113,26 +113,29 @@ function getInt32Memory0() {
 /**
 * @param {string} html
 * @param {string} base
+* @param {string} well_known_prefix
 * @returns {string}
 */
-export function html_to_rdfa(html, base) {
-    let deferred3_0;
-    let deferred3_1;
+export function html_to_rdfa(html, base, well_known_prefix) {
+    let deferred4_0;
+    let deferred4_1;
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(html, wasm.__wbindgen_export_0, wasm.__wbindgen_export_1);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passStringToWasm0(base, wasm.__wbindgen_export_0, wasm.__wbindgen_export_1);
         const len1 = WASM_VECTOR_LEN;
-        wasm.html_to_rdfa(retptr, ptr0, len0, ptr1, len1);
+        const ptr2 = passStringToWasm0(well_known_prefix, wasm.__wbindgen_export_0, wasm.__wbindgen_export_1);
+        const len2 = WASM_VECTOR_LEN;
+        wasm.html_to_rdfa(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
-        deferred3_0 = r0;
-        deferred3_1 = r1;
+        deferred4_0 = r0;
+        deferred4_1 = r1;
         return getStringFromWasm0(r0, r1);
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
-        wasm.__wbindgen_export_2(deferred3_0, deferred3_1, 1);
+        wasm.__wbindgen_export_2(deferred4_0, deferred4_1, 1);
     }
 }
 
