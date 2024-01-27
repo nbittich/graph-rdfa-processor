@@ -13,11 +13,13 @@
   "files": [
     "rdfa_wasm_bg.wasm",
     "rdfa_wasm.js",
+    "rdfa_wasm_bg.js",
     "rdfa_wasm.d.ts"
   ],
   "module": "rdfa_wasm.js",
   "types": "rdfa_wasm.d.ts",
   "sideEffects": [
+    "./rdfa_wasm.js",
     "./snippets/*"
   ]
 }
