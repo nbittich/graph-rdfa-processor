@@ -516,7 +516,7 @@ fn resolve_uri<'a>(
 
         // Curie
         Ok(iri) => {
-            if uri.starts_with("mail") || uri.starts_with("tel") {
+            if uri.starts_with("mail:") || uri.starts_with("tel:") {
                 Ok(Node::Iri(Cow::Borrowed(uri)))
             } else if let Some(value) = ctx.prefixes.get(iri.scheme()) {
                 let iri = uri
