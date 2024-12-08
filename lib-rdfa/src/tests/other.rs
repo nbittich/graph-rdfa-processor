@@ -7,6 +7,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/other";
 #[test_case("example0001"  ; "Case prefix not scoped properly                                                              : other_0001 ")]
 #[test_case("example0002"  ; "inlist doesn't behave with base ending with /                                                : other_0002 ")]
 #[test_case("example0003"  ; "inlist override base                                                                         : other_0003 ")]
+#[test_case("example0004"  ; "whitespace in uri                                                                            : other_0004 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

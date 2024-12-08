@@ -1,0 +1,31 @@
+
+<https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=ToegevoegdeAgenda_Gemeenteraad_06-09-2021.html> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Document>, <https://data.vlaanderen.be/id/concept/BesluitDocumentType/13fefad6-a9d6-4025-83b5-e4cbee3a8965> .
+<https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=ToegevoegdeAgenda_Gemeenteraad_06-09-2021.html#Zitting> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.vlaanderen.be/ns/besluit#Zitting>;
+ <http://data.vlaanderen.be/ns/besluit#heeftAgenda> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=ToegevoegdeAgenda_Gemeenteraad_06-09-2021.html#Agenda4826>;
+ <http://data.vlaanderen.be/ns/besluit#isGehoudenDoor> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+ <http://data.vlaanderen.be/ns/besluit#geplandeStart> "2021-09-06T17:30:00.0000000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=ToegevoegdeAgenda_Gemeenteraad_06-09-2021.html#Agenda4826> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Document> .
+<http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.vlaanderen.be/ns/besluit#Bestuursorgaan>;
+ <http://data.vlaanderen.be/ns/mandaat#isTijdspecialisatieVan> <http://data.lblod.info/id/bestuursorganen/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad> .
+<http://data.lblod.info/id/bestuursorganen/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.vlaanderen.be/ns/besluit#Bestuursorgaan>;
+ <http://www.w3.org/2004/02/skos/core#prefLabel> "Gemeenteraad Stad Izegem"@nl .
+<https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=ToegevoegdeAgenda_Gemeenteraad_06-09-2021.html#%20Agendapunt28668> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+ <http://purl.org/dc/terms/title> """
+            B1 Op vraag van raadslid Sybille Vandeputte d.d. 01.09.2021: In
+            kaart brengen en aanpakken van niet-conflictvrije kruispunten in
+            schoolzones en elders in de stad. Goedkeuring.
+          """^^<http://www.w3.org/2001/XMLSchema#string>;
+ <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=ToegevoegdeAgenda_Gemeenteraad_06-09-2021.html#%20Agendapunt28677> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+ <http://purl.org/dc/terms/title> """
+            B2 Op vraag van raadslid Hannes Vanderstraeten d.d. 02.09.2021:
+            Opstart van een Rollend Fonds voor verduurzamen van huishoudens met
+            beperkte financiële middelen. Goedkeuring.
+          """^^<http://www.w3.org/2001/XMLSchema#string>;
+ <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=ToegevoegdeAgenda_Gemeenteraad_06-09-2021.html#%20Agendapunt28678> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+ <http://purl.org/dc/terms/title> """
+            B3 Op vraag van raadslid Veerle Renier d.d. 02.09.2021:
+            Groepsaankoop CO2 meters voor Izegemse scholen. Goedkeuring.
+          """^^<http://www.w3.org/2001/XMLSchema#string>;
+ <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .

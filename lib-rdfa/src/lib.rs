@@ -520,6 +520,7 @@ fn resolve_uri<'a>(
     ctx: &Context<'a>,
     is_resource: bool,
 ) -> Result<Node<'a>, &'static str> {
+    let uri = uri.trim();
     let iri = Url::parse(uri);
     let trailing_white_space = if ctx.base.ends_with('/')
         || ctx.base.ends_with('#')
@@ -531,7 +532,25 @@ fn resolve_uri<'a>(
         "/"
     };
     match iri {
-        Ok(iri) if !iri.cannot_be_a_base() || iri.is_special() => Ok(Node::Iri(Cow::Borrowed(uri))),
+        Ok(iri) if !iri.cannot_be_a_base() || iri.is_special() => {
+            // special case pct encoded, see other/example0004
+            if uri.contains(|c: char| c.is_whitespace() || c.is_control()) {
+                let mut new_uri = String::with_capacity(uri.len() * 125 / 100);
+                for c in uri.chars() {
+                    match c {
+                        '\n' => new_uri.push_str("%0A"),
+                        '\0' => new_uri.push_str("%00"),
+                        '\t' => new_uri.push_str("%09"),
+                        '\r' => new_uri.push_str("%0D"),
+                        ' ' => new_uri.push_str("%20"),
+                        c => new_uri.push(c),
+                    }
+                }
+                Ok(Node::Iri(Cow::Owned(new_uri)))
+            } else {
+                Ok(Node::Iri(Cow::Borrowed(uri)))
+            }
+        }
 
         // Curie
         Ok(iri) => {

@@ -14,8 +14,8 @@ mod rdfa_core;
 mod rdfa_primer;
 
 const DEBUG: bool = true;
-const WRITE_RESULT_TO_FILE: bool = false;
-const WRITE_DIFF_TO_FILE: bool = false;
+const WRITE_RESULT_TO_FILE: bool = true;
+const WRITE_DIFF_TO_FILE: bool = true;
 
 fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     let _ = env_logger::try_init();
