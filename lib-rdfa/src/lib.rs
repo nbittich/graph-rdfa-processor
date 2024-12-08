@@ -88,14 +88,21 @@ fn traverse_element<'a, 'b>(
         let mut s = s.trim();
         if s.starts_with('[') {
             s = &s[1..];
+        } else {
+            return false;
         }
         if s.ends_with(']') {
             s = &s[0..s.len() - 1];
+        } else {
+            return false;
         }
         s.is_empty()
     };
 
-    let resource = elt.resource.filter(|r| !is_empty_curie(r));
+    let resource =
+        elt.resource
+            .filter(|r| !is_empty_curie(r))
+            .map(|c| if c.is_empty() { ctx.base } else { c });
 
     ctx.lang = elt.lang.or_else(|| parent.and_then(|p| p.lang));
 
@@ -344,12 +351,9 @@ fn traverse_element<'a, 'b>(
             push_triples(stmts, &base, &rels.take(), &current_node);
         } else {
             let child_with_rdfa_tag = element_ref
-                .select(&Selector::parse(
-                    "[href], [src], [resource], [typeof], [property]",
-                )?)
+                .select(&Selector::parse("[href], [src], [resource], [property]")?)
                 .count()
                 == 0;
-
             current_node = if let Some(src_or_href) = src_or_href.take() {
                 src_or_href
             } else if child_with_rdfa_tag || parent.is_none() {
@@ -370,6 +374,7 @@ fn traverse_element<'a, 'b>(
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
             .map(Ok)
             .unwrap_or_else(|| get_parent_subject(&ctx))?;
+
         push_triples(
             stmts,
             &current_node,
@@ -483,15 +488,6 @@ fn extract_literal<'a>(
         let texts = rdfa_el.texts();
         let text = if texts.is_empty() {
             Cow::Borrowed("")
-        } else if texts.len() == 1 {
-            let text = {
-                if texts[0].lines().filter(|l| !l.trim().is_empty()).count() == 1 {
-                    texts[0].trim()
-                } else {
-                    texts[0]
-                }
-            };
-            Cow::Borrowed(text)
         } else {
             let text = texts.iter().map(|t| t.to_string()).join("");
             Cow::Owned(text)
@@ -510,7 +506,15 @@ fn resolve_uri<'a>(
     is_resource: bool,
 ) -> Result<Node<'a>, &'static str> {
     let iri = Url::parse(uri);
-
+    let trailing_white_space = if ctx.base.ends_with('/')
+        || ctx.base.ends_with('#')
+        || uri.starts_with('/')
+        || uri.starts_with('#')
+    {
+        ""
+    } else {
+        "/"
+    };
     match iri {
         Ok(iri) if !iri.cannot_be_a_base() || iri.is_special() => Ok(Node::Iri(Cow::Borrowed(uri))),
 
@@ -562,15 +566,6 @@ fn resolve_uri<'a>(
                 }
             }
             if is_resource || uri.starts_with('#') || uri.starts_with('/') {
-                let trailing_white_space = if ctx.base.ends_with('/')
-                    || ctx.base.ends_with('#')
-                    || uri.starts_with('/')
-                    || uri.starts_with('#')
-                {
-                    ""
-                } else {
-                    "/"
-                };
                 Ok(Node::TermIri(Cow::Owned(
                     [ctx.base, trailing_white_space, uri].join(""),
                 )))

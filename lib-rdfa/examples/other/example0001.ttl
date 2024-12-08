@@ -1,0 +1,118 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5>
+   <http://mu.semte.ch/vocabularies/ext/metadata> """
+                        
+                            
+                            
+                            
+                                
+                                    
+                                    
+                                        Notulen
+                                    
+                                
+                                
+                                    
+                                        Gemeenteraad
+                                    
+                                
+                                
+                                    
+                                        
+                                    
+                                    
+                                        
+                                            
+                                            Zitting van donderdag 18
+                                                april 2024
+                                            
+                                            
+                                            
+                                        
+                                    
+                                
+                                
+                                    
+                                        
+                                            Aanwezig: 
+                                            Ben D'Haene
+                                        
+                                    
+                                
+
+
+                                
+                                    
+                                        Stemmingen
+                                        
+                                            Aanwezig: 
+                                            
+                                                
+                                                    Henriette
+                                                    Scheire
+                                                (
+                                                
+                                                    
+                                                        Gemeenteraadslid
+                                                        
+                                                    
+                                                ),
+                                            
+                                        
+                                        
+                                    
+                                
+                            
+
+                        
+
+                    """;
+   rdf:type <http://www.w3.org/ns/person#Person>;
+   <https://data.vlaanderen.be/ns/persoon#gebruikteVoornaam> "Henriette";
+   foaf:familyName "Scheire" .
+<https://data.destelbergen.be/zittingen/8b9fe347-4c93-ee11-be37-000d3ad8b15b>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Zitting>;
+   <http://data.vlaanderen.be/ns/besluit#heeftNotulen> <https://destelbergen.powerappsportals.com/zittingen/?id=a6a451c4-601f-ef11-840a-002248a03ee0>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/cd9ddb549bfc87477be14071944f0bcae5a468aa2e912dd59f1534d9e28f871a>;
+   dc:title """
+                                            
+                                            Zitting van donderdag 18
+                                                april 2024
+                                            
+                                            
+                                            
+                                        """;
+   <http://data.vlaanderen.be/ns/besluit#isGehoudenDoor> <http://data.lblod.info/id/bestuursorganen/cd9ddb549bfc87477be14071944f0bcae5a468aa2e912dd59f1534d9e28f871a>;
+   <http://data.vlaanderen.be/ns/besluit#geplandeStart> "2024-04-18T17:46:39Z"^^xsd:dateTime;
+   <http://www.w3.org/ns/prov#atLocation> "Destelbergen"^^xsd:string;
+   <http://www.w3.org/ns/prov#startedAtTime> "2024-04-18T17:46:39Z"^^xsd:dateTime;
+   <http://www.w3.org/ns/prov#endedAtTime> "2024-04-18T19:00:00Z"^^xsd:dateTime;
+   <http://mu.semte.ch/vocabularies/ext/insertAanwezigenText> """
+                                            Aanwezig: 
+                                            Ben D'Haene
+                                        """;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5F33F82AF9D30200080002C5>;
+   <http://data.vlaanderen.be/ns/besluit#heeftAanwezige> <http://data.lblod.info/id/mandatarissen/5D69204AA3ACB6000900033B> .
+<https://destelbergen.powerappsportals.com/zittingen/?id=a6a451c4-601f-ef11-840a-002248a03ee0>
+   rdf:type foaf:Document .
+<http://data.lblod.info/id/bestuursorganen/cd9ddb549bfc87477be14071944f0bcae5a468aa2e912dd59f1534d9e28f871a>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Bestuursorgaan> .
+<http://data.lblod.info/id/mandatarissen/5F33F82AF9D30200080002C5>
+   rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandataris> .
+<http://data.lblod.info/id/mandatarissen/5D69204AA3ACB6000900033B>
+   rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandataris>;
+   <http://data.vlaanderen.be/ns/mandaat#isBestuurlijkeAliasVan> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5>;
+   org:holds <http://data.lblod.info/id/mandaten/387293fe1088c6291c86a2f60cd4133c86cc464ed0e54b9ceaf12d04b5ff1f23> .
+<http://data.lblod.info/id/mandaten/387293fe1088c6291c86a2f60cd4133c86cc464ed0e54b9ceaf12d04b5ff1f23>
+   rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandaat>;
+   org:role <http://data.vlaanderen.be/id/concept/BestuursfunctieCode/5ab0e9b8a3b2ca7c5e000011> .
+<http://data.vlaanderen.be/id/concept/BestuursfunctieCode/5ab0e9b8a3b2ca7c5e000011>
+   rdf:type skos:Concept;
+   skos:prefLabel """Gemeenteraadslid
+                                                        """ .

@@ -1,8 +1,17 @@
-<http://www.example.org/#somebody> <http://xmlns.com/foaf/0.1/knows> <http://data.lblod.info/.well-known/genid#1>.
-<http://data.lblod.info/.well-known/genid#1> <http://xmlns.com/foaf/0.1/knows> <http://www.example.org/#somebody>.
-<http://data.lblod.info/.well-known/genid#1> <http://xmlns.com/foaf/0.1/name> "Ivan Herman".
-<http://data.lblod.info/.well-known/genid#1> <http://xmlns.com/foaf/0.1/mailbox> <mailto:ivan@w3.org>.
-<http://danbri.org/foaf.rdf#danbri> <http://xmlns.com/foaf/0.1/name> "Dan Brickley".
-<http://danbri.org/foaf.rdf#danbri> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person>.
-<http://www.example.org/#somebody> <http://xmlns.com/foaf/0.1/knows> <http://danbri.org/foaf.rdf#danbri>.
-<http://danbri.org/foaf.rdf#danbri> <http://xmlns.com/foaf/0.1/knows> <http://www.example.org/#somebody>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://www.example.org/#somebody>
+   foaf:knows <http://data.lblod.info/.well-known/genid#1>;
+   foaf:knows <http://danbri.org/foaf.rdf#danbri> .
+<http://data.lblod.info/.well-known/genid#1>
+   foaf:name "Ivan Herman";
+   foaf:knows <http://www.example.org/#somebody>;
+   foaf:mailbox <mailto:ivan@w3.org> .
+<http://danbri.org/foaf.rdf#danbri>
+   rdf:type foaf:Person;
+   foaf:name """
+          Dan Brickley
+        """;
+   foaf:knows <http://www.example.org/#somebody> .
+

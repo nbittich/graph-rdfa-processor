@@ -48,11 +48,3 @@ use graph_rdfa_processor::RdfaGraph;
 
 - used [RDFa/Play](https://rdfa.info/play/) for comparing.
 - [Demo](https://nbittich.github.io/graph-rdfa-processor/)
-
-### WIP
-
-The plan is to make as much tests as possible, and fix the bugs along the way.
-
-### KNOWN ISSUES
-
-- White space not preserved. See test 0329.

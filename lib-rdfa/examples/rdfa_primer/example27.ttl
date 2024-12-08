@@ -1,5 +1,16 @@
-<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://schema.org/>.
-<http://test.org/alice/posts/trouble_with_bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/BlogPosting>.
-<http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/title> "The trouble with Bob".
-<http://test.org/alice/posts/trouble_with_bob> <http://purl.org/dc/terms/creator> <http://test.org#me>.
-<http://test.org/alice/posts/trouble_with_bob> <http://schema.org/articleBody> "The trouble with Bob is that he takes much better photos than I do:".
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+
+<http://test.org>
+   rdfa:usesVocabulary schema: .
+<http://test.org/alice/posts/trouble_with_bob>
+   rdf:type schema:BlogPosting;
+   dc:title "The trouble with Bob";
+   dc:creator <http://test.org#me>;
+   schema:articleBody """
+        
+          The trouble with Bob is that he takes much better photos than I do:
+        
+      """ .

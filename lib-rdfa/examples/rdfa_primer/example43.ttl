@@ -1,3 +1,10 @@
-<http://test.org> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://w.com/>.
-<http://test.org/alice/posts/trouble_with_bob> <http://w.com/title> "The trouble with Bob".
-<http://test.org/alice/posts/jos_barbecue> <http://w.com/title> "Jo's Barbecue".
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+
+<http://test.org>
+   rdfa:usesVocabulary <http://w.com/> .
+<http://test.org/alice/posts/trouble_with_bob>
+   <http://w.com/title> """
+    The trouble with Bob
+  """ .
+<http://test.org/alice/posts/jos_barbecue>
+   <http://w.com/title> "Jo's Barbecue" .

@@ -92,6 +92,21 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
         self.property.is_some()
     }
 
+    pub fn has_non_empty_resource(&self) -> bool {
+        self.resource.filter(|c| !c.is_empty()).is_some()
+    }
+    pub fn has_non_empty_href(&self) -> bool {
+        self.href.filter(|c| !c.is_empty()).is_some()
+    }
+    pub fn has_non_empty_src(&self) -> bool {
+        self.src.filter(|c| !c.is_empty()).is_some()
+    }
+    pub fn has_non_empty_property(&self) -> bool {
+        self.property.filter(|c| !c.is_empty()).is_some()
+    }
+    pub fn has_non_empty_type_of(&self) -> bool {
+        self.type_of.filter(|c| !c.is_empty()).is_some()
+    }
     pub fn has_about(&self) -> bool {
         self.about.is_some()
     }
@@ -104,11 +119,7 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
         }
     }
     pub fn texts(&self) -> Vec<&'a str> {
-        let texts = self
-            .element_ref
-            .text()
-            .filter(|t| !t.trim().is_empty())
-            .collect_vec();
+        let texts = self.element_ref.text().collect_vec();
         if texts.len() == 1 || !texts.iter().any(|t| t.lines().count() > 1) {
             texts
         } else {
