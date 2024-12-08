@@ -5,6 +5,8 @@ based on rdfa annotations.
 
 ## Examples
 
+### Rust usage:
+
 ```rust
 use graph_rdfa_processor::RdfaGraph;
     let html = r#"
@@ -18,6 +20,37 @@ use graph_rdfa_processor::RdfaGraph;
     RdfaGraph::parse_str(html, base, well_known_prefix).unwrap()
 
 ```
+
+### Node usage:
+
+`npm i @nbittich/rdfa-wasm`
+
+```js
+const { html_to_rdfa } = require("@nbittich/rdfa-wasm");
+
+const example = `
+           
+<!doctype html>
+<html>
+  <head>
+    <title>Test 0224</title>
+  </head>
+  <body>
+    <div about="">
+      <ol rel="rdf:value" inlist="">
+        <li>git remote add origin git@github.com:nbittich/node-rdfa-wasm-example.git<a href="foo">Foo</a></li>
+        <li><a href="bar">Bar</a></li>
+      </ol>
+    </div>
+  </body>
+</html>
+
+`;
+
+console.log(html_to_rdfa(example, "http://data.lblod.info", ""));
+```
+
+### Web usage (not published on npm yet):
 
 ```js
  <script type="module">
