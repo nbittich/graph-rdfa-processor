@@ -1,11 +1,22 @@
-import init, { html_to_rdfa } from "./pkg/rdfa_wasm.js";
-
+async function loadWasmContext() {
+  const module = await import("./pkg/rdfa_wasm.js");
+  await module.default();
+  // return module.compute_as_string; use that one instead to create the heap from javascript
+  return module.html_to_rdfa;
+}
+function toggleForm(form, toggle) {
+  const elements = form.elements;
+  for (let i = 0, len = elements.length; i < len; ++i) {
+    elements[i].readOnly = toggle;
+  }
+  const submitButton = form.querySelector('button[type="submit"]');
+  submitButton.disabled = toggle;
+}
 async function run() {
   const form = document.querySelector("form");
-  form.classList.add("d-none");
-  await init();
-  form.classList.remove("d-none");
-
+  toggleForm(form, true);
+  const html_to_rdfa = await loadWasmContext();
+  toggleForm(form, false);
   const text_area = document.querySelector("#html");
   text_area.value = `
             <!DOCTYPE html>
@@ -33,7 +44,6 @@ async function run() {
     );
     const out = document.querySelector("pre");
     out.innerText = res;
-    console.log(res);
   });
   const issueLink = document.querySelector("#issueLink");
   issueLink.onclick = (e) => {
