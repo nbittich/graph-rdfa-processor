@@ -27,8 +27,22 @@ impl<'a> RdfaGraph<'a> {
         initial_context: Context<'a>,
     ) -> Result<RdfaGraph<'a>, Box<dyn Error>> {
         let mut triples = vec![];
+        let mut inlist_triples = vec![];
         let well_known_prefix = initial_context.well_known_prefix;
-        traverse_element(input, None, initial_context, &mut triples, &mut vec![])?;
+        traverse_element(
+            input,
+            None,
+            initial_context,
+            &mut triples,
+            &mut inlist_triples,
+        )?;
+
+        // fixes examples/other/example0002.html
+        // when base ends with "/", inlist_triples is not append
+        // todo find a better fix
+        if !inlist_triples.is_empty() {
+            triples.append(&mut inlist_triples);
+        }
 
         triples = copy_pattern(triples)?;
 
@@ -207,6 +221,7 @@ fn traverse_element<'a, 'b>(
             } else {
                 Node::Ref(Arc::new(extract_literal(&elt, &ctx)?))
             };
+
             for predicate in predicates {
                 push_triples_inlist(in_list_stmts, &subject, predicate, &obj);
             }

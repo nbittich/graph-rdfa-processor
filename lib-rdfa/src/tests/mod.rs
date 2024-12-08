@@ -13,7 +13,7 @@ mod other;
 mod rdfa_core;
 mod rdfa_primer;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 const WRITE_RESULT_TO_FILE: bool = false;
 const WRITE_DIFF_TO_FILE: bool = false;
 
@@ -43,10 +43,7 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     let ttl = std::fs::read_to_string(&path_to_ttl).unwrap();
 
     let ttl = ttl.trim_end();
-    if DEBUG {
-        println!("============ Expected result ============");
-        println!("{ttl}");
-    }
+
     let document = Html::parse_document(html);
     let root = document.root_element();
 
@@ -56,20 +53,24 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     };
     let graph = RdfaGraph::parse(&root, root_ctx).unwrap().to_string();
 
-    if DEBUG {
-        println!("============ Actual result ============");
-        println!("{graph}");
-    }
     if WRITE_RESULT_TO_FILE {
         std::fs::write("/tmp/res.ttl", &graph).expect("could not write file");
     }
     let ttl =
         TurtleDoc::try_from((ttl, Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
+    if DEBUG {
+        println!("============ Expected result ============");
+        println!("{ttl}");
+    }
     let graph = TurtleDoc::try_from((
         graph.as_str(),
         Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()),
     ))
     .unwrap();
+    if DEBUG {
+        println!("============ Actual result ============");
+        println!("{graph}");
+    }
     let mut diff = ttl.difference(&graph).unwrap();
     diff = diff.add(graph.difference(&ttl).unwrap());
     if !diff.is_empty() && DEBUG {

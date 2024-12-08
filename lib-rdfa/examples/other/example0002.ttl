@@ -1,0 +1,10 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   rdf:value _:1 .
+_:1 
+   rdf:first <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/foo>;
+   rdf:rest _:2 .
+_:2 
+   rdf:first <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/bar>;
+   rdf:rest rdf:nil .

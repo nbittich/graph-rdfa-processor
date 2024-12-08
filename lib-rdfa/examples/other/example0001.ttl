@@ -5,7 +5,7 @@
 @prefix org: <http://www.w3.org/ns/org#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5>
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
    <http://mu.semte.ch/vocabularies/ext/metadata> """
                         
                             
@@ -107,7 +107,7 @@
    rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandataris> .
 <http://data.lblod.info/id/mandatarissen/5D69204AA3ACB6000900033B>
    rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandataris>;
-   <http://data.vlaanderen.be/ns/mandaat#isBestuurlijkeAliasVan> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5>;
+   <http://data.vlaanderen.be/ns/mandaat#isBestuurlijkeAliasVan> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>;
    org:holds <http://data.lblod.info/id/mandaten/387293fe1088c6291c86a2f60cd4133c86cc464ed0e54b9ceaf12d04b5ff1f23> .
 <http://data.lblod.info/id/mandaten/387293fe1088c6291c86a2f60cd4133c86cc464ed0e54b9ceaf12d04b5ff1f23>
    rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandaat>;
