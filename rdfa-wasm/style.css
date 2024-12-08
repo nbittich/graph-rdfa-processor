@@ -14,13 +14,11 @@
   border-radius: 0 !important;
 }
 
-.terminal {
-  resize: none;
+.flat {
   border-radius: 0;
-  background-color: var(--bs-body-bg) !important;
   outline: none !important;
   caret-color: lime;
-  /* Color of the cursor */
+  resize: none;
 }
 
 textarea:focus {
@@ -31,6 +29,6 @@ textarea:focus {
 
 @media (min-width: 720px) {
   .terminal {
-    height: 82vh !important;
+    height: 85vh !important;
   }
 }
