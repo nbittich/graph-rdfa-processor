@@ -30,5 +30,6 @@ textarea:focus {
 @media (min-width: 720px) {
   .terminal {
     height: 85vh !important;
+    overflow: scroll;
   }
 }
