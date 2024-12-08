@@ -16,84 +16,100 @@
   </head>
 
   <body>
-    <h1>RDFa Playground</h1>
-    <p>
-      This is a poc of an rdfa library written in rust. If you find any bug,
-      please <a href="#issueLink" id="issueLink">open an issue.</a>
-    </p>
+    <div class="ps-1">
+      <h1>RDFa Playground</h1>
+      <p>
+        This is a poc of an rdfa library written in rust. If you find any bug,
+        please <a href="#issueLink" id="issueLink">open an issue.</a>
+      </p>
+    </div>
     <hr />
-    <div class="d-flex justify-content-center">
-      <div class="col-3 me-1 border p-2">
-        <form action="" id="rdfaForm">
-          <div class="mb-2 align-items-center">
-            <div class="col-auto">
-              <label for="base" class="col-form-label fw-bold">Base</label>
-            </div>
-            <div class="col-auto">
-              <input
-                required
-                type="url"
-                id="base"
-                name="base"
-                class="form-control"
-                aria-describedby="base url"
-                value="http://example.com"
-              />
-            </div>
-          </div>
-          <div class="mb-2 align-items-center">
-            <div class="col-auto">
-              <label for="base" class="col-form-label fw-bold"
-                >Well Known prefix</label
-              >
-            </div>
-            <div class="col-auto">
-              <input
-                required
-                type="url"
-                id="wellKnownPrefix"
-                name="wellKnownPrefix"
-                class="form-control"
-                aria-describedby="well known prefix"
-                value="http://example.com/.well-known/"
-              />
-              <div id="passwordHelpBlock" class="form-text">
-                Well known prefix for
-                <a
-                  target="_blank"
-                  href="https://www.w3.org/2011/rdf-wg/wiki/Skolemisation"
-                  >Skolemisation</a
-                >
-              </div>
-            </div>
-          </div>
+    <div class="overflow-x-hidden">
+      <div class="d-lg-flex justify-content-center d-block">
+        <div class="col-lg-6 col-12 me-lg-1">
+          <div class="card">
+            <div class="card-body">
+              <form action="" id="rdfaForm">
+                <div class="mb-2 align-items-center">
+                  <div class="col-auto">
+                    <label for="base" class="col-form-label fw-bold"
+                      >Base</label
+                    >
+                  </div>
+                  <div class="col-auto">
+                    <input
+                      required
+                      type="url"
+                      id="base"
+                      name="base"
+                      class="form-control"
+                      aria-describedby="base url"
+                      value="http://example.com"
+                    />
+                  </div>
+                </div>
+                <div class="mb-2 align-items-center">
+                  <div class="col-auto">
+                    <label for="base" class="col-form-label fw-bold"
+                      >Well Known prefix</label
+                    >
+                  </div>
+                  <div class="col-auto">
+                    <input
+                      required
+                      type="url"
+                      id="wellKnownPrefix"
+                      name="wellKnownPrefix"
+                      class="form-control"
+                      aria-describedby="well known prefix"
+                      value="http://example.com/.well-known/"
+                    />
+                    <div id="passwordHelpBlock" class="form-text">
+                      Well known prefix for
+                      <a
+                        target="_blank"
+                        href="https://www.w3.org/2011/rdf-wg/wiki/Skolemisation"
+                        >Skolemisation</a
+                      >
+                    </div>
+                  </div>
+                </div>
 
-          <div class="mb-2 align-items-center">
-            <div class="col-auto">
-              <label for="html" class="col-form-label fw-bold">Html</label>
-            </div>
-            <div class="col-auto">
-              <textarea
-                required
-                rows="18"
-                id="html"
-                name="html"
-                class="form-control"
-                aria-describedby="Html content"
-              ></textarea>
+                <div class="mb-2 align-items-center">
+                  <div class="col-auto">
+                    <label for="html" class="col-form-label fw-bold"
+                      >Html</label
+                    >
+                  </div>
+                  <div class="col-auto">
+                    <textarea
+                      required
+                      rows="18"
+                      id="html"
+                      name="html"
+                      class="form-control"
+                      aria-describedby="Html content"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="d-grid gap-2">
+                  <button type="submit" class="btn btn-outline-danger">
+                    Submit
+                  </button>
+                  <button class="btn btn-primary" id="copyToClipboard">
+                    Copy Output
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-          <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-outline-danger">Submit</button>
-            <button class="btn btn-primary" id="copyToClipboard">
-              Copy Output
-            </button>
+        </div>
+        <div class="col-lg-6 col-12 mt-lg-0 mt-2">
+          <div class="card">
+            <div class="card-body">
+              <pre class="p-2" id="out"></pre>
+            </div>
           </div>
-        </form>
-      </div>
-      <div class="col-8">
-        <div class="bg-light border h-100">
-          <pre class="p-2" id="out"></pre>
         </div>
       </div>
     </div>
