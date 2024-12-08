@@ -33,6 +33,7 @@ async function run() {
     );
     const out = document.querySelector("pre");
     out.innerText = res;
+    console.log(res);
   });
   const issueLink = document.querySelector("#issueLink");
   issueLink.onclick = (e) => {
