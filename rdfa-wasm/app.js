@@ -17,6 +17,8 @@ async function run() {
   toggleForm(form, true);
   const html_to_rdfa = await loadWasmContext();
   toggleForm(form, false);
+
+  initLoadFromUrl();
   const text_area = document.querySelector("#html");
   text_area.value = `
             <!DOCTYPE html>
@@ -76,6 +78,30 @@ async function run() {
     a.target = "_blank";
     a.click();
   };
+}
+
+function initLoadFromUrl() {
+  const loadBtn = document.querySelector("#loadFromUrlBtn");
+  loadBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const url = document.querySelector('#fromUrl');
+    const urlContent = url.value;
+    if (urlContent?.length) {
+      try {
+        const _ = new URL(urlContent);// just to make sure url is valid
+
+        const response = await fetch(urlContent);
+        if (response.status === 200) {
+          alert(await response.text());
+        }
+      } catch (e) {
+        alert("url seems invalid, check logs");
+        console.log(e);
+      }
+
+    }
+  });
 }
 const copyToClipboardBtn = document.querySelector("#copyToClipboard");
 copyToClipboardBtn.onclick = function (e) {

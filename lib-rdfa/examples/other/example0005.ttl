@@ -1,0 +1,542 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024.html>
+   rdf:type foaf:Document;
+   rdf:type <https://data.vlaanderen.be/id/concept/BesluitDocumentType/3fa67785-ffdc-4b30-8880-2b99d97b4dee>;
+   dc:type <https://data.vlaanderen.be/id/concept/BesluitDocumentType/3fa67785-ffdc-4b30-8880-2b99d97b4dee>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date .
+<http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Bestuursorgaan>;
+   <http://data.vlaanderen.be/ns/besluit#bestuurt> <http://data.lblod.info/id/bestuurseenheden/6a56d8c050b6c2a76912c5f6ec3859b939de6d990815f35403e5be41a7703a44>;
+   org:classification <http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000005>;
+   skos:prefLabel "
+          Gemeenteraad Stad Izegem
+        "^^rdfs:Literal;
+   <http://data.vlaanderen.be/ns/mandaat#isTijdspecialisatieVan> <http://data.lblod.info/id/bestuursorganen/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad> .
+<http://data.lblod.info/id/bestuurseenheden/6a56d8c050b6c2a76912c5f6ec3859b939de6d990815f35403e5be41a7703a44>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Bestuurseenheid>;
+   org:classification <http://data.vlaanderen.be/id/concept/BestuurseenheidClassificatieCode/5ab0e9b8a3b2ca7c5e000001>;
+   skos:prefLabel "
+          Stad Izegem
+        "^^rdfs:Literal;
+   <http://data.vlaanderen.be/ns/besluit#werkingsgebied> <http://data.lblod.info/id/werkingsgebieden/60b70f3b49cc098224ba560fa597f0c0e9efa4d0e5a32eacd8e81ee89cef173e> .
+<http://data.vlaanderen.be/id/concept/BestuurseenheidClassificatieCode/5ab0e9b8a3b2ca7c5e000001>
+   rdf:type skos:Concept .
+<http://data.lblod.info/id/werkingsgebieden/60b70f3b49cc098224ba560fa597f0c0e9efa4d0e5a32eacd8e81ee89cef173e>
+   rdf:type <http://www.w3.org/ns/prov#Location> .
+<http://data.lblod.info/id/bestuursorganen/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Bestuursorgaan>;
+   <http://data.vlaanderen.be/ns/besluit#bestuurt> <http://data.lblod.info/id/bestuurseenheden/6a56d8c050b6c2a76912c5f6ec3859b939de6d990815f35403e5be41a7703a44>;
+   org:classification <http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000005>;
+   skos:prefLabel """
+          Gemeenteraad Stad Izegem
+        """@nl .
+<http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000005>
+   rdf:type skos:Concept .
+<https://lblod.izegem.be/LBLODWeb/id/zittingen/95fe2ed631c941a98629e6c80a619121-7403>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Zitting>;
+   dc:title """
+              
+              GEMEENTERAAD
+              VAN
+              18 NOV 2024
+            """@nl;
+   <http://data.vlaanderen.be/ns/besluit#isGehoudenDoor> <http://data.lblod.info/id/bestuursorganen/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad>;
+   <http://data.vlaanderen.be/ns/besluit#geplandeStart> "2024-11-18T18:30:00.0000000Z"^^xsd:dateTime;
+   <http://www.w3.org/ns/prov#atLocation> "Meilief"^^xsd:string;
+   <http://data.vlaanderen.be/ns/besluit#heeftBesluitenlijst> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024.html>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://www.w3.org/ns/prov#startedAtTime> "2024-11-18T18:30:00.0000000Z"^^xsd:dateTime;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/6be94d5bb54e45a79e0f0ac3cac49304-60347>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/ed9694d6bf6e4c94b175f01eab29d39c-60292>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/c153362dfc024988afabd02ba8b50f87-60389>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/4345fd3a14c44fb9a631fc7aab46f8e7-60390>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/694ef6e48e1b491fa2a6495e2ffe5461-60508>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/0005aa760a514e32beb28222e60fad69-59994>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/7b57d1dcac70414f94690cd28cad3bad-51461>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/4093fa024b964794aff6adec5ee85282-60367>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/7f26979f0ab0422f83ab31f3dadf5685-60506>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/339c538e43c94741b11fd9d78aaaa3dd-58962>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/9f4c38d4e7e64f91a63c8697b4dd765c-58963>;
+   <http://data.vlaanderen.be/ns/besluit#behandelt> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/45f417c6cf314522a336433c91e7b614-58964> .
+<http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>
+   rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandataris> .
+<http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>
+   rdf:type <http://data.vlaanderen.be/ns/mandaat#Mandataris> .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/6be94d5bb54e45a79e0f0ac3cac49304-60347>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  1 BAV IVIO op 9.12.2024 te Izegem: 1. Goedkeuren agenda 2.
+                    Vaststellen mandaat vertegenwoordiger
+                "^^xsd:string;
+   dc:description "
+                  BAV IVIO op 9.12.2024 te Izegem: 1. Goedkeuren agenda 2.
+                  Vaststellen mandaat vertegenwoordiger
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/ed9694d6bf6e4c94b175f01eab29d39c-60292>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/6be94d5bb54e45a79e0f0ac3cac49304-60347>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  2 Hulpverleningszone MIDWEST. Begroting dienstjaar 2025.
+                    Financiële verdeelsleutel en dotatie 2025 -
+                    Vaststelling.
+                "^^xsd:string;
+   dc:description ""^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/c153362dfc024988afabd02ba8b50f87-60389>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/ed9694d6bf6e4c94b175f01eab29d39c-60292>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  3 Politiezone RIHO. Begroting 2025 + vaststelling
+                    gemeentelijke aandeel 2025.
+                "^^xsd:string;
+   dc:description "
+                  Politiezone RIHO. Begroting 2025 + vaststelling gemeentelijke
+                  aandeel 2025.
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/4345fd3a14c44fb9a631fc7aab46f8e7-60390>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/c153362dfc024988afabd02ba8b50f87-60389>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  4 Politiezone RIHO - Begrotingswijziging (3 en 4)
+                    dienstjaar 2024 - Gewone en buitengewone dienst.
+                    Goedkeuring.
+                "^^xsd:string;
+   dc:description ""^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/694ef6e48e1b491fa2a6495e2ffe5461-60508>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/4345fd3a14c44fb9a631fc7aab46f8e7-60390>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  5 Gebouwen en technieken. Middenspanningscabine Loodsen.
+                    Lastenboek. Wijze van gunnen. Goedkeuring.
+                  
+                "^^xsd:string;
+   dc:description "
+                  Gebouwen en technieken. Middenspanningscabine Loodsen.
+                  Lastenboek. Wijze van gunnen. Goedkeuring.
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/0005aa760a514e32beb28222e60fad69-59994>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/694ef6e48e1b491fa2a6495e2ffe5461-60508>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  6 Besluit van de gouverneur van 09 oktober 2024 tot
+                    goedkeuring van de jaarrekening 2023 van de stad en het OCMW
+                    van Izegem. Mededeling.
+                "^^xsd:string;
+   dc:description "
+                  Besluit van de gouverneur van 09 oktober 2023 tot goedkeuring
+                  van de jaarrekening 2023 van de stad en het OCMW van Izegem.
+                  Mededeling.
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/7b57d1dcac70414f94690cd28cad3bad-51461>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/0005aa760a514e32beb28222e60fad69-59994>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  7 Proces-verbaal van de zitting van de gemeenteraad van
+                    21.10.2024. Goedkeuring.
+                "^^xsd:string;
+   dc:description ""^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/4093fa024b964794aff6adec5ee85282-60367>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/7b57d1dcac70414f94690cd28cad3bad-51461>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  8 Wijziging huishoudelijk reglement en deontologische code
+                    mandatarissen. Goedkeuring.
+                "^^xsd:string;
+   dc:description ""^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/7f26979f0ab0422f83ab31f3dadf5685-60506>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/4093fa024b964794aff6adec5ee85282-60367>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  9 Patrimonium. Ontwerpakte aankoop stuk grond
+                    Mariastraat.
+                "^^xsd:string;
+   dc:description "
+                  Patrimonium. Ontwerpakte aankoop stuk grond Mariastraat.
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/339c538e43c94741b11fd9d78aaaa3dd-58962>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/7f26979f0ab0422f83ab31f3dadf5685-60506>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  10 Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                    Vaststelling deel stad.
+                "^^xsd:string;
+   dc:description "
+                  Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                  Vaststelling deel stad.
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/9f4c38d4e7e64f91a63c8697b4dd765c-58963>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/339c538e43c94741b11fd9d78aaaa3dd-58962>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  11 Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                    Goedkeuring vastgesteld deel OCMW en definitieve
+                    vaststelling aangepast meerjarenplan in zijn geheel.
+                "^^xsd:string;
+   dc:description "
+                  Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                  Goedkeuring vastgesteld deel OCMW en definitieve vaststelling
+                  aangepast meerjarenplan in zijn geheel.
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/agendapunt/45f417c6cf314522a336433c91e7b614-58964>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <https://lblod.izegem.be/LBLODWeb/id/agendapunt/9f4c38d4e7e64f91a63c8697b4dd765c-58963>;
+   <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> "true"^^xsd:boolean;
+   dc:title "
+                  12 Aanpassing 2024-1 van de meerjarenplanning 2020-2027
+                    AGIZ. Goedkeuring.
+                "^^xsd:string;
+   dc:description "
+                  Aanpassing 2024-1 van de meerjarenplanning 2020-2027 AGIZ.
+                  Goedkeuring.
+                "^^xsd:string .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/6be94d5bb54e45a79e0f0ac3cac49304-60347>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/6be94d5bb54e45a79e0f0ac3cac49304-60347>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/6be94d5bb54e45a79e0f0ac3cac49304-60347>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/6be94d5bb54e45a79e0f0ac3cac49304-60347> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/6be94d5bb54e45a79e0f0ac3cac49304-60347>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/6be94d5bb54e45a79e0f0ac3cac49304-60347>;
+   <http://data.europa.eu/eli/ontology#title> "1 BAV IVIO op 9.12.2024 te Izegem: 1. Goedkeuren agenda 2.
+                  Vaststellen mandaat vertegenwoordiger"^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "BAV IVIO op 9.12.2024 te Izegem: 1. Goedkeuren agenda 2.
+                Vaststellen mandaat vertegenwoordiger"^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                BAV IVIO op 9.12.2024 te Izegem: 1. Goedkeuren agenda 2.
+                Vaststellen mandaat vertegenwoordiger
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/6be94d5bb54e45a79e0f0ac3cac49304-60347>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> """BAV IVIO op 9.12.2024 te Izegem:
+1. Goedkeuren agenda
+2. Vaststellen mandaat vertegenwoordiger"""@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/ed9694d6bf6e4c94b175f01eab29d39c-60292>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/6be94d5bb54e45a79e0f0ac3cac49304-60347>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/ed9694d6bf6e4c94b175f01eab29d39c-60292>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/ed9694d6bf6e4c94b175f01eab29d39c-60292>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/ed9694d6bf6e4c94b175f01eab29d39c-60292> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/ed9694d6bf6e4c94b175f01eab29d39c-60292>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/ed9694d6bf6e4c94b175f01eab29d39c-60292>;
+   <http://data.europa.eu/eli/ontology#title> "2 Hulpverleningszone MIDWEST. Begroting dienstjaar 2025.
+                  Financiële verdeelsleutel en dotatie 2025 -
+                  Vaststelling."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> ""^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> ""^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/ed9694d6bf6e4c94b175f01eab29d39c-60292>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> """Hulpverleningszone MIDWEST. Begroting dienstjaar 2025.
+Financiële verdeelsleutel en dotatie 2025 -  Vaststelling."""@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Vaststelling"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/c153362dfc024988afabd02ba8b50f87-60389>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/ed9694d6bf6e4c94b175f01eab29d39c-60292>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/c153362dfc024988afabd02ba8b50f87-60389>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/c153362dfc024988afabd02ba8b50f87-60389>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/c153362dfc024988afabd02ba8b50f87-60389> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/c153362dfc024988afabd02ba8b50f87-60389>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/c153362dfc024988afabd02ba8b50f87-60389>;
+   <http://data.europa.eu/eli/ontology#title> "3 Politiezone RIHO. Begroting 2025 + vaststelling
+                  gemeentelijke aandeel 2025."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "Politiezone RIHO. Begroting 2025 + vaststelling gemeentelijke
+                aandeel 2025."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                Politiezone RIHO. Begroting 2025 + vaststelling gemeentelijke
+                aandeel 2025.
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/c153362dfc024988afabd02ba8b50f87-60389>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Politiezone RIHO. Begroting 2025 + vaststelling gemeentelijke aandeel 2025."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/4345fd3a14c44fb9a631fc7aab46f8e7-60390>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/c153362dfc024988afabd02ba8b50f87-60389>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/4345fd3a14c44fb9a631fc7aab46f8e7-60390>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/4345fd3a14c44fb9a631fc7aab46f8e7-60390>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/4345fd3a14c44fb9a631fc7aab46f8e7-60390> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/4345fd3a14c44fb9a631fc7aab46f8e7-60390>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/4345fd3a14c44fb9a631fc7aab46f8e7-60390>;
+   <http://data.europa.eu/eli/ontology#title> "4 Politiezone RIHO - Begrotingswijziging (3 en 4) dienstjaar
+                  2024 - Gewone en buitengewone dienst. Goedkeuring."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> ""^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> ""^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/4345fd3a14c44fb9a631fc7aab46f8e7-60390>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Politiezone RIHO - Begrotingswijziging (3 en 4) dienstjaar 2024 - Gewone en buitengewone dienst. Goedkeuring."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Goedkeuring"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/694ef6e48e1b491fa2a6495e2ffe5461-60508>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/4345fd3a14c44fb9a631fc7aab46f8e7-60390>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/694ef6e48e1b491fa2a6495e2ffe5461-60508>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/694ef6e48e1b491fa2a6495e2ffe5461-60508>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/694ef6e48e1b491fa2a6495e2ffe5461-60508> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/694ef6e48e1b491fa2a6495e2ffe5461-60508>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/694ef6e48e1b491fa2a6495e2ffe5461-60508>;
+   <http://data.europa.eu/eli/ontology#title> "5 Gebouwen en technieken. Middenspanningscabine Loodsen.
+                  Lastenboek. Wijze van gunnen. Goedkeuring.
+                "^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "Gebouwen en technieken. Middenspanningscabine Loodsen.
+                Lastenboek. Wijze van gunnen. Goedkeuring.
+              "^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                Gebouwen en technieken. Middenspanningscabine Loodsen.
+                Lastenboek. Wijze van gunnen. Goedkeuring.
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/694ef6e48e1b491fa2a6495e2ffe5461-60508>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Gebouwen en technieken. Middenspanningscabine Loodsen. Lastenboek. Wijze van gunnen. Goedkeuring. "@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/0005aa760a514e32beb28222e60fad69-59994>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/694ef6e48e1b491fa2a6495e2ffe5461-60508>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/0005aa760a514e32beb28222e60fad69-59994>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/0005aa760a514e32beb28222e60fad69-59994>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/0005aa760a514e32beb28222e60fad69-59994> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/0005aa760a514e32beb28222e60fad69-59994>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/0005aa760a514e32beb28222e60fad69-59994>;
+   <http://data.europa.eu/eli/ontology#title> "6 Besluit van de gouverneur van 09 oktober 2024 tot
+                  goedkeuring van de jaarrekening 2023 van de stad en het OCMW
+                  van Izegem. Mededeling."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "Besluit van de gouverneur van 09 oktober 2023 tot goedkeuring
+                van de jaarrekening 2023 van de stad en het OCMW van Izegem.
+                Mededeling."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                Besluit van de gouverneur van 09 oktober 2023 tot goedkeuring
+                van de jaarrekening 2023 van de stad en het OCMW van Izegem.
+                Mededeling.
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/0005aa760a514e32beb28222e60fad69-59994>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Besluit van de gouverneur van 09 oktober 2024 tot goedkeuring van de jaarrekening 2023 van de stad en het OCMW van Izegem.  Mededeling."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Aktename"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/7b57d1dcac70414f94690cd28cad3bad-51461>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/0005aa760a514e32beb28222e60fad69-59994>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/7b57d1dcac70414f94690cd28cad3bad-51461>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/7b57d1dcac70414f94690cd28cad3bad-51461>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/7b57d1dcac70414f94690cd28cad3bad-51461> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/7b57d1dcac70414f94690cd28cad3bad-51461>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/7b57d1dcac70414f94690cd28cad3bad-51461>;
+   <http://data.europa.eu/eli/ontology#title> "7 Proces-verbaal van de zitting van de gemeenteraad van
+                  21.10.2024. Goedkeuring."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> ""^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> ""^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/7b57d1dcac70414f94690cd28cad3bad-51461>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Proces-verbaal van de zitting van de gemeenteraad van 21.10.2024. Goedkeuring."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/4093fa024b964794aff6adec5ee85282-60367>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/7b57d1dcac70414f94690cd28cad3bad-51461>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/4093fa024b964794aff6adec5ee85282-60367>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/4093fa024b964794aff6adec5ee85282-60367>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/4093fa024b964794aff6adec5ee85282-60367> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/4093fa024b964794aff6adec5ee85282-60367>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/4093fa024b964794aff6adec5ee85282-60367>;
+   <http://data.europa.eu/eli/ontology#title> "8 Wijziging huishoudelijk reglement en deontologische code
+                  mandatarissen. Goedkeuring."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> ""^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> ""^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/4093fa024b964794aff6adec5ee85282-60367>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Wijziging huishoudelijk reglement en deontologische code mandatarissen. Goedkeuring."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Te hernemen"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/7f26979f0ab0422f83ab31f3dadf5685-60506>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/4093fa024b964794aff6adec5ee85282-60367>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/7f26979f0ab0422f83ab31f3dadf5685-60506>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/7f26979f0ab0422f83ab31f3dadf5685-60506>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/7f26979f0ab0422f83ab31f3dadf5685-60506> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/7f26979f0ab0422f83ab31f3dadf5685-60506>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/7f26979f0ab0422f83ab31f3dadf5685-60506>;
+   <http://data.europa.eu/eli/ontology#title> "9 Patrimonium. Ontwerpakte aankoop stuk grond
+                  Mariastraat."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "Patrimonium. Ontwerpakte aankoop stuk grond Mariastraat."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                Patrimonium. Ontwerpakte aankoop stuk grond Mariastraat.
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/7f26979f0ab0422f83ab31f3dadf5685-60506>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Patrimonium. Ontwerpakte aankoop stuk grond Mariastraat."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/339c538e43c94741b11fd9d78aaaa3dd-58962>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/7f26979f0ab0422f83ab31f3dadf5685-60506>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/339c538e43c94741b11fd9d78aaaa3dd-58962>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/339c538e43c94741b11fd9d78aaaa3dd-58962>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/339c538e43c94741b11fd9d78aaaa3dd-58962> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/339c538e43c94741b11fd9d78aaaa3dd-58962>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   rdf:type <https://data.vlaanderen.be/id/concept/BesluitType/1869e152-e724-4dd7-927c-a11e7d832858>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/339c538e43c94741b11fd9d78aaaa3dd-58962>;
+   <http://data.europa.eu/eli/ontology#title> "10 Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                  Vaststelling deel stad."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                Vaststelling deel stad."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                Vaststelling deel stad.
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/339c538e43c94741b11fd9d78aaaa3dd-58962>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Aanpassing 2024-1 van de meerjarenplanning 2020-2027. Vaststelling deel stad."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/9f4c38d4e7e64f91a63c8697b4dd765c-58963>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/339c538e43c94741b11fd9d78aaaa3dd-58962>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/9f4c38d4e7e64f91a63c8697b4dd765c-58963>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/9f4c38d4e7e64f91a63c8697b4dd765c-58963>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/9f4c38d4e7e64f91a63c8697b4dd765c-58963> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/9f4c38d4e7e64f91a63c8697b4dd765c-58963>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   rdf:type <https://data.vlaanderen.be/id/concept/BesluitType/1869e152-e724-4dd7-927c-a11e7d832858>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/9f4c38d4e7e64f91a63c8697b4dd765c-58963>;
+   <http://data.europa.eu/eli/ontology#title> "11 Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                  Goedkeuring vastgesteld deel OCMW en definitieve vaststelling
+                  aangepast meerjarenplan in zijn geheel."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                Goedkeuring vastgesteld deel OCMW en definitieve vaststelling
+                aangepast meerjarenplan in zijn geheel."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                Aanpassing 2024-1 van de meerjarenplanning 2020-2027.
+                Goedkeuring vastgesteld deel OCMW en definitieve vaststelling
+                aangepast meerjarenplan in zijn geheel.
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/9f4c38d4e7e64f91a63c8697b4dd765c-58963>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Aanpassing 2024-1 van de meerjarenplanning 2020-2027.  Goedkeuring vastgesteld deel OCMW en definitieve vaststelling aangepast meerjarenplan in zijn geheel."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .
+<https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/45f417c6cf314522a336433c91e7b614-58964>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
+   <http://data.vlaanderen.be/ns/besluit#openbaar> "true"^^xsd:boolean;
+   <http://data.vlaanderen.be/ns/besluit#gebeurtNa> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/9f4c38d4e7e64f91a63c8697b4dd765c-58963>;
+   dc:subject <https://lblod.izegem.be/LBLODWeb/id/agendapunt/45f417c6cf314522a336433c91e7b614-58964>;
+   <http://www.w3.org/ns/prov#generated> <https://lblod.izegem.be/LBLODWeb/id/besluiten/45f417c6cf314522a336433c91e7b614-58964>;
+   <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> <http://data.lblod.info/id/functionarissen/5D7A534EA3ACB600080001E7>;
+   <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> <http://data.lblod.info/id/mandatarissen/5D257B90A3ACB60008000684>;
+   <http://data.vlaanderen.be/ns/besluit#heeftStemming> <https://lblod.izegem.be/LBLODWeb/id/stemmingen/45f417c6cf314522a336433c91e7b614-58964> .
+<https://lblod.izegem.be/LBLODWeb/id/besluiten/45f417c6cf314522a336433c91e7b614-58964>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Besluit>;
+   rdf:type <https://data.vlaanderen.be/id/concept/BesluitType/849c66c2-ba33-4ac1-a693-be48d8ac7bc7>;
+   <http://data.europa.eu/eli/ontology#passed_by> <http://data.lblod.info/id/bestuursorganen/b784a500840af3b20d20131c73e4b9801040190e5a7bd1914314b67f4dd61696>;
+   <http://data.europa.eu/eli/ontology#date_publication> "2024-11-25"^^xsd:date;
+   <http://www.w3.org/ns/prov#wasGeneratedBy> <https://lblod.izegem.be/LBLODWeb/id/behandelingen-van-agendapunten/45f417c6cf314522a336433c91e7b614-58964>;
+   <http://data.europa.eu/eli/ontology#title> "12 Aanpassing 2024-1 van de meerjarenplanning 2020-2027 AGIZ.
+                  Goedkeuring."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#language> <http://publications.europa.eu/resource/authority/language/NLD>;
+   <http://data.europa.eu/eli/ontology#title_short> "Aanpassing 2024-1 van de meerjarenplanning 2020-2027 AGIZ.
+                Goedkeuring."^^xsd:string;
+   <http://data.europa.eu/eli/ontology#description> "
+                Aanpassing 2024-1 van de meerjarenplanning 2020-2027 AGIZ.
+                Goedkeuring.
+              "^^xsd:string;
+   <http://www.w3.org/ns/prov#value> <https://lblod.izegem.be/LBLODWeb/Home/Overzicht/4daec95bfe0ad44a09ff60222ada11725d5145d3a5c76dc645feed7b26eee7ad/GetPublication/?filename=BesluitenLijstUitspraak_Gemeenteraad_18-11-2024_Besluitenlijst.pdf> .
+<https://lblod.izegem.be/LBLODWeb/id/stemmingen/45f417c6cf314522a336433c91e7b614-58964>
+   rdf:type <http://data.vlaanderen.be/ns/besluit#Stemming>;
+   <http://data.vlaanderen.be/ns/besluit#onderwerp> "Aanpassing 2024-1 van de meerjarenplanning 2020-2027 AGIZ.  Goedkeuring."@nl;
+   <http://data.vlaanderen.be/ns/besluit#gevolg> "Algemeen goedgekeurd"@nl .

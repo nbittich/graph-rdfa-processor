@@ -8,6 +8,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/other";
 #[test_case("example0002"  ; "inlist doesn't behave with base ending with /                                                : other_0002 ")]
 #[test_case("example0003"  ; "inlist override base                                                                         : other_0003 ")]
 #[test_case("example0004"  ; "whitespace in uri                                                                            : other_0004 ")]
+#[test_case("example0005"  ; "other random example from izegem                                                             : other_0005 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(
