@@ -18,7 +18,7 @@ async function run() {
   const html_to_rdfa = await loadWasmContext();
   toggleForm(form, false);
 
-  initLoadFromUrl();
+  // initLoadFromUrl();
   const text_area = document.querySelector("#html");
   text_area.value = `
             <!DOCTYPE html>
