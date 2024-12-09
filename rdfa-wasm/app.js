@@ -93,6 +93,7 @@ function initLoadFromUrl() {
 
         const response = await fetch(urlContent);
         if (response.status === 200) {
+          // doesn't work on gh pages because of CORS
           alert(await response.text());
         }
       } catch (e) {
