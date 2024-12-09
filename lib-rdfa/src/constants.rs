@@ -1,7 +1,26 @@
-use std::{borrow::Cow, collections::HashMap, sync::atomic::AtomicU64};
+use std::{borrow::Cow, collections::HashMap};
 
 use crate::{structs::DataTypeFromPattern, Node};
-pub static BNODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
+
+#[cfg(test)]
+static FAKE_UUID_GEN: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+#[cfg(test)]
+pub(crate) fn reset_fake_uuid_gen() {
+    FAKE_UUID_GEN.store(0, std::sync::atomic::Ordering::SeqCst);
+}
+#[cfg(not(test))]
+pub fn get_uuid() -> String {
+    uuid::Uuid::new_v4().to_string().replace("-", "")
+}
+#[cfg(test)]
+pub fn get_uuid() -> String {
+    FAKE_UUID_GEN.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    format!(
+        "{}",
+        FAKE_UUID_GEN.load(std::sync::atomic::Ordering::SeqCst)
+    )
+}
 pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
 pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";

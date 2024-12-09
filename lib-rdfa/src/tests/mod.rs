@@ -4,7 +4,7 @@ use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
 
 use crate::{
-    constants::{self, BNODE_ID_GENERATOR},
+    constants::{self, reset_fake_uuid_gen},
     Context, RdfaGraph,
 };
 
@@ -22,7 +22,7 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
 
     println!("running test {test_name}");
     // reset bnode id generator
-    BNODE_ID_GENERATOR.store(1, std::sync::atomic::Ordering::SeqCst);
+    reset_fake_uuid_gen();
 
     let path_buf = PathBuf::from(input_output_dir);
     let path_to_html = path_buf.join(format!("{test_name}.html"));
@@ -47,8 +47,10 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
+    let empty_ref_node_substitute = "00000000-0000-0000-0000-000000000000";
     let root_ctx = Context {
         base,
+        empty_ref_node_substitute,
         ..Default::default()
     };
     let graph = RdfaGraph::parse(&root, root_ctx).unwrap().to_string();

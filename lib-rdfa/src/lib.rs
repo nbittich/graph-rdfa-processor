@@ -7,15 +7,14 @@ mod structs;
 mod tests;
 
 use constants::{
-    BNODE_ID_GENERATOR, COMMON_PREFIXES, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE,
-    NODE_RDFA_USES_VOCABULARY, RESERVED_KEYWORDS,
+    get_uuid, COMMON_PREFIXES, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE, NODE_RDFA_USES_VOCABULARY,
+    RESERVED_KEYWORDS,
 };
 use itertools::Itertools;
 use log::{debug, error};
 use rdfa_elt::RdfaElement;
 use scraper::{ElementRef, Selector};
 use url::Url;
-use uuid::Uuid;
 
 use crate::constants::{NODE_RDF_FIRST, NODE_RDF_NIL, NODE_RDF_REST, NODE_RDF_XML_LITERAL};
 pub use structs::RdfaGraph;
@@ -29,6 +28,12 @@ impl<'a> RdfaGraph<'a> {
         let mut triples = vec![];
         let mut inlist_triples = vec![];
         let well_known_prefix = initial_context.well_known_prefix;
+        if initial_context.empty_ref_node_substitute.is_empty() {
+            return Err(
+                "if you provide a context, you most provide an empty_ref_node_substitute property."
+                    .into(),
+            );
+        }
         traverse_element(
             input,
             None,
@@ -51,17 +56,19 @@ impl<'a> RdfaGraph<'a> {
             well_known_prefix,
         })
     }
-    // temporary thing
+
     pub fn parse_str(
         html: &'a str,
         base: &'a str,
         well_known_prefix: Option<&'a str>,
     ) -> Result<String, Box<dyn Error>> {
         let document = scraper::Html::parse_document(html);
+        let empty_ref_node_substitue = get_uuid();
         let root = document.root_element();
 
         let root_ctx = Context {
             base,
+            empty_ref_node_substitute: &empty_ref_node_substitue,
             well_known_prefix,
             ..Default::default()
         };
@@ -445,6 +452,7 @@ fn traverse_element<'a, 'b>(
             }
             let child_ctx = Context {
                 base: ctx.base,
+                empty_ref_node_substitute: ctx.empty_ref_node_substitute,
                 ..Default::default()
             };
 
@@ -574,14 +582,17 @@ fn resolve_uri<'a>(
         }
         Err(url::ParseError::RelativeUrlWithoutBase) => {
             if let Ok((prefix, reference)) = parse_safe_curie(uri) {
+                let reference = reference.trim();
                 let prefix = prefix.trim();
                 if prefix == "_" {
-                    let uuid = if cfg!(test) {
-                        Uuid::nil()
+                    let id = if reference.is_empty() {
+                        dbg!(&reference);
+                        dbg!(ctx.empty_ref_node_substitute);
+                        ctx.empty_ref_node_substitute
                     } else {
-                        Uuid::new_v4()
+                        reference
                     };
-                    return Ok(Node::RefBlank((reference.trim(), uuid)));
+                    return Ok(Node::RefBlank(id));
                 } else if prefix.is_empty() && !reference.is_empty() {
                     return Ok(Node::TermIri(Cow::Owned(
                         [COMMON_PREFIXES[""], reference].join(""),
@@ -749,7 +760,7 @@ fn get_children<'a>(
 
 #[inline]
 fn make_bnode<'a>() -> Node<'a> {
-    Node::Blank(BNODE_ID_GENERATOR.fetch_add(1, std::sync::atomic::Ordering::SeqCst))
+    Node::Blank(get_uuid())
 }
 
 #[inline]

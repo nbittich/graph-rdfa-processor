@@ -6,11 +6,8 @@ use std::{
 };
 
 use regex::Regex;
-use uuid::Uuid;
 
-use crate::constants::{
-    BNODE_ID_GENERATOR, DATETIME_TYPES, DEFAULT_WELL_KNOWN_PREFIX, NODE_RDF_XSD_STRING,
-};
+use crate::constants::{DATETIME_TYPES, DEFAULT_WELL_KNOWN_PREFIX, NODE_RDF_XSD_STRING};
 #[macro_export]
 macro_rules! iri {
     ($name:literal) => {
@@ -28,6 +25,7 @@ pub struct RdfaGraph<'a> {
 pub struct Context<'a> {
     pub base: &'a str,
     pub well_known_prefix: Option<&'a str>,
+    pub empty_ref_node_substitute: &'a str,
     pub vocab: Option<&'a str>,
     pub lang: Option<&'a str>,
     pub in_rel: Option<Vec<Node<'a>>>,
@@ -56,8 +54,8 @@ pub enum Node<'a> {
     TermIri(Cow<'a, str>),
     Literal(Literal<'a>),
     Ref(Arc<Node<'a>>),
-    Blank(u64),
-    RefBlank((&'a str, Uuid)),
+    Blank(String),
+    RefBlank(&'a str),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -95,7 +93,7 @@ impl Node<'_> {
             }
             Node::Ref(r) => r.is_empty(),
             Node::Blank(_) => false,
-            Node::RefBlank((s, _)) => s.is_empty(),
+            Node::RefBlank(s) => s.is_empty(),
         }
     }
     fn as_ntriple_string(&self, well_known_prefix: Option<&str>) -> String {
@@ -130,33 +128,11 @@ impl Node<'_> {
                     id
                 )
             }
-            Node::RefBlank((id, uuid)) => {
-                if let Ok(v) = id.parse::<u64>() {
-                    if v <= BNODE_ID_GENERATOR.load(std::sync::atomic::Ordering::SeqCst) {
-                        format!(
-                            "<{}{}>",
-                            well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
-                            uuid
-                        )
-                    } else {
-                        format!(
-                            "<{}{}>",
-                            well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
-                            id
-                        )
-                    }
-                } else if id.is_empty() {
-                    format!(
-                        "<{}{}>",
-                        well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
-                        uuid
-                    )
+            Node::RefBlank(id) => {
+                if let Some(well_known_prefix) = well_known_prefix {
+                    format!("<{well_known_prefix}{id}>",)
                 } else {
-                    format!(
-                        "<{}{}>",
-                        well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
-                        id
-                    )
+                    format!("_:{id}")
                 }
             }
         }
