@@ -3,10 +3,7 @@ use std::{ops::Add, path::PathBuf};
 use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
 
-use crate::{
-    constants::{self, reset_fake_uuid_gen},
-    Context, RdfaGraph,
-};
+use crate::{constants::reset_fake_uuid_gen, Context, RdfaGraph};
 
 mod earl_html5;
 mod other;
@@ -17,6 +14,7 @@ const DEBUG: bool = true;
 const WRITE_RESULT_TO_FILE: bool = true;
 const WRITE_DIFF_TO_FILE: bool = true;
 
+const DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     let _ = env_logger::try_init();
 
@@ -58,17 +56,13 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     if WRITE_RESULT_TO_FILE {
         std::fs::write("/tmp/res.ttl", &graph).expect("could not write file");
     }
-    let ttl =
-        TurtleDoc::try_from((ttl, Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
+    let ttl = TurtleDoc::try_from((ttl, Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
     if DEBUG {
         println!("============ Expected result ============");
         println!("{ttl}");
     }
-    let graph = TurtleDoc::try_from((
-        graph.as_str(),
-        Some(constants::DEFAULT_WELL_KNOWN_PREFIX.to_string()),
-    ))
-    .unwrap();
+    let graph =
+        TurtleDoc::try_from((graph.as_str(), Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
     if DEBUG {
         println!("============ Actual result ============");
         println!("{graph}");

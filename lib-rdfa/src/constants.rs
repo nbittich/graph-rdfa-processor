@@ -21,7 +21,7 @@ pub fn get_uuid() -> String {
         FAKE_UUID_GEN.load(std::sync::atomic::Ordering::SeqCst)
     )
 }
-pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
+// pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
 pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";
 pub static RDFA_USES_VOCABULARY: &str = "http://www.w3.org/ns/rdfa#usesVocabulary";

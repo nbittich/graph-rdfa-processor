@@ -7,7 +7,7 @@ use std::{
 
 use regex::Regex;
 
-use crate::constants::{DATETIME_TYPES, DEFAULT_WELL_KNOWN_PREFIX, NODE_RDF_XSD_STRING};
+use crate::constants::{DATETIME_TYPES, NODE_RDF_XSD_STRING};
 #[macro_export]
 macro_rules! iri {
     ($name:literal) => {
@@ -121,12 +121,11 @@ impl Node<'_> {
                 s
             }
             Node::Blank(id) => {
-                // todo maybe this should use the base?
-                format!(
-                    "<{}{}>",
-                    well_known_prefix.unwrap_or(DEFAULT_WELL_KNOWN_PREFIX),
-                    id
-                )
+                if let Some(well_known_prefix) = well_known_prefix {
+                    format!("<{well_known_prefix}{id}>",)
+                } else {
+                    format!("_:{id}")
+                }
             }
             Node::RefBlank(id) => {
                 if let Some(well_known_prefix) = well_known_prefix {

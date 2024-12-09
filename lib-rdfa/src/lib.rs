@@ -69,7 +69,7 @@ impl<'a> RdfaGraph<'a> {
         let root_ctx = Context {
             base,
             empty_ref_node_substitute: &empty_ref_node_substitue,
-            well_known_prefix,
+            well_known_prefix: well_known_prefix.filter(|f| !f.is_empty()),
             ..Default::default()
         };
         RdfaGraph::parse(&root, root_ctx).map(|g| g.to_string())
