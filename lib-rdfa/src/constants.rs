@@ -131,3 +131,15 @@ lazy_static::lazy_static! {
 
         ]);
 }
+
+pub static IS_SPECIAL_NODE_FN: fn(&Option<Box<Node<'_>>>) -> bool =
+    |datatype: &Option<Box<Node<'_>>>| {
+        datatype
+            .as_ref()
+            .filter(|dt| {
+                dt.as_ref() == &*NODE_RDF_HTML_LITERAL
+                    || dt.as_ref() == &*NODE_RDF_XML_LITERAL
+                    || dt.as_ref() == &*NODE_RDF_PLAIN_LITERAL
+            })
+            .is_some()
+    };

@@ -1,12 +1,12 @@
 use std::error::Error;
 
-use itertools::Itertools;
 use scraper::{node::Element, ElementRef, Selector};
 
 #[derive(Debug, Clone, Copy)]
 pub struct RdfaElement<'a, 'b> {
     pub element_ref: &'b ElementRef<'a>,
     pub element: &'a Element,
+    pub name: &'a str,
     pub base: Option<&'a str>,
     pub vocab: Option<&'a str>,
     pub prefix: Option<&'a str>,
@@ -38,6 +38,7 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
                 let pos_fragment = b.chars().position(|p| p == '#').unwrap_or(b.len());
                 &b[0..pos_fragment]
             });
+        let name = element.name();
         let prefix = element.attr("prefix");
         let resource = element.attr("resource");
         let lang = element.attr("lang").or_else(|| element.attr("xml:lang"));
@@ -57,6 +58,7 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
             element_ref,
             element,
             base,
+            name,
             vocab,
             prefix,
             lang,
@@ -119,12 +121,7 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
         }
     }
     pub fn texts(&self) -> Vec<&'a str> {
-        let texts = self.element_ref.text().collect_vec();
-        if texts.len() == 1 || !texts.iter().any(|t| t.lines().count() > 1) {
-            texts
-        } else {
-            self.element_ref.text().collect()
-        }
+        self.element_ref.text().collect()
     }
 
     pub(crate) fn has_rel_or_rev(&self) -> bool {

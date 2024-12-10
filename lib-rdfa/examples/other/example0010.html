@@ -1,0 +1,67 @@
+
+<!doctype html>
+<html
+  lang="en"
+  prefix="schema: http://schema.org/ dc: http://purl.org/dc/elements/1.1/ foaf: http://xmlns.com/foaf/0.1/"
+>
+  <head>
+    <title>Complex RDFa Example</title>
+  </head>
+  <body>
+    <article vocab="http://schema.org/" typeof="schema:Article">
+      <header>
+        <h1 property="schema:headline">The Future of RDFa Parsing</h1>
+        <p>
+          By
+          <span property="schema:author" typeof="schema:Person">
+            <span property="schema:name">Jane Doe</span>
+            <link property="schema:email" href="mailto:jane.doe@example.com" />
+          </span>
+        </p>
+        <time property="schema:datePublished" datetime="2024-12-10"
+          >December 10, 2024</time
+        >
+      </header>
+      <section property="schema:mainEntityOfPage" typeof="schema:WebPage">
+        <link property="schema:url" href="#main-content" />
+        <div id="main-content">
+          <p property="schema:about">
+            RDFa is a standard for embedding structured data in web documents.
+            This document explores
+            <span typeof="schema:Thing" resource="#rdf-concepts">
+              <a href="https://www.w3.org/TR/rdfa-core/" property="schema:about"
+                >advanced RDFa concepts</a
+              >
+            </span>
+            and their applications.
+          </p>
+        </div>
+      </section>
+      <aside>
+        <p>Other contributors:</p>
+        <ul>
+          <li property="schema:contributor" typeof="schema:Person">
+            <span property="schema:name">John Smith</span>
+            <a property="schema:url" href="http://example.com/john">Profile</a>
+          </li>
+          <li property="schema:contributor" typeof="schema:Person">
+            <span property="schema:name">Alice Jones</span>
+            <a href="http://example.com/alice" property="schema:sameAs"
+              >SameAs</a
+            >
+          </li>
+        </ul>
+      </aside>
+      <footer>
+        <p>License:</p>
+        <a
+          rel="dc:license"
+          href="http://creativecommons.org/licenses/by/4.0/"
+          resource="http://creativecommons.org/licenses/by/4.0/"
+        >
+          Creative Commons Attribution 4.0 International
+        </a>
+      </footer>
+    </article>
+  </body>
+</html>

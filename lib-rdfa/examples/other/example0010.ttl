@@ -1,0 +1,30 @@
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://schema.org/> .
+_:1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Article>;
+ <http://schema.org/headline> "The Future of RDFa Parsing"@en;
+ <http://schema.org/author> _:2;
+ <http://schema.org/datePublished> "2024-12-10"^^<http://www.w3.org/2001/XMLSchema#date>;
+ <http://schema.org/mainEntityOfPage> _:3;
+ <http://schema.org/contributor> _:4, _:5;
+ <http://purl.org/dc/elements/1.1/license> <http://creativecommons.org/licenses/by/4.0/> .
+_:2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Person>;
+ <http://schema.org/name> "Jane Doe"@en;
+ <http://schema.org/email> <mailto:jane.doe@example.com> .
+_:3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/WebPage>;
+ <http://schema.org/url> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#main-content>;
+ <http://schema.org/about> """
+            RDFa is a standard for embedding structured data in web documents.
+            This document explores
+            
+              advanced RDFa concepts
+            
+            and their applications.
+          """@en .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#rdf-concepts> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Thing>;
+ <http://schema.org/about> <https://www.w3.org/TR/rdfa-core/> .
+_:4 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Person>;
+ <http://schema.org/name> "John Smith"@en;
+ <http://schema.org/url> <http://example.com/john> .
+_:5 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Person>;
+ <http://schema.org/name> "Alice Jones"@en;
+ <http://schema.org/sameAs> <http://example.com/alice> .

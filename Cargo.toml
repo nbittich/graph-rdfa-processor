@@ -14,13 +14,13 @@ license = "MIT"
 
 [workspace.dependencies]
 log = "0.4.22"
-itertools = "0.13.0"
+# itertools = "0.13.0"
 lazy_static = "1.5.0"
-scraper = "0.21.0"
+scraper = "0.22.0"
 url = "2.5.4"
 uuid = { version = "1.11.0", features = ["v4"] }
 regex = "1.11.1"
-ego-tree = "0.9.0"
+ego-tree = "0.10.0"
 # some tests must run sequentially. 
 # if library is broken, alternative is: cargo test -- --test-threads 1
 graph-rdfa-processor = { version = "0.2.1", path='./lib-rdfa' }

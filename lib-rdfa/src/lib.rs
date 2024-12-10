@@ -7,19 +7,18 @@ mod structs;
 mod tests;
 
 use constants::{
-    get_uuid, COMMON_PREFIXES, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE, NODE_RDFA_USES_VOCABULARY,
-    NODE_RDF_HTML_LITERAL, NODE_RDF_PLAIN_LITERAL, RESERVED_KEYWORDS,
+    get_uuid, COMMON_PREFIXES, IS_SPECIAL_NODE_FN, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE,
+    NODE_RDFA_USES_VOCABULARY, NODE_RDF_FIRST, NODE_RDF_NIL, NODE_RDF_PLAIN_LITERAL, NODE_RDF_REST,
+    RESERVED_KEYWORDS,
 };
-use itertools::Itertools;
 use log::{debug, error};
 use rdfa_elt::RdfaElement;
 use scraper::{ElementRef, Selector};
 use url::Url;
 
-use crate::constants::{NODE_RDF_FIRST, NODE_RDF_NIL, NODE_RDF_REST, NODE_RDF_XML_LITERAL};
-pub use structs::RdfaGraph;
 use structs::{Context, DataTypeFromPattern, Literal, Node, Statement};
 
+pub use structs::RdfaGraph;
 impl<'a> RdfaGraph<'a> {
     pub fn parse(
         input: &ElementRef<'a>,
@@ -163,16 +162,7 @@ fn traverse_element<'a, 'b>(
                 None
             }
         });
-    let is_special_node = |datatype: &Option<Box<Node<'_>>>| {
-        datatype
-            .as_ref()
-            .filter(|dt| {
-                dt.as_ref() == &*NODE_RDF_HTML_LITERAL
-                    || dt.as_ref() == &*NODE_RDF_XML_LITERAL
-                    || dt.as_ref() == &*NODE_RDF_PLAIN_LITERAL
-            })
-            .is_some()
-    };
+
     let predicates = elt
         .property
         .map(|p| parse_property_or_type_of(p, &ctx, false));
@@ -192,7 +182,7 @@ fn traverse_element<'a, 'b>(
 
     // by default, current node set as the base unless it's a special node
     // check other/example0006 for special node
-    let mut current_node = if !is_special_node(&datatype) {
+    let mut current_node = if !IS_SPECIAL_NODE_FN(&datatype) {
         base.clone()
     } else {
         make_bnode()
@@ -343,7 +333,7 @@ fn traverse_element<'a, 'b>(
                         }
                         !m
                     })
-                    .collect_vec()
+                    .collect()
             });
             revs = revs.take().map(|rs| {
                 rs.into_iter()
@@ -356,7 +346,7 @@ fn traverse_element<'a, 'b>(
                         }
                         !m
                     })
-                    .collect_vec()
+                    .collect()
             });
         }
 
@@ -398,15 +388,17 @@ fn traverse_element<'a, 'b>(
                 })
             }
             push_triples(stmts, &base, &rels.take(), &current_node);
-        } else if !is_special_node(&datatype) {
+        } else if !IS_SPECIAL_NODE_FN(&datatype) {
             let child_with_rdfa_tag = element_ref
-                .select(&Selector::parse("[href], [src], [resource], [property]")?)
+                .select(&Selector::parse(
+                    "[href], [src], [resource], [property], [about]",
+                )?)
                 .filter(|e| {
                     RdfaElement::new(e)
                         .ok()
                         .and_then(|e2| e2.datatype)
                         .and_then(|dt| match resolve_uri(dt, &ctx, false).ok().map(Box::new) {
-                            v @ Some(_) if is_special_node(&v) => v,
+                            v @ Some(_) if IS_SPECIAL_NODE_FN(&v) => v,
                             _ => None,
                         })
                         .is_none()
@@ -415,7 +407,12 @@ fn traverse_element<'a, 'b>(
                 == 0;
             current_node = if let Some(src_or_href) = src_or_href.take() {
                 src_or_href
-            } else if child_with_rdfa_tag || parent.is_none() {
+            // not sure about this rule
+            } else if elt.name == "body"
+                || elt.name == "head"
+                || child_with_rdfa_tag
+                || parent.is_none()
+            {
                 base.clone()
             } else {
                 make_bnode()
@@ -532,13 +529,7 @@ fn extract_literal<'a>(
             value: Cow::Borrowed(content),
             lang,
         }))
-    } else if datatype
-        .as_ref()
-        .filter(|dt| {
-            dt.as_ref() == &*NODE_RDF_XML_LITERAL || dt.as_ref() == &*NODE_RDF_HTML_LITERAL
-        })
-        .is_some()
-    {
+    } else if !plain_datatype && IS_SPECIAL_NODE_FN(datatype) {
         Ok(Node::Literal(Literal {
             value: Cow::Owned(rdfa_el.element_ref.inner_html()),
             datatype: datatype.clone(),
@@ -563,7 +554,11 @@ fn extract_literal<'a>(
         let text = if texts.is_empty() {
             Cow::Borrowed("")
         } else {
-            let text = texts.iter().map(|t| t.to_string()).join("");
+            let text = texts
+                .iter()
+                .map(|t| t.to_string())
+                .collect::<Vec<_>>()
+                .join("");
             Cow::Owned(text)
         };
         Ok(Node::Literal(Literal {
@@ -701,7 +696,9 @@ fn parse_safe_curie(s: &str) -> Result<(&str, &str), &'static str> {
 fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
     s.split_whitespace()
         .map(|s| s.trim())
-        .tuples::<(_, _)>()
+        .collect::<Vec<_>>()
+        .chunks_exact(2)
+        .map(|c| (c[0], c[1]))
         .filter_map(|(s, p)| {
             if let Ok((s, _)) = parse_safe_curie(s) {
                 Some((s, p))
@@ -722,7 +719,7 @@ fn parse_property_or_type_of<'a>(
         .filter_map(|uri| resolve_uri(uri, ctx, false).ok())
         .filter(|node| allow_b_node || !matches!(node, Node::Blank(_) | Node::RefBlank(_)))
         .map(|n| Node::Ref(Arc::new(n)))
-        .collect_vec()
+        .collect()
 }
 
 fn push_triples_inlist<'a>(
