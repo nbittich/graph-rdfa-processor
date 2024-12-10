@@ -1,0 +1,7 @@
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://schema.org/>;
+ <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/CreativeWork> .
+_:1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Text>;
+ <http://schema.org/description> """
+      <p>This is a <strong>bold</strong> statement within an HTMLLiteral!</p>
+      <p>RDFa supports <em>rich content</em> extraction.</p>
+    """^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML> .

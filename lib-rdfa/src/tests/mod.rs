@@ -9,7 +9,6 @@ mod earl_html5;
 mod other;
 mod rdfa_core;
 mod rdfa_primer;
-
 const DEBUG: bool = true;
 const WRITE_RESULT_TO_FILE: bool = true;
 const WRITE_DIFF_TO_FILE: bool = true;

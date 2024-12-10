@@ -26,6 +26,8 @@ pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
 pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";
 pub static RDFA_USES_VOCABULARY: &str = "http://www.w3.org/ns/rdfa#usesVocabulary";
 pub static RDF_XML_LITERAL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";
+pub static RDF_HTML_LITERAL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML";
+pub static RDF_PLAIN_LITERAL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral";
 pub static RDF_XSD_STRING: &str = "http://www.w3.org/2001/XMLSchema#string";
 pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 pub static RDF_FIRST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
@@ -68,6 +70,8 @@ pub static DATETIME_TYPES: [&DataTypeFromPattern; 6] = [
 
 lazy_static::lazy_static! {
     pub static ref NODE_RDF_XML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_XML_LITERAL));
+    pub static ref NODE_RDF_PLAIN_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_PLAIN_LITERAL));
+    pub static ref NODE_RDF_HTML_LITERAL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_HTML_LITERAL));
     pub static ref NODE_RDF_FIRST: Node<'static> = Node::Iri(Cow::Borrowed(RDF_FIRST));
     pub static ref NODE_RDF_REST: Node<'static> = Node::Iri(Cow::Borrowed(RDF_REST));
     pub static ref NODE_RDF_NIL: Node<'static> = Node::Iri(Cow::Borrowed(RDF_NIL));

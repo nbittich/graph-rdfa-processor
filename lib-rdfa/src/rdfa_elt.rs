@@ -41,6 +41,7 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
         let prefix = element.attr("prefix");
         let resource = element.attr("resource");
         let lang = element.attr("lang").or_else(|| element.attr("xml:lang"));
+        println!("{lang:?}");
         let property = element.attr("property");
         let rel = element.attr("rel");
         let rev = element.attr("rev");
