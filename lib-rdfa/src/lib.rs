@@ -163,7 +163,7 @@ fn traverse_element<'a, 'b>(
             }
         });
 
-    let predicates = elt
+    let mut predicates = elt
         .property
         .map(|p| parse_property_or_type_of(p, &ctx, false));
 
@@ -226,6 +226,7 @@ fn traverse_element<'a, 'b>(
         }
         if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
             in_rel = true;
+
             let obj = if let Some(resource) = resource
                 .and_then(|r| resolve_uri(r, &ctx, true).ok())
                 .map(|n| Node::Ref(Arc::new(n)))
@@ -236,16 +237,15 @@ fn traverse_element<'a, 'b>(
                 Node::Ref(Arc::new(extract_literal(&elt, &datatype, &ctx)?))
             };
             for rel in rels {
-                push_triples_inlist(in_list_stmts, &subject, rel, &obj);
+                push_triples_inlist(in_list_stmts, &subject, rel.clone(), &obj);
             }
         }
-        if let Some(predicates) = predicates {
-            let obj = if let (Some(resource), false) = (resource, in_rel) {
-                Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?))
-            } else {
-                Node::Ref(Arc::new(extract_literal(&elt, &datatype, &ctx)?))
-            };
-
+        let obj = if let (Some(resource), false) = (resource, in_rel) {
+            Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?))
+        } else {
+            Node::Ref(Arc::new(extract_literal(&elt, &datatype, &ctx)?))
+        };
+        if let Some(predicates) = predicates.take() {
             for predicate in predicates {
                 push_triples_inlist(in_list_stmts, &subject, predicate, &obj);
             }
@@ -335,19 +335,6 @@ fn traverse_element<'a, 'b>(
                     })
                     .collect()
             });
-            revs = revs.take().map(|rs| {
-                rs.into_iter()
-                    .filter(|r| {
-                        let m = matches!(r, Node::Ref(r) if matches!(r.as_ref(), Node::TermIri(_)));
-                        if m {
-                            has_term = true;
-                        } else {
-                            emit_triple = true;
-                        }
-                        !m
-                    })
-                    .collect()
-            });
         }
 
         push_triples(stmts, &current_node, &rels, &src_or_href);
@@ -358,6 +345,18 @@ fn traverse_element<'a, 'b>(
                 elt.src.take();
                 elt.href.take();
             }
+
+            push_triples(
+                stmts,
+                &current_node,
+                &predicates,
+                &extract_literal(&elt, &datatype, &ctx)?,
+            );
+        }
+        // example0012
+        if revs.is_some() && predicates.is_some() {
+            elt.src.take();
+            elt.href.take();
             push_triples(
                 stmts,
                 &current_node,
@@ -389,6 +388,8 @@ fn traverse_element<'a, 'b>(
             }
             push_triples(stmts, &base, &rels.take(), &current_node);
         } else if !IS_SPECIAL_NODE_FN(&datatype) {
+            // property shouldn't be in the list
+            // fixme
             let child_with_rdfa_tag = element_ref
                 .select(&Selector::parse(
                     "[href], [src], [resource], [property], [about]",
