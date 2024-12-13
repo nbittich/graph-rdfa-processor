@@ -1,0 +1,51 @@
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://schema.org/>;
+ <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/WebPage>;
+ <http://schema.org/headline> "Advanced RDFa Parser Test"@en;
+ <http://schema.org/author> _:1;
+ <http://schema.org/datePublished> "2024-12-10"^^<http://www.w3.org/2001/XMLSchema#date>;
+ <http://example.org/vocab#relatedTopic> <https://example.com/linked-data>;
+<http://purl.org/dc/elements/1.1/abstract> """
+        <abstract>
+          <title>Advanced RDFa</title>
+          </abstract>"""^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral>.
+_:1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Person>;
+ <http://schema.org/name> "Jane Smith"@en;
+ <http://schema.org/sameAs> "View Profile"@en .
+<https://example.com/jane> <http://schema.org/link> _:1 .
+_:2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Article>;
+ <http://schema.org/headline> "Exploring RDFa Features"@en;
+ <http://schema.org/about> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#advanced-features>;
+ <http://schema.org/description> """
+        RDFa allows embedding structured data directly into HTML documents.
+      """@en;
+ <http://schema.org/contentLocation> _:3;
+ <http://schema.org/citation> _:6 .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#advanced-features> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Thing>;
+ <http://schema.org/name> "Advanced RDFa Features"@en .
+ 
+_:3 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Place>;
+ <http://schema.org/name> "Virtual Location"@en;
+ <http://schema.org/geo> _:4 .
+_:4 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/GeoCoordinates>;
+ <http://schema.org/latitude> "37.7749"@en;
+ <http://schema.org/longitude> "-122.4194"@en .
+_:5 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/CreativeWork>;
+ <http://schema.org/name> "RDFa Primer"@en;
+ <http://schema.org/url> <https://www.w3.org/TR/rdfa-primer/> .
+ 
+_:7 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/CreativeWork>;
+ <http://schema.org/name> "Semantic Web for Developers"@en;
+ <http://schema.org/url> <https://example.com/semantic-web> .
+ 
+_:6 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:5;
+ <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> _:8 .
+ 
+_:8 <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> _:7;
+ <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+ 
+<https://example.org/references> <http://example.org/vocab#mentionedBy> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/> .
+_:9 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Description>;
+ <http://purl.org/dc/elements/1.1/description> """
+        <strong>Advanced RDFa Parser Test</strong> was authored by
+        <em>Jane Smith</em>.
+      """^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML> .

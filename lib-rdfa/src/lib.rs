@@ -606,7 +606,7 @@ fn extract_literal<'a>(
         }))
     } else if !plain_datatype && IS_SPECIAL_NODE_FN(datatype) {
         Ok(Node::Literal(Literal {
-            value: Cow::Owned(rdfa_el.element_ref.inner_html()),
+            value: Cow::Owned(rdfa_el.inner_html()),
             datatype: datatype.clone(),
             lang: None,
         }))

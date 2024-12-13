@@ -123,6 +123,9 @@ impl<'a, 'b> RdfaElement<'a, 'b> {
     pub fn texts(&self) -> Vec<&'a str> {
         self.element_ref.text().collect()
     }
+    pub fn inner_html(&self) -> String {
+        self.element_ref.inner_html()
+    }
 
     pub(crate) fn has_rel_or_rev(&self) -> bool {
         self.rel.is_some() || self.rev.is_some()

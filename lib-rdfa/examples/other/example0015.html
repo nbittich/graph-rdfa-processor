@@ -1,0 +1,94 @@
+<!doctype html>
+<html
+  lang="en"
+  prefix="schema: http://schema.org/ ex: http://example.org/vocab# foaf: http://xmlns.com/foaf/0.1/ dc: http://purl.org/dc/elements/1.1/"
+>
+  <head>
+    <title>Advanced RDFa Example</title>
+  </head>
+  <body vocab="http://schema.org/" typeof="schema:WebPage">
+    <header>
+      <h1 property="schema:headline">Advanced RDFa Parser Test</h1>
+      <p property="schema:author" typeof="schema:Person">
+        <span property="schema:name">Jane Smith</span>
+        <a
+          property="schema:sameAs"
+          href="https://example.com/jane"
+          rev="schema:link"
+          >View Profile</a
+        >
+      </p>
+      <time property="schema:datePublished" datetime="2024-12-10"
+        >December 10, 2024</time
+      >
+    </header>
+    <article typeof="schema:Article">
+      <h2 property="schema:headline">Exploring RDFa Features</h2>
+      <p
+        property="schema:about"
+        typeof="schema:Thing"
+        resource="#advanced-features"
+      >
+        This article is about
+        <span property="schema:name">Advanced RDFa Features</span>.
+      </p>
+      <p property="schema:description">
+        RDFa allows embedding structured data directly into HTML documents.
+      </p>
+      <section property="schema:contentLocation" typeof="schema:Place">
+        <h3 property="schema:name">Virtual Location</h3>
+        <p>
+          Coordinates:
+          <span property="schema:geo" typeof="schema:GeoCoordinates">
+            <meta property="schema:latitude" content="37.7749" />
+            <meta property="schema:longitude" content="-122.4194" />
+            San Francisco
+          </span>
+        </p>
+      </section>
+      <section>
+        <h3>Dynamic List of References</h3>
+        <ul>
+          <li inlist="true" rel="schema:citation" typeof="schema:CreativeWork">
+            <span property="schema:name">RDFa Primer</span> -
+            <a property="schema:url" href="https://www.w3.org/TR/rdfa-primer/"
+              >W3C Document</a
+            >
+          </li>
+          <li inlist="true" rel="schema:citation" typeof="schema:CreativeWork">
+            <span property="schema:name">Semantic Web for Developers</span> -
+            <a property="schema:url" href="https://example.com/semantic-web"
+              >Read More</a
+            >
+          </li>
+        </ul>
+      </section>
+    </article>
+    <aside>
+      <h3>Related Topics</h3>
+      <ul>
+        <li>
+          <a href="https://example.com/linked-data" rel="ex:relatedTopic"
+            >Linked Data</a
+          >
+        </li>
+        <li rev="ex:mentionedBy">
+          <a href="https://example.org/references">Referenced by Example.org</a>
+        </li>
+      </ul>
+    </aside>
+    <footer>
+      <p>Attribution:</p>
+      <p property="dc:description" datatype="rdf:HTML" typeof="rdf:Description">
+        <strong>Advanced RDFa Parser Test</strong> was authored by
+        <em>Jane Smith</em>.
+      </p>
+      <p property="dc:abstract" datatype="rdf:XMLLiteral">
+        <abstract>
+          <title>Advanced RDFa</title>
+          <section>Deep testing of RDFa features in HTML5.</section>
+        </abstract>
+      </p>
+    </footer>
+  </body>
+</html>
