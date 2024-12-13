@@ -1,0 +1,21 @@
+<!doctype html>
+<html
+  lang="en"
+  prefix="schema: http://schema.org/ ex: http://example.org/vocab# foaf: http://xmlns.com/foaf/0.1/ dc: http://purl.org/dc/elements/1.1/"
+>
+  <head>
+    <title>Advanced RDFa Example</title>
+  </head>
+  <body vocab="http://schema.org/" typeof="schema:WebPage">
+    <header>
+      <p property="schema:author" typeof="schema:Person">
+        <a
+          property="schema:sameAs"
+          href="https://example.com/jane"
+          rev="schema:link"
+          >View Profile</a
+        >
+      </p>
+    </header>
+  </body>
+</html>
