@@ -136,6 +136,14 @@ impl Node<'_> {
             }
         }
     }
+
+    pub fn is_blank(&self) -> bool {
+        match self {
+            Node::Iri(_) | Node::TermIri(_) | Node::Literal(_) => false,
+            Node::Ref(r) => r.is_blank(),
+            Node::RefBlank(_) | Node::Blank(_) => true,
+        }
+    }
 }
 
 impl PartialEq for Node<'_> {

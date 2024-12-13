@@ -1,0 +1,16 @@
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   rdfa:usesVocabulary schema:;
+   rdf:type schema:WebPage;
+   schema:citation _:2 .
+_:1 
+   rdf:type schema:CreativeWork;
+   schema:name "RDFa Primer"@en;
+   schema:url <https://www.w3.org/TR/rdfa-primer/> .
+_:2 
+   rdf:first _:1;
+   rdf:rest rdf:nil .

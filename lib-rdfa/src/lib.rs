@@ -19,6 +19,21 @@ use url::Url;
 use structs::{Context, DataTypeFromPattern, Literal, Node, Statement};
 
 pub use structs::RdfaGraph;
+
+struct NodeContext<'a, 'b> {
+    element_ref: &'b ElementRef<'a>,
+    ctx: Context<'a>,
+    stmts: &'b mut Vec<Statement<'a>>,
+    current_node: Node<'a>,
+    rels: Option<Vec<Node<'a>>>,
+    revs: Option<Vec<Node<'a>>>,
+    in_list_stmts: &'b mut Vec<Statement<'a>>,
+    type_ofs: Option<Vec<Node<'a>>>,
+    parent_in_rel: Option<Vec<Node<'a>>>,
+    parent_in_rev: Option<Vec<Node<'a>>>,
+    parent: &'b Option<&'b Context<'a>>,
+}
+
 impl<'a> RdfaGraph<'a> {
     pub fn parse(
         input: &ElementRef<'a>,
@@ -167,19 +182,6 @@ fn traverse_element<'a, 'b>(
         .property
         .map(|p| parse_property_or_type_of(p, &ctx, false));
 
-    let get_parent_subject = |ctx: &Context<'a>| {
-        parent
-            .and_then(|p| p.current_node.clone())
-            .or_else(|| {
-                if parent.is_none() {
-                    resolve_uri(ctx.base, ctx, true).ok()
-                } else {
-                    None
-                }
-            })
-            .ok_or("no parent")
-    };
-
     // by default, current node set as the base unless it's a special node
     // check other/example0006 for special node
     let mut current_node = if !IS_SPECIAL_NODE_FN(&datatype) {
@@ -190,7 +192,7 @@ fn traverse_element<'a, 'b>(
 
     // if parent is inlist
     if let Some(parent_in_list) = parent_in_list.take() {
-        let subject = get_parent_subject(&ctx)?;
+        let subject = get_parent_subject(&parent, &ctx)?;
         let obj = if let Some(resource) = resource
             .and_then(|r| resolve_uri(r, &ctx, true).ok())
             .map(|n| Node::Ref(Arc::new(n)))
@@ -209,7 +211,7 @@ fn traverse_element<'a, 'b>(
     else if elt.is_inlist() {
         let mut in_rel = false;
 
-        let subject = get_parent_subject(&ctx)?;
+        let subject = get_parent_subject(&parent, &ctx)?;
 
         if rels.is_some()
             && src_or_href.is_none()
@@ -219,12 +221,54 @@ fn traverse_element<'a, 'b>(
         // empty list
         {
             if element_ref.children().count() != 0 {
-                ctx.in_list = rels.take();
+                // example0013 && example0014
+                if type_ofs.is_some() {
+                    let Some(rels) = rels.take() else {
+                        unreachable!()
+                    };
+                    current_node = make_bnode();
+                    handle_children(NodeContext {
+                        element_ref,
+                        ctx: ctx.clone(),
+                        stmts,
+                        current_node: current_node.clone(),
+                        rels: None,
+                        revs: revs.clone(),
+                        in_list_stmts,
+                        type_ofs: type_ofs.take(),
+                        parent_in_rel: parent_in_rel.take(),
+                        parent_in_rev: parent_in_rev.take(),
+                        parent: &parent,
+                    })?;
+                    for rel in rels {
+                        let mut existing_rel_in_list = None;
+                        if let Some(node) =
+                            find_pos_last_node_in_inlist(in_list_stmts, &subject, &rel)
+                                .and_then(|s| in_list_stmts.get_mut(s))
+                                .filter(|p| p.object != *NODE_RDF_NIL)
+                        {
+                            existing_rel_in_list = Some(node.object.clone());
+                        }
+
+                        if let Some(existing_rel_in_list) = existing_rel_in_list {
+                            push_triples_inlist(
+                                in_list_stmts,
+                                &subject,
+                                rel,
+                                &existing_rel_in_list,
+                            );
+                        } else {
+                            push_triples_inlist(in_list_stmts, &subject, rel, &current_node);
+                        }
+                    }
+                    return Ok(Some(subject));
+                } else {
+                    ctx.in_list = rels.take();
+                }
             } else {
                 push_triples(in_list_stmts, &subject, &rels.take(), &NODE_RDF_NIL);
             }
-        }
-        if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
+        } else if let Some(rels) = rels.take().filter(|r| !r.is_empty()) {
             in_rel = true;
 
             let obj = if let Some(resource) = resource
@@ -237,7 +281,7 @@ fn traverse_element<'a, 'b>(
                 Node::Ref(Arc::new(extract_literal(&elt, &datatype, &ctx)?))
             };
             for rel in rels {
-                push_triples_inlist(in_list_stmts, &subject, rel.clone(), &obj);
+                push_triples_inlist(in_list_stmts, &subject, rel, &obj);
             }
         }
         let obj = if let (Some(resource), false) = (resource, in_rel) {
@@ -264,7 +308,7 @@ fn traverse_element<'a, 'b>(
         let subject = about
             .take()
             .map(|a| Ok(Node::Ref(Arc::new(a))))
-            .unwrap_or_else(|| get_parent_subject(&ctx))?;
+            .unwrap_or_else(|| get_parent_subject(&parent, &ctx))?;
 
         push_triples(stmts, &subject, &predicates, &current_node);
 
@@ -317,7 +361,9 @@ fn traverse_element<'a, 'b>(
     // test 0303
     else if src_or_href.is_some() && (rels.is_some() || revs.is_some()) {
         let src_or_href = src_or_href.take().ok_or("no src")?;
-        current_node = get_parent_subject(&ctx).ok().unwrap_or_else(make_bnode);
+        current_node = get_parent_subject(&parent, &ctx)
+            .ok()
+            .unwrap_or_else(make_bnode);
 
         let mut has_term = false;
         let mut emit_triple = false;
@@ -419,7 +465,9 @@ fn traverse_element<'a, 'b>(
                 make_bnode()
             };
 
-            let subject = get_parent_subject(&ctx).ok().unwrap_or_else(make_bnode);
+            let subject = get_parent_subject(&parent, &ctx)
+                .ok()
+                .unwrap_or_else(make_bnode);
 
             push_triples(stmts, &subject, &predicates, &current_node);
         } else {
@@ -438,7 +486,7 @@ fn traverse_element<'a, 'b>(
             .take()
             .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
             .map(Ok)
-            .unwrap_or_else(|| get_parent_subject(&ctx))?;
+            .unwrap_or_else(|| get_parent_subject(&parent, &ctx))?;
 
         push_triples(
             stmts,
@@ -448,6 +496,35 @@ fn traverse_element<'a, 'b>(
         );
     }
 
+    handle_children(NodeContext {
+        element_ref,
+        ctx,
+        stmts,
+        current_node,
+        rels,
+        revs,
+        in_list_stmts,
+        type_ofs,
+        parent_in_rel,
+        parent_in_rev,
+        parent: &parent,
+    })
+}
+fn handle_children<'a>(
+    NodeContext {
+        element_ref,
+        mut ctx,
+        stmts,
+        current_node,
+        rels,
+        revs,
+        in_list_stmts,
+        type_ofs,
+        mut parent_in_rel,
+        mut parent_in_rev,
+        parent,
+    }: NodeContext<'a, '_>,
+) -> Result<Option<Node<'a>>, Box<dyn Error>> {
     if let Some(type_ofs) = type_ofs {
         for type_of in type_ofs {
             stmts.push(Statement {
@@ -459,17 +536,15 @@ fn traverse_element<'a, 'b>(
     }
 
     if parent_in_rel.is_some() || parent_in_rev.is_some() {
-        let parent = get_parent_subject(&ctx)
+        let parent = get_parent_subject(parent, &ctx)
             .ok()
             .ok_or("in_rel: no parent node")?;
         push_triples(stmts, &parent, &parent_in_rel.take(), &current_node);
         push_triples(stmts, &current_node, &parent_in_rev.take(), &parent);
     }
-
     ctx.current_node = Some(current_node.clone());
     ctx.in_rel = rels.clone();
     ctx.in_rev = revs.clone();
-
     for child in get_children(element_ref)? {
         if let Some(c) = ElementRef::wrap(child) {
             // Triples are also 'completed' if any one of @property, @rel or @rev are present.
@@ -506,7 +581,6 @@ fn traverse_element<'a, 'b>(
             }
         }
     }
-
     Ok(ctx.current_node.clone())
 }
 fn extract_literal<'a>(
@@ -569,7 +643,21 @@ fn extract_literal<'a>(
         }))
     }
 }
-
+fn get_parent_subject<'a>(
+    parent: &Option<&Context<'a>>,
+    ctx: &Context<'a>,
+) -> Result<Node<'a>, Box<dyn Error>> {
+    parent
+        .and_then(|p| p.current_node.clone())
+        .or_else(|| {
+            if parent.is_none() {
+                resolve_uri(ctx.base, ctx, true).ok()
+            } else {
+                None
+            }
+        })
+        .ok_or("no parent".into())
+}
 fn resolve_uri<'a>(
     uri: &'a str,
     ctx: &Context<'a>,
@@ -633,8 +721,6 @@ fn resolve_uri<'a>(
                 let prefix = prefix.trim();
                 if prefix == "_" {
                     let id = if reference.is_empty() {
-                        dbg!(&reference);
-                        dbg!(ctx.empty_ref_node_substitute);
                         ctx.empty_ref_node_substitute
                     } else {
                         reference

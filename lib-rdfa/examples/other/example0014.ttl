@@ -1,0 +1,19 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+
+_:1 
+   rdf:type schema:CreativeWork;
+   schema:name "RDFa Primer";
+   schema:url <https://www.w3.org/TR/rdfa-primer/> .
+_:3 
+   rdf:type schema:CreativeWork;
+   schema:name "Semantic Web for Developers";
+   schema:url <https://example.com/semantic-web> .
+_:2 
+   rdf:first _:1;
+   rdf:rest _:4 .
+_:4 
+   rdf:first _:3;
+   rdf:rest rdf:nil .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   schema:citation _:2 .
