@@ -1,0 +1,35 @@
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/book/the-great-novel>
+   rdf:type schema:Book;
+   rdf:type schema:Review;
+   <http://purl.org/dc/elements/1.1/title> "The Great Novel";
+   schema:datePublished "2023-01-01"^^xsd:date;
+   schema:reviewedBy <https://example.org/reviewer/jane-smith> .
+<https://example.org/author/john-doe>
+   rdf:type schema:Person;
+   schema:author """
+          John Doe """;
+   schema:name "John Doe" .
+<https://example.org/publisher/fictional-publishers>
+   rdf:type schema:Organization;
+   rdf:type schema:Book;
+   schema:publisher """
+          Fictional Publishers
+        """;
+   schema:publisher <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>;
+   schema:name "Fictional Publishers" .
+<https://example.org/reviewer/jane-smith>
+   rdf:type schema:Person;
+   schema:name "Jane Smith" .
+<https://example.org/library/city-library>
+   rdf:type schema:Library;
+   schema:hasPart <https://example.org/book/the-great-novel> .
+<https://example.org/book/the-sequel>
+   rdf:type schema:Book;
+   schema:prequel <https://example.org/book/the-great-novel> .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   schema:hasReview <https://example.org/book/the-great-novel> .

@@ -1,0 +1,87 @@
+<!doctype html>
+<html prefix="dc: http://purl.org/dc/elements/1.1/ schema: http://schema.org/">
+  <head>
+    <title>Complex RDFa Example with rev</title>
+  </head>
+  <body>
+    <article
+      typeof="schema:Book"
+      about="https://example.org/book/the-great-novel"
+    >
+      <h1 property="dc:title">The Great Novel</h1>
+      <p>
+        Written by
+        <span
+          property="schema:author"
+          typeof="schema:Person"
+          about="https://example.org/author/john-doe"
+        >
+          <span property="schema:name">John Doe</span> </span
+        >.
+      </p>
+      <p>
+        Published by
+        <span
+          property="schema:publisher"
+          typeof="schema:Organization"
+          about="https://example.org/publisher/fictional-publishers"
+        >
+          <span property="schema:name">Fictional Publishers</span>
+        </span>
+        in
+        <time property="schema:datePublished" datetime="2023-01-01"
+          >January 2023</time
+        >.
+      </p>
+      <p>
+        Reviewed by
+        <a
+          href="https://example.org/reviewer/jane-smith"
+          rel="schema:reviewedBy"
+          typeof="schema:Person"
+        >
+          <span property="schema:name">Jane Smith</span> </a
+        >.
+      </p>
+      <p>
+        <a
+          href="https://example.org/library/city-library"
+          rev="schema:hasPart"
+          typeof="schema:Library"
+        >
+          Part of City Library Collection
+        </a>
+      </p>
+      <p>
+        <a
+          href="https://example.org/book/the-sequel"
+          rev="schema:prequel"
+          typeof="schema:Book"
+        >
+          Prequel: The Sequel
+        </a>
+      </p>
+    </article>
+
+    <footer>
+      <p>
+        <a
+          href="https://example.org/book/the-great-novel"
+          rel="schema:hasReview"
+          typeof="schema:Review"
+        >
+          Read reviews for The Great Novel
+        </a>
+      </p>
+      <p>
+        <a
+          href="https://example.org/publisher/fictional-publishers"
+          rev="schema:publisher"
+          typeof="schema:Book"
+        >
+          Published books by Fictional Publishers
+        </a>
+      </p>
+    </footer>
+  </body>
+</html>
