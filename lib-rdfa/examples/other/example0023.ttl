@@ -1,0 +1,20 @@
+
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   rdfa:usesVocabulary schema: .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#bbg>
+   rdf:type schema:LocalBusiness;
+   schema:name "Beachwalk Beachwear & Giftware";
+   schema:description """
+    A superb collection of fine gifts and clothing to accent your stay in Mexico
+    Beach.""";
+   schema:address <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#bbg-address>;
+   schema:telephone "850-648-4200" .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#bbg-address>
+   rdf:type schema:PostalAddress;
+   schema:streetAddress "3102 Highway 98";
+   schema:addressLocality "Mexico Beach";
+   schema:addressRegion "FL" .
