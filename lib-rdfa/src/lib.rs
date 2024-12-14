@@ -299,24 +299,41 @@ fn traverse_element<'a, 'b>(
     }
     // if there is a resource attr
     else if let Some(resource) = resource {
-        let object = about
-            .as_ref()
-            .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
-            .map(|a| Node::Ref(Arc::new(a.clone())))
-            .unwrap_or(Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?)));
-        current_node = object;
-        let subject = about
-            .take()
-            .map(|a| Ok(Node::Ref(Arc::new(a))))
-            .unwrap_or_else(|| get_parent_subject(&parent, &ctx))?;
+        let resource = Node::Ref(Arc::new(resolve_uri(resource, &ctx, true)?));
 
-        push_triples(stmts, &subject, &predicates, &current_node);
+        if !elt.has_content_or_datatype() {
+            let object = about
+                .as_ref()
+                .filter(|_| parent_in_rel.is_some() || parent_in_rev.is_some())
+                .map(|a| Node::Ref(Arc::new(a.clone())))
+                .unwrap_or(resource);
+            current_node = object;
+            let subject = about
+                .take()
+                .map(|a| Ok(Node::Ref(Arc::new(a))))
+                .unwrap_or_else(|| get_parent_subject(&parent, &ctx))?;
 
-        if predicates.is_some() && type_ofs.is_none() {
-            current_node = subject;
+            push_triples(stmts, &subject, &predicates, &current_node);
+
+            if predicates.is_some() && type_ofs.is_none() {
+                current_node = subject;
+            } else {
+                push_triples(stmts, &subject, &rels.take(), &current_node);
+                push_triples(stmts, &current_node, &revs.take(), &subject);
+            }
         } else {
-            push_triples(stmts, &subject, &rels.take(), &current_node);
-            push_triples(stmts, &current_node, &revs.take(), &subject);
+            //example0020 && example0021
+            let resource = about
+                .as_ref()
+                .map(|a| Node::Ref(Arc::new(a.clone())))
+                .unwrap_or(resource);
+            push_triples(
+                stmts,
+                &resource,
+                &predicates,
+                &extract_literal(&elt, &datatype, &ctx)?,
+            );
+            current_node = resource;
         }
     }
     // if there is no resource but about
