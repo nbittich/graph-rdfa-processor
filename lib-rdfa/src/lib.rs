@@ -351,6 +351,7 @@ fn traverse_element<'a, 'b>(
     // now the interesting bits
     else if src_or_href.is_some() && elt.has_content_or_datatype() {
         current_node = src_or_href.take().ok_or("no src")?;
+
         push_triples(
             stmts,
             &current_node,
@@ -398,6 +399,16 @@ fn traverse_element<'a, 'b>(
                 &predicates,
                 &extract_literal(&elt, &datatype, &ctx)?,
             );
+        }
+        // example0017
+        if rels.is_some() && type_ofs.is_some() {
+            if let Some(type_ofs) = type_ofs.take() {
+                let pred = Some(vec![NODE_NS_TYPE.clone()]);
+
+                for to in type_ofs {
+                    push_triples(stmts, &src_or_href, &pred, &to);
+                }
+            }
         }
         // example0012
         if revs.is_some() {
