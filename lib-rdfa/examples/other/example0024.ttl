@@ -1,0 +1,26 @@
+
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   rdfa:usesVocabulary schema: .
+_:1 
+   rdf:type schema:Event;
+   schema:url <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/nba-miami-philidelphia-game3.html>;
+   schema:name "Miami Heat at Philadelphia 76ers - Game 3 (Home Game 1)";
+   schema:startDate "2011-04-21T20:00";
+   schema:location _:2;
+   schema:offers _:4 .
+_:2 
+   rdf:type schema:Place;
+   schema:url <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/wells-fargo-center.html>;
+   schema:address _:3 .
+_:3 
+   rdf:type schema:PostalAddress;
+   schema:addressLocality "Philadelphia";
+   schema:addressRegion "PA" .
+_:4 
+   rdf:type schema:AggregateOffer;
+   schema:lowPrice "$35";
+   schema:offerCount "1,938" .
