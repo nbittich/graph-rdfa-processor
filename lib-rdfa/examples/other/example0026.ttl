@@ -1,0 +1,15 @@
+
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   rdfa:usesVocabulary schema: .
+_:1 
+   rdf:type schema:Person;
+   schema:image <http://manu.sporny.org/images/manu.png>;
+   schema:name "Manu Sporny";
+   schema:jobTitle "Founder/CEO";
+   schema:telephone "(540) 961-4469";
+   schema:email <mailto:msporny@digitalbazaar.com>;
+   schema:url <http://manu.sporny.org/> .
