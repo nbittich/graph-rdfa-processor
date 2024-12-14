@@ -1,0 +1,25 @@
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+_:1 
+   rdf:type gr:Offering;
+   gr:name "Canon Rebel T2i (EOS 550D)";
+   foaf:depiction <http://shop.usa.canon.com/wcsstore/eStore/images/t2ikit_1_l.jpg>;
+   gr:description """
+      The Canon Rebel T2i (EOS 550D) is Cannon's top-of-the-line consumer
+      digital SLR camera. It can shoot up to 18 megapixel resolution photos and
+      features an ISO range of 100-6400.
+    """;
+   gr:hasBusinessFunction gr:Sell;
+   gr:hasEAN_UCC-13 "013803123784";
+   gr:hasPriceSpecification _:2;
+   gr:acceptedPaymentMethods gr:PayPal;
+   gr:acceptedPaymentMethods gr:MasterCard;
+   foaf:page <http://shop.usa.canon.com/> .
+_:2 
+   rdf:type gr:UnitPriceSpecification;
+   gr:hasCurrency "USD";
+   gr:hasCurrencyValue "899"^^xsd:float .
