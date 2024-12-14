@@ -1,0 +1,24 @@
+<!doctype html>
+<html prefix="dc: http://purl.org/dc/elements/1.1/ schema: http://schema.org/">
+  <head>
+    <title>Complex RDFa Example with rev</title>
+  </head>
+  <body>
+    <article
+      typeof="schema:Book"
+      about="https://example.org/book/the-great-novel"
+    >
+      <p>
+        <a
+          href="https://example.org/library/city-library"
+          rev="schema:hasPart"
+          typeof="schema:Library"
+        >
+          Part of City Library Collection
+        </a>
+      </p>
+    </article>
+
+    <footer></footer>
+  </body>
+</html>

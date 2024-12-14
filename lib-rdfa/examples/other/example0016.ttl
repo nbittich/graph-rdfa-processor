@@ -1,0 +1,8 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+
+<https://example.org/book/the-great-novel>
+   rdf:type schema:Book .
+<https://example.org/library/city-library>
+   rdf:type schema:Library;
+   schema:hasPart <https://example.org/book/the-great-novel> .

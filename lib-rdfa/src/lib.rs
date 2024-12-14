@@ -233,7 +233,7 @@ fn traverse_element<'a, 'b>(
                         stmts,
                         current_node: current_node.clone(),
                         rels: None,
-                        revs: revs.clone(),
+                        revs: revs.take(),
                         in_list_stmts,
                         type_ofs: type_ofs.take(),
                         parent_in_rel: parent_in_rel.take(),
@@ -400,15 +400,24 @@ fn traverse_element<'a, 'b>(
             );
         }
         // example0012
-        if revs.is_some() && predicates.is_some() {
-            elt.src.take();
-            elt.href.take();
-            push_triples(
-                stmts,
-                &current_node,
-                &predicates,
-                &extract_literal(&elt, &datatype, &ctx)?,
-            );
+        if revs.is_some() {
+            if predicates.is_some() {
+                elt.src.take();
+                elt.href.take();
+                push_triples(
+                    stmts,
+                    &current_node,
+                    &predicates,
+                    &extract_literal(&elt, &datatype, &ctx)?,
+                );
+            }
+            if let Some(type_ofs) = type_ofs.take() {
+                let pred = Some(vec![NODE_NS_TYPE.clone()]);
+
+                for to in type_ofs {
+                    push_triples(stmts, &src_or_href, &pred, &to);
+                }
+            }
         }
     }
     // another case
