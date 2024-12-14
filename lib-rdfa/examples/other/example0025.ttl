@@ -1,0 +1,18 @@
+
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   rdfa:usesVocabulary foaf: .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#manu>
+   rdf:type foaf:Person;
+   foaf:name "Manu Sporny";
+   foaf:knows <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#alex>;
+   foaf:knows <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#brian> .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#alex>
+   rdf:type foaf:Person;
+   foaf:name "Alex Milowski" .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/#brian>
+   rdf:type foaf:Person;
+   foaf:name "Brian Sletten" .
