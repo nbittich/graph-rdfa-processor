@@ -1,0 +1,9 @@
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema: <http://schema.org/> .
+
+<https://example.org/reviewer/jane-smith>
+   rdf:type schema:Person;
+   schema:name "Jane Smith"@en .
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   schema:reviewedBy <https://example.org/reviewer/jane-smith> .

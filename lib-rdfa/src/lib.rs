@@ -409,6 +409,9 @@ fn traverse_element<'a, 'b>(
                     push_triples(stmts, &src_or_href, &pred, &to);
                 }
             }
+            //example0018
+            current_node = src_or_href.clone();
+            rels.take();
         }
         // example0012
         if revs.is_some() {
@@ -445,6 +448,7 @@ fn traverse_element<'a, 'b>(
             push_triples(stmts, &current_node, &predicates, &node);
         } else if rels.is_some() {
             current_node = make_bnode();
+
             for to in type_ofs.take().into_iter().flatten() {
                 stmts.push(Statement {
                     subject: current_node.clone(),
