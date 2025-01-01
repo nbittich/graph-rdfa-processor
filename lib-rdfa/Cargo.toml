@@ -16,7 +16,7 @@ log = { workspace = true }
 lazy_static = { workspace = true }
 scraper = { workspace = true }
 url = { workspace = true }
-uuid = { workspace = true, features = ["v4"] }
+uuid = { workspace = true, features = ["v7"] }
 regex = { workspace = true }
 ego-tree = { workspace = true }
 

@@ -31,6 +31,7 @@ const INPUT_OUTPUT_DIR: &str = "examples/other";
 #[test_case("example0025"  ; "From rdfa.info/play social                                                                   : other_0025 ")]
 #[test_case("example0026"  ; "From rdfa.info/play person                                                                   : other_0026 ")]
 #[test_case("example0027"  ; "Missing link to publication                                                                  : other_0027 ")]
+#[test_case("example0028"  ; "Trying our bests to parse the text                                                           : other_0028 ")]
 #[serial]
 fn test(test_name: &str) {
     cmp_files(

@@ -105,7 +105,15 @@ impl Node<'_> {
                 lang,
                 value,
             }) => {
-                let mut s = format!(r#""""{value}""""#);
+                const DEFAULT_SEPARATOR: &str = r#"""""#;
+                const FALLBACK_SEPARATOR: &str = "'''";
+                let value = value.replace(FALLBACK_SEPARATOR, "\'\'\'");
+                let separator = if value.ends_with("\"") || value.contains(DEFAULT_SEPARATOR) {
+                    FALLBACK_SEPARATOR
+                } else {
+                    DEFAULT_SEPARATOR
+                };
+                let mut s = format!(r#"{separator}{value}{separator}"#);
 
                 if let Some(datatype) = datatype
                     .as_ref()
