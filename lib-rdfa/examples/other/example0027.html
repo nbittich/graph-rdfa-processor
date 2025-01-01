@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <title>Raadpleegomgeving - Kalender</title>
+
+    <meta http-equiv="X-UA-COMPATIBLE" content="IE=edge" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta name="_ctx" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap"
+    />
+
+    <link rel="stylesheet" href="/lib/datatables/css/datatables.min.css" />
+    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/lib/fontawesome/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="/lib/datetimepicker/css/bootstrap-datetimepicker.min.css"
+    />
+    <link rel="stylesheet" href="/lib/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="/lib/select2/css/select2-bootstrap4.min.css" />
+    <link rel="stylesheet" href="/lib/select2/css/select2-readonly.css" />
+    <link
+      rel="stylesheet"
+      href="/lib/bootstrap-multiselect/css/bootstrap-multiselect.min.css"
+    />
+    <link rel="stylesheet" href="/consult.css" />
+
+    <script src="/lib/less/less.min.js"></script>
+    <script src="/lib/jquery/jquery-3.4.1.min.js"></script>
+    <script src="/lib/jquery-mustache/jquery.mustache.js"></script>
+    <script src="/lib/jquery-pagination/jquery-pagination.js"></script>
+    <script src="/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/lib/bootbox/bootbox.min.js"></script>
+    <script src="/lib/underscore/underscore.min.js"></script>
+    <script src="/lib/datatables/js/datatables.min.js"></script>
+    <script src="/lib/moment/moment-with-locales.min.js"></script>
+    <script src="/lib/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/lib/select2/js/select2.min.js"></script>
+    <script src="/lib/select2/i18n/select2.nl.js"></script>
+    <script src="/lib/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+    <script src="//sdk.companywebcast.com/sdk/player/client.js"></script>
+
+    <!-- Matomo -->
+    <script type="text/javascript">
+      var _paq = (window._paq = window._paq || []);
+      _paq.push(["trackPageView"]);
+      _paq.push(["enableLinkTracking"]);
+      (function () {
+        var u = "https://onlinesmartcities.matomo.cloud/";
+        _paq.push(["setTrackerUrl", u + "matomo.php"]);
+        _paq.push(["setSiteId", 2]);
+        var d = document,
+          g = d.createElement("script"),
+          s = d.getElementsByTagName("script")[0];
+        g.type = "text/javascript";
+        g.async = true;
+        g.src = u + "matomo.js";
+        s.parentNode.insertBefore(g, s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
+
+    <script>
+      var _contextPath = "";
+      $(document).ready(function () {
+        var _ctxContent = $("meta[name=_ctx]").attr("content");
+        _contextPath = _ctxContent ? _ctxContent : "";
+      });
+    </script>
+
+    <script src="/js/consult.js"></script>
+    <script src="/js/calendar.js"></script>
+    <!-- Templates -->
+    <script id="tmpl-calendar-day" type="text/x-js-template">
+      <div class="{{#isToday}}today{{/isToday}}" data-date="{{date}}">
+          <span class="{{#isOtherMonth}}other-month{{/isOtherMonth}}">{{day}}</span>
+      </div>
+    </script>
+    <script id="tmpl-meeting-calendarview" type="text/x-js-template">
+      <a href="{{contextPath}}/zittingen/{{id}}" class="btn btn-default" data-toggle="popover" data-trigger="hover" data-html="true" data-content="
+              <em>{{#organ}}{{name}}{{/organ}}</em>
+              <em>{{dateTime}}</em>
+              {{#location}}
+                  <em>{{location}}</em>
+              {{/location}}
+      " data-placement="top">{{#organ}}{{shortName}}{{/organ}}</a>
+    </script>
+    <script
+      id="tmpl-meeting-calendarview-not-published"
+      type="text/x-js-template"
+    >
+      <a href="#" class="btn btn-default not-published" data-toggle="popover" data-trigger="hover" data-html="true" data-content="
+              <em>{{#organ}}{{name}}{{/organ}}</em>
+              <em>{{dateTime}}</em>
+              {{#location}}
+                  <em>{{location}}</em>
+              {{/location}}
+      &lt;span&gt;De inhoud van deze zitting is (nog) niet bekendgemaakt.&lt;/span&gt;" data-placement="top">{{#organ}}{{shortName}}{{/organ}} <i class="fal fa-lock float-right"></i></a>
+    </script>
+    <script id="tmpl-meeting-listview" type="text/x-js-template">
+      <a class="meeting-detail" href="{{contextPath}}/zittingen/{{id}}">
+          {{#organ}}
+              <span class="organ">{{name}}</span>
+          {{/organ}}
+          <span class="time">{{dateTime}}</span>
+          {{#location}}
+              <span class="location">{{location}}</span>
+          {{/location}}
+      </a>
+    </script>
+    <script id="tmpl-meeting-listview-not-published" type="text/x-js-template">
+      <a class="meeting-detail not-published" href="#">
+          {{#organ}}
+          <span class="organ"><i class="fal fa-lock"></i> {{name}}</span>
+          {{/organ}}
+              <span class="time">{{dateTime}}</span>
+          {{#location}}
+              <span class="location">{{location}}</span>
+          {{/location}}
+          <span class="message">De inhoud van deze zitting is (nog) niet bekendgemaakt.</span>
+      </a>
+    </script>
+  </head>
+  <body>
+    <nav>
+      <div class="container">
+        <div class="logo">
+          <a class="navi-logo" href="/"
+            ><img
+              src="data:image/png;base64, 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"
+              alt="Logo Raadpleegomgeving"
+          /></a>
+        </div>
+        <div class="menu">
+          <span class="menu-item">
+            <a href="/"
+              ><i class="fal fa-home"></i
+              ><span class="d-none d-lg-inline-block">Startpagina</span></a
+            >
+          </span>
+          <span class="menu-item">
+            <a href="/zittingen/lijst" class="calendar-link"
+              ><i class="fal fa-calendar-alt"></i
+              ><span class="d-none d-lg-inline-block">Kalender</span></a
+            >
+          </span>
+
+          <span class="menu-item d-lg-none">
+            <a href="/zoeken"
+              ><i class="far fa-search"></i
+              ><span class="d-none d-lg-inline-block">Zoeken</span></a
+            >
+          </span>
+          <div class="search menu-item d-none d-lg-inline-block">
+            <label for="search-field" class="sr-only">Zoeken</label>
+            <input type="text" autocomplete="off" id="search-field" />
+            <i class="far fa-search"></i>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <section>
+      <div class="page">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <h1>Kalender</h1>
+
+              <form class="form-inline calendar-actions">
+                <div class="form-group">
+                  <label for="organs" class="sr-only">Organen</label>
+                  <select id="organs" class="form-control" multiple="multiple">
+                    <option value="15.0218.3275.7907" selected="selected">
+                      College van burgemeester en schepenen
+                    </option>
+                    <option value="16.0309.8106.2483" selected="selected">
+                      Gemeenteraad
+                    </option>
+                    <option value="15.0218.2606.2713" selected="selected">
+                      Burgemeesterbesluiten
+                    </option>
+                    <option value="15.0218.8069.2838" selected="selected">
+                      Commissie 2
+                    </option>
+                    <option value="15.0218.5917.9096" selected="selected">
+                      Commissie 3
+                    </option>
+                    <option value="15.0218.4831.6716" selected="selected">
+                      Commissie 5
+                    </option>
+                    <option value="15.0218.5033.0655" selected="selected">
+                      Commissie 6
+                    </option>
+                    <option value="15.0218.5049.9165" selected="selected">
+                      Commissie 8
+                    </option>
+                    <option value="15.0218.0666.0404" selected="selected">
+                      Verenigde commissie
+                    </option>
+                    <option value="15.0218.3236.7126" selected="selected">
+                      Commissie 1
+                    </option>
+                    <option value="15.0218.2402.0603" selected="selected">
+                      Commissie 4
+                    </option>
+                    <option value="15.0218.8476.5969" selected="selected">
+                      Commissie 7
+                    </option>
+                    <option value="15.0326.9491.6978" selected="selected">
+                      raad voor maatschappelijk welzijn
+                    </option>
+                    <option value="15.0225.8756.7890" selected="selected">
+                      vast bureau
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="month-select">Maanden</label>
+                  <select id="month-select" class="form-control">
+                    <option value="01">januari</option>
+                    <option value="02">februari</option>
+                    <option value="03">maart</option>
+                    <option value="04">april</option>
+                    <option value="05">mei</option>
+                    <option value="06">juni</option>
+                    <option value="07">juli</option>
+                    <option value="08">augustus</option>
+                    <option value="09">september</option>
+                    <option value="10">oktober</option>
+                    <option value="11">november</option>
+                    <option value="12">december</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="year-select">Jaren</label>
+                  <select id="year-select" class="form-control">
+                    <option value="2000">2000</option>
+                    <option value="2001">2001</option>
+                    <option value="2002">2002</option>
+                    <option value="2003">2003</option>
+                    <option value="2004">2004</option>
+                    <option value="2005">2005</option>
+                    <option value="2006">2006</option>
+                    <option value="2007">2007</option>
+                    <option value="2008">2008</option>
+                    <option value="2009">2009</option>
+                    <option value="2010">2010</option>
+                    <option value="2011">2011</option>
+                    <option value="2012">2012</option>
+                    <option value="2013">2013</option>
+                    <option value="2014">2014</option>
+                    <option value="2015">2015</option>
+                    <option value="2016">2016</option>
+                    <option value="2017">2017</option>
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <ul class="pagination">
+                    <li class="page-item previous">
+                      <a href="#" class="page-link"
+                        ><span class="sr-only">vorige maand</span
+                        ><i class="fas fa-caret-left"></i
+                      ></a>
+                    </li>
+                    <li class="page-item current">
+                      <a href="#" class="page-link">deze maand</a>
+                    </li>
+                    <li class="page-item next">
+                      <a href="#" class="page-link"
+                        ><span class="sr-only">volgende maand</span
+                        ><i class="fas fa-caret-right"></i
+                      ></a>
+                    </li>
+                  </ul>
+                  <!-- For crawler LBLOD -->
+                  <div
+                    class="d-none"
+                    prefix="lblodBesluit: http://lblod.data.gift/vocabularies/besluit/"
+                  >
+                    <a
+                      href="/zittingen/lijst?month=01&amp;year=2025"
+                      property="lblodBesluit:linkToPublication"
+                      >vorige maand</a
+                    >
+                    <a
+                      href="/zittingen/lijst?month=03&amp;year=2025"
+                      property="lblodBesluit:linkToPublication"
+                      >volgende maand</a
+                    >
+                  </div>
+                </div>
+                <div class="form-group views">
+                  <a
+                    href="/zittingen/lijst"
+                    class="btn btn-primary"
+                    data-view="list"
+                    ><span class="sr-only">lijstweergave</span
+                    ><i class="fas fa-list"></i
+                  ></a>
+                  <a
+                    href="/zittingen/kalender"
+                    class="btn btn-default"
+                    data-view="calendar"
+                    ><span class="sr-only">kalenderweergave</span
+                    ><i class="fas fa-calendar-alt"></i
+                  ></a>
+                </div>
+              </form>
+
+              <!-- Calendar view -->
+              <div class="calendar-view" style="display: none">
+                <h2>februari 2025</h2>
+                <div class="calendar table">
+                  <div class="table-head">
+                    <div class="table-row">
+                      <div>Ma</div>
+                      <div>Di</div>
+                      <div>Wo</div>
+                      <div>Do</div>
+                      <div>Vr</div>
+                      <div>Za</div>
+                      <div>Zo</div>
+                    </div>
+                  </div>
+                  <div class="table-body"></div>
+                </div>
+              </div>
+
+              <!-- List view -->
+              <div class="list-view" style="display: none">
+                <div
+                  id="202502"
+                  class="month-block"
+                  prefix="lblodBesluit: http://lblod.data.gift/vocabularies/besluit/"
+                >
+                  <h2>februari 2025</h2>
+
+                  <a
+                    href="/zittingen/24.1106.5779.7433"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ"
+                      >College van burgemeester en schepenen</span
+                    >
+                    <span class="time">do 06/02/2025 - 12:30</span>
+                    <span class="location">Vergaderlokaal 1</span> </a
+                  ><a
+                    href="/zittingen/24.0923.0425.4648"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ">Vast bureau</span>
+                    <span class="time">do 06/02/2025 - 15:00</span>
+                    <span class="location">Vergaderlokaal 1</span> </a
+                  ><a
+                    href="/zittingen/24.1014.3296.2721"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ">Gemeenteraad</span>
+                    <span class="time">ma 10/02/2025 - 19:30</span>
+                    <span class="location">Trouw- en raadzaal</span> </a
+                  ><a
+                    href="/zittingen/24.0923.5771.6039"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ">Raad voor maatschappelijk welzijn</span>
+                    <span class="time">ma 10/02/2025 - 21:00</span>
+                    <span class="location">Trouw- en raadzaal</span> </a
+                  ><a
+                    href="/zittingen/24.1106.2120.3211"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ"
+                      >College van burgemeester en schepenen</span
+                    >
+                    <span class="time">do 13/02/2025 - 12:30</span>
+                    <span class="location">Vergaderlokaal 1</span> </a
+                  ><a
+                    href="/zittingen/24.0923.8159.6795"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ">Vast bureau</span>
+                    <span class="time">do 13/02/2025 - 15:00</span>
+                    <span class="location">Vergaderlokaal 1</span> </a
+                  ><a
+                    href="/zittingen/24.1106.9910.4616"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ"
+                      >College van burgemeester en schepenen</span
+                    >
+                    <span class="time">do 20/02/2025 - 12:30</span>
+                    <span class="location">Vergaderlokaal 1</span> </a
+                  ><a
+                    href="/zittingen/24.0923.5623.6897"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ">Vast bureau</span>
+                    <span class="time">do 20/02/2025 - 15:00</span>
+                    <span class="location">Vergaderlokaal 1</span> </a
+                  ><a
+                    href="/zittingen/24.1106.8380.5755"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ"
+                      >College van burgemeester en schepenen</span
+                    >
+                    <span class="time">do 27/02/2025 - 12:30</span>
+                    <span class="location">Vergaderlokaal 1</span> </a
+                  ><a
+                    href="/zittingen/24.0923.3845.7264"
+                    class="meeting-detail"
+                    property="lblodBesluit:linkToPublication"
+                  >
+                    <span class="organ">Vast bureau</span>
+                    <span class="time">do 27/02/2025 - 15:00</span>
+                    <span class="location">Vergaderlokaal 1</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer>
+      <div class="container">
+        <div class="copyright">
+          &copy;&nbsp;<a
+            href="https://www.greenvalleybelgium.be"
+            target="_blank"
+            >Green Valley Belgium</a
+          >
+        </div>
+        <div class="contact"></div>
+      </div>
+    </footer>
+    <script>
+      var $isCalendarView = false;
+      var $calendarMonth = "02";
+      var $calendarYear = "2025";
+      var $firstMeetingDate = "200002";
+      var $lastMeetingDate = "202512";
+      var $noMeetingsLabel =
+        "Er zijn geen zittingen bekendgemaakt die voldoen aan de zoekcriteria.";
+    </script>
+  </body>
+</html>

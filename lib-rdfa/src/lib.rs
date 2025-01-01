@@ -705,6 +705,7 @@ fn resolve_uri<'a>(
     is_resource: bool,
 ) -> Result<Node<'a>, &'static str> {
     let uri = uri.trim();
+
     let iri = Url::parse(uri);
     let trailing_white_space = if ctx.base.ends_with('/')
         || ctx.base.ends_with('#')
@@ -740,17 +741,24 @@ fn resolve_uri<'a>(
         Ok(iri) => {
             if uri.starts_with("mail:") || uri.starts_with("tel:") {
                 Ok(Node::Iri(Cow::Borrowed(uri)))
-            } else if let Some(value) = ctx.prefixes.get(iri.scheme()) {
-                let iri = uri
-                    .replacen(':', "", 1)
-                    .trim()
-                    .replacen(iri.scheme(), value, 1);
+            } else if let Some((prefix, value)) = ctx
+                .prefixes
+                .iter()
+                .find(|(k, _)| k.eq_ignore_ascii_case(iri.scheme()))
+            {
+                let iri = format!(
+                    "{value}{}",
+                    &uri.replacen(':', "", 1).trim()[prefix.len()..]
+                );
                 Ok(Node::Iri(Cow::Owned(iri)))
-            } else if let Some(value) = COMMON_PREFIXES.get(iri.scheme()) {
-                let iri = uri
-                    .replacen(':', "", 1)
-                    .trim()
-                    .replacen(iri.scheme(), value, 1);
+            } else if let Some((prefix, value)) = COMMON_PREFIXES
+                .iter()
+                .find(|(k, _)| k.eq_ignore_ascii_case(iri.scheme()))
+            {
+                let iri = format!(
+                    "{value}{}",
+                    &uri.replacen(':', "", 1).trim()[prefix.len()..]
+                );
                 Ok(Node::Iri(Cow::Owned(iri)))
             } else {
                 Ok(Node::Iri(Cow::Owned(uri.to_string())))
@@ -785,6 +793,11 @@ fn resolve_uri<'a>(
                 }
             }
             if is_resource || uri.starts_with('#') || uri.starts_with('/') {
+                let uri = if uri.starts_with("/") && ctx.base.ends_with("/") {
+                    &uri[1..]
+                } else {
+                    uri
+                };
                 Ok(Node::TermIri(Cow::Owned(
                     [ctx.base, trailing_white_space, uri].join(""),
                 )))

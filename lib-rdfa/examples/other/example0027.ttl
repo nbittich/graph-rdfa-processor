@@ -1,0 +1,14 @@
+<http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/>
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/lijst?month=01&year=2025>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/lijst?month=03&year=2025>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.1106.5779.7433>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.0923.0425.4648>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.1014.3296.2721>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.0923.5771.6039>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.1106.2120.3211>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.0923.8159.6795>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.1106.9910.4616>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.0923.5623.6897>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.1106.8380.5755>;
+   <http://lblod.data.gift/vocabularies/besluit/linkToPublication> <http://rdfa.info/test-suite/test-cases/rdfa1.1/html5/zittingen/24.0923.3845.7264> .
+
