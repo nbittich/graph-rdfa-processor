@@ -17,7 +17,7 @@ default = ["console_error_panic_hook","lol_alloc"]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-getrandom = { version = "0.2.10", features = ["js"] }
+getrandom = { version = "0.2.15", features = ["js"] }
 graph-rdfa-processor.workspace = true
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen.workspace = true
