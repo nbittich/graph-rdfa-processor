@@ -13,12 +13,12 @@ edition = "2021"
 license = "MIT"
 
 [workspace.dependencies]
-log = "0.4.22"
+log = "0.4.25"
 # itertools = "0.13.0"
 lazy_static = "1.5.0"
 scraper = "0.22.0"
 url = "2.5.4"
-uuid = { version = "1.11.0", features = ["v7"] }
+uuid = { version = "1.12.0", features = ["v7"] }
 regex = "1.11.1"
 ego-tree = "0.10.0"
 # some tests must run sequentially. 
@@ -28,8 +28,8 @@ console_error_panic_hook = "0.1.7"
 serial_test = "3.2.0"
 test-case = "3.3.1"
 env_logger = "0.11.6"
-tortank = "0.25.0"
-wasm-bindgen = "0.2.99"
+tortank = "0.25.3"
+wasm-bindgen = "0.2.100"
 lol_alloc = "0.4.1"
 [profile.release]
 opt-level = 'z'   # Optimize for size.
