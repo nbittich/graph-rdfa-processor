@@ -16,12 +16,14 @@ log = { workspace = true }
 lazy_static = { workspace = true }
 scraper = { workspace = true }
 url = { workspace = true }
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-uuid = { workspace = true, features = ["js", "v7"] }
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-uuid = { workspace = true, features = ["v7"] }
 regex = { workspace = true }
 ego-tree = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+uuid = { workspace = true, features = ["v7"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+uuid = { workspace = true, features = ["js", "v7"] }
 
 [dev-dependencies]
 serial_test = { workspace = true }
