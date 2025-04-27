@@ -3,7 +3,7 @@ use std::{ops::Add, path::PathBuf};
 use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
 
-use crate::{constants::reset_fake_uuid_gen, Context, RdfaGraph};
+use crate::{Context, RdfaGraph, constants::reset_fake_uuid_gen};
 
 mod earl_html5;
 mod other;

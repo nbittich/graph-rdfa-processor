@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use scraper::{node::Element, ElementRef, Selector};
+use scraper::{ElementRef, Selector, node::Element};
 
 #[derive(Debug, Clone, Copy)]
 pub struct RdfaElement<'a, 'b> {

@@ -7,9 +7,9 @@ mod structs;
 mod tests;
 
 use constants::{
-    get_uuid, COMMON_PREFIXES, IS_SPECIAL_NODE_FN, NODE_NS_TYPE, NODE_RDFA_PATTERN_TYPE,
-    NODE_RDFA_USES_VOCABULARY, NODE_RDF_FIRST, NODE_RDF_NIL, NODE_RDF_PLAIN_LITERAL, NODE_RDF_REST,
-    RESERVED_KEYWORDS,
+    COMMON_PREFIXES, IS_SPECIAL_NODE_FN, NODE_NS_TYPE, NODE_RDF_FIRST, NODE_RDF_NIL,
+    NODE_RDF_PLAIN_LITERAL, NODE_RDF_REST, NODE_RDFA_PATTERN_TYPE, NODE_RDFA_USES_VOCABULARY,
+    RESERVED_KEYWORDS, get_uuid,
 };
 use log::{debug, error};
 use rdfa_elt::RdfaElement;
@@ -134,10 +134,10 @@ fn traverse_element<'a, 'b>(
         s.is_empty()
     };
 
-    let resource =
-        elt.resource
-            .filter(|r| !is_empty_curie(r))
-            .map(|c| if c.is_empty() { ctx.base } else { c });
+    let resource = elt
+        .resource
+        .filter(|r| !is_empty_curie(r))
+        .map(|c| if c.is_empty() { ctx.base } else { c });
 
     ctx.lang = elt
         .lang
