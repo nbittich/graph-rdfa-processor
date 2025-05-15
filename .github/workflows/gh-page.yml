@@ -27,7 +27,7 @@ jobs:
       - name: Build
         run: |
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-          wasm-pack build --target web --release --scope nbittich ./rdfa-wasm
+          RUSTFLAGS='--cfg getrandom_backend="wasm_js" -Ctarget-cpu=mvp' wasm-pack build --target web --release --scope nbittich ./rdfa-wasm
           mkdir ghPages
           cp -r  ./rdfa-wasm/pkg ghPages
           cp ./rdfa-wasm/app.js ghPages

@@ -17,9 +17,13 @@ default = ["console_error_panic_hook","lol_alloc"]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-getrandom = { version = "0.2.15", features = ["js"] }
+getrandom = { version = "0.3.3", features = ["wasm_js"] }
+
 graph-rdfa-processor.workspace = true
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen.workspace = true
 console_error_panic_hook = { workspace = true, optional = true }
 lol_alloc={workspace=true,optional=true}
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O","--enable-bulk-memory", "--enable-mutable-globals"]
