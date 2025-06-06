@@ -3,7 +3,7 @@ members = ["lib-rdfa", "rdfa-wasm"]
 resolver = "2"
 
 [workspace.package]
-version = "0.3.4"
+version = "0.3.5"
 authors = ["Nordine Bittich"]
 description = "Graph rdfa Processor"
 documentation = "https://github.com/nbittich/graph-rdfa-processor"
@@ -23,7 +23,7 @@ regex = "1.11.1"
 ego-tree = "0.10.0"
 # some tests must run sequentially. 
 # if library is broken, alternative is: cargo test -- --test-threads 1
-graph-rdfa-processor = { version = "0.3.4", path = './lib-rdfa' }
+graph-rdfa-processor = { version = "0.3.5", path = './lib-rdfa' }
 console_error_panic_hook = "0.1.7"
 serial_test = "3.2.0"
 test-case = "3.3.1"
