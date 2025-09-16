@@ -379,7 +379,7 @@ dependencies = [
 
 [[package]]
 name = "graph-rdfa-processor"
-version = "0.3.7"
+version = "0.3.8"
 dependencies = [
  "ego-tree",
  "env_logger",
@@ -868,7 +868,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "rdfa-wasm"
-version = "0.3.7"
+version = "0.3.8"
 dependencies = [
  "console_error_panic_hook",
  "getrandom",
