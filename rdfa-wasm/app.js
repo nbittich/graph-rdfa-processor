@@ -2,7 +2,7 @@ async function loadWasmContext() {
   const module = await import("./pkg/rdfa_wasm.js");
   await module.default();
   // return module.compute_as_string; use that one instead to create the heap from javascript
-  return module.html_to_rdfa;
+  return { htmlToRdfa: module.html_to_rdfa, rdfaToTurtle :module.rdfa_to_turtle };
 }
 function toggleForm(form, toggle) {
   const elements = form.elements;
@@ -15,7 +15,7 @@ function toggleForm(form, toggle) {
 async function run() {
   const form = document.querySelector("form");
   toggleForm(form, true);
-  const html_to_rdfa = await loadWasmContext();
+  const {htmlToRdfa,rdfaToTurtle} = await loadWasmContext();
   toggleForm(form, false);
 
   // initLoadFromUrl();
@@ -39,13 +39,15 @@ async function run() {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const data = new FormData(e.target);
-    let res = html_to_rdfa(
+    let res = htmlToRdfa(
       data.get("html") || "",
       data.get("base") || "",
       data.get("wellKnownPrefix") || "",
     );
+    // transform to turtle for better reading. could be just a button.
+    let turtle = rdfaToTurtle(res)
     const out = document.querySelector("pre");
-    out.innerText = res;
+    out.innerText = turtle;
   });
   const issueLink = document.querySelector("#issueLink");
   issueLink.onclick = (e) => {

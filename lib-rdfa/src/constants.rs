@@ -22,6 +22,7 @@ pub fn get_uuid() -> String {
     )
 }
 // pub static DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
+#[allow(unused)]
 pub static RDFA_COPY_PREDICATE: &str = "http://www.w3.org/ns/rdfa#copy";
 pub static RDFA_PATTERN_TYPE: &str = "http://www.w3.org/ns/rdfa#Pattern";
 pub static RDFA_USES_VOCABULARY: &str = "http://www.w3.org/ns/rdfa#usesVocabulary";

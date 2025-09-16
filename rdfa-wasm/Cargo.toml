@@ -18,7 +18,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 getrandom = { version = "0.3.3", features = ["wasm_js"] }
-
+tortank.workspace=true
 graph-rdfa-processor.workspace = true
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen.workspace = true
