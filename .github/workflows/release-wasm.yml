@@ -21,7 +21,8 @@ jobs:
       - name: Build
         run: |
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-          RUSTFLAGS='--cfg getrandom_backend="wasm_js" -Ctarget-cpu=mvp' wasm-pack build --target nodejs --release --scope nbittich --enable-bulk-memory  ./rdfa-wasm 
+          cd rdfa-wasm 
+          RUSTFLAGS='--cfg getrandom_backend="wasm_js" -Ctarget-cpu=mvp' wasm-pack build --target nodejs --release --scope nbittich   .
           wasm-pack pack ./rdfa-wasm/pkg
 
       - name: Upload pkg
