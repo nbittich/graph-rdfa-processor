@@ -23,7 +23,7 @@ jobs:
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
           cd rdfa-wasm 
           RUSTFLAGS='--cfg getrandom_backend="wasm_js" -Ctarget-cpu=mvp' wasm-pack build --target nodejs --release --scope nbittich   .
-          wasm-pack pack ./rdfa-wasm/pkg
+          wasm-pack pack pkg
 
       - name: Upload pkg
         uses: actions/upload-artifact@v4
