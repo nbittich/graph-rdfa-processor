@@ -1194,9 +1194,9 @@ dependencies = [
 
 [[package]]
 name = "tortank"
-version = "0.30.2"
+version = "0.30.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1adce9042397309f47ed6b03bad6c56cf2989562e846a7f24ed7b828b19fc458"
+checksum = "7ba7538ae63fb07bc44b5f7f46679ab6dae2a332b277149593f323dfa2697b1e"
 dependencies = [
  "chrono",
  "nom",
