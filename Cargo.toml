@@ -8,18 +8,18 @@ authors = ["Nordine Bittich"]
 description = "Graph rdfa Processor"
 documentation = "https://github.com/nbittich/graph-rdfa-processor"
 repository = "https://github.com/nbittich/graph-rdfa-processor"
-rust-version = "1.89"
+rust-version = "1.90"
 edition = "2024"
 license = "MIT"
 
 [workspace.dependencies]
-log = "0.4.27"
+log = "0.4.28"
 # itertools = "0.13.0"
 lazy_static = "1.5.0"
 scraper = "0.24.0"
-url = "2.5.4"
-uuid = { version = "1.17.0", features = ["v7"] }
-regex = "1.11.1"
+url = "2.5.7"
+uuid = { version = "1.18.1", features = ["v7"] }
+regex = "1.11.3"
 ego-tree = "0.10.0"
 # some tests must run sequentially. 
 # if library is broken, alternative is: cargo test -- --test-threads 1
@@ -29,8 +29,9 @@ serial_test = "3.2.0"
 test-case = "3.3.1"
 env_logger = "0.11.8"
 tortank = "0.30.6"
-wasm-bindgen = "0.2.100"
+wasm-bindgen = "0.2.104"
 lol_alloc = "0.4.1"
+
 [profile.release]
 opt-level = 'z'   # Optimize for size.
 lto = true        # Link Time Optimization (LTO)
