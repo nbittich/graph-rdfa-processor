@@ -14,7 +14,7 @@ use constants::{
 use log::{debug, error};
 use rdfa_elt::RdfaElement;
 use scraper::{ElementRef, Selector};
-use url::Url;
+use url::{Origin, Url};
 
 use structs::{Context, DataTypeFromPattern, Literal, Node, Statement};
 
@@ -699,12 +699,26 @@ fn get_parent_subject<'a>(
         })
         .ok_or("no parent".into())
 }
+
 fn resolve_uri<'a>(
     uri: &'a str,
     ctx: &Context<'a>,
     is_resource: bool,
 ) -> Result<Node<'a>, &'static str> {
     let uri = uri.trim();
+
+    // special case, see bug#
+    if let Ok(ref origin) = Url::parse(ctx.base).map(|u| u.origin())
+        && let Origin::Tuple(_, host, _) = origin
+    {
+        let host = &host.to_string();
+
+        if uri.starts_with(host) {
+            return Ok(Node::TermIri(Cow::Owned(
+                uri.replace(host, &origin.unicode_serialization()),
+            )));
+        }
+    };
 
     let iri = Url::parse(uri);
     let trailing_white_space = if ctx.base.ends_with('/')

@@ -5,6 +5,7 @@ use tortank::turtle::turtle_doc::TurtleDoc;
 
 use crate::{Context, RdfaGraph, constants::reset_fake_uuid_gen};
 
+mod bug;
 mod earl_html5;
 mod other;
 mod rdfa_core;
