@@ -120,8 +120,10 @@ lazy_static::lazy_static! {
             ("v","http://rdf.data-vocabulary.org/#"),
             ("vcard","http://www.w3.org/2006/vcard/ns#"),
             ("schema","http://schema.org/"),
-            ("powders","http://www.w3.org/2007/05/powder-s#"),
-            ("xvoc","http://www.w3.org/1999/xhtml/vocab#"),
+        // specific
+            ("describedby","http://www.w3.org/2007/05/powder-s#describedby"),
+            ("license","http://www.w3.org/1999/xhtml/vocab#license"),
+            ("role","http://www.w3.org/1999/xhtml/vocab#role"),
             ("locn", "http://www.w3.org/ns/locn#"),
             ("adres", "https://data.vlaanderen.be/id/adres/")
 
