@@ -8,28 +8,28 @@ authors = ["Nordine Bittich"]
 description = "Graph rdfa Processor"
 documentation = "https://github.com/nbittich/graph-rdfa-processor"
 repository = "https://github.com/nbittich/graph-rdfa-processor"
-rust-version = "1.90"
+rust-version = "1.98"
 edition = "2024"
 license = "MIT"
 
 [workspace.dependencies]
-log = "0.4.28"
+log = "0.4.34"
 # itertools = "0.13.0"
-lazy_static = "1.5.0"
-scraper = "0.24.0"
-url = "2.5.7"
-uuid = { version = "1.18.1", features = ["v7"] }
-regex = "1.11.3"
-ego-tree = "0.10.0"
+lazy_static = "1.5.1"
+scraper = "0.27.0"
+url = "2.5.8"
+uuid = { version = "1.26.1", features = ["v7"] }
+regex = "1.13.1"
+ego-tree = "0.11.0"
 # some tests must run sequentially. 
 # if library is broken, alternative is: cargo test -- --test-threads 1
 graph-rdfa-processor = { version = "0.3.12", path = './lib-rdfa' }
 console_error_panic_hook = "0.1.7"
-serial_test = "3.2.0"
-test-case = "3.3.1"
-env_logger = "0.11.8"
-tortank = "0.30.7"
-wasm-bindgen = "0.2.104"
+serial_test = "3.5.0"
+test-case = "3.4.0"
+env_logger = "0.11.11"
+tortank = "0.30.8"
+wasm-bindgen = "0.2.129"
 lol_alloc = "0.4.1"
 
 [profile.release]

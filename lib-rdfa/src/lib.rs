@@ -852,7 +852,9 @@ fn parse_prefixes(s: &str) -> HashMap<&str, &str> {
     s.split_whitespace()
         .map(|s| s.trim())
         .collect::<Vec<_>>()
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|c| (c[0], c[1]))
         .filter_map(|(s, p)| {
             if let Ok((s, _)) = parse_safe_curie(s) {
