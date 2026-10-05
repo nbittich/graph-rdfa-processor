@@ -1,0 +1,82 @@
+name: WASM Build & Test
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  wasm:
+    name: WASM / Node.js + Browser
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: rdfa-wasm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install wasm-pack
+        uses: taiki-e/install-action@wasm-pack
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # ------------------------------------------------------------
+      # Node.js
+      #
+      # Builds the actual JS/WASM package consumed by tests/node.mjs.
+      # ------------------------------------------------------------
+
+      - name: Build WASM for Node.js
+        run: |
+          wasm-pack build \
+            --target nodejs \
+            --out-dir pkg-node \
+            --dev
+
+      - name: Test generated Node.js package
+        run: node tests/node.mjs
+
+      # ------------------------------------------------------------
+      # Browser
+      #
+      # Executes tests/web.rs using wasm-bindgen-test + Chrome.
+      # ------------------------------------------------------------
+
+      - name: Test WASM in Chrome
+        run: |
+          wasm-pack test \
+            --headless \
+            --chrome \
+            --test web
+
+      # ------------------------------------------------------------
+      # Browser package
+      # ------------------------------------------------------------
+
+      - name: Build WASM for browser
+        run: |
+          wasm-pack build \
+            --target web \
+            --out-dir pkg-web \
+            --dev

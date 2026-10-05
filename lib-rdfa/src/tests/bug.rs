@@ -34,8 +34,12 @@ pub fn test_host_instead_of_base() {
         <https://ranst.meetingburger.net/rmw/09795852-b9a1-4389-b391-d4bac55627a0/agenda> <http://www.w3.org/ns/rdfa#usesVocabulary> <http://data.vlaanderen.be/ns/besluit#>.
         <https://ranst.meetingburger.net/rmw/09795852-b9a1-4389-b391-d4bac55627a0#puntbehandelingc9ecabeb-930b-4a4c-8f89-39f79eea98a8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>.
 
-    "#, Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
-    let actual =
-        TurtleDoc::try_from((graph.as_str(), Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
+    "#, Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()), None)).unwrap();
+    let actual = TurtleDoc::try_from((
+        graph.as_str(),
+        Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()),
+        None,
+    ))
+    .unwrap();
     assert!(expected.difference(&actual).unwrap().is_empty());
 }

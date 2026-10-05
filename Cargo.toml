@@ -28,7 +28,7 @@ console_error_panic_hook = "0.1.7"
 serial_test = "3.5.0"
 test-case = "3.4.0"
 env_logger = "0.11.11"
-tortank = "0.30.8"
+tortank = "0.31.1"
 wasm-bindgen = "0.2.129"
 lol_alloc = "0.4.1"
 

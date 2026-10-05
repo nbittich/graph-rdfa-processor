@@ -56,13 +56,18 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     if WRITE_RESULT_TO_FILE {
         std::fs::write("/tmp/res.ttl", &graph).expect("could not write file");
     }
-    let ttl = TurtleDoc::try_from((ttl, Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
+    let ttl =
+        TurtleDoc::try_from((ttl, Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()), None)).unwrap();
     if DEBUG {
         println!("============ Expected result ============");
         println!("{ttl}");
     }
-    let graph =
-        TurtleDoc::try_from((graph.as_str(), Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()))).unwrap();
+    let graph = TurtleDoc::try_from((
+        graph.as_str(),
+        Some(DEFAULT_WELL_KNOWN_PREFIX.to_string()),
+        None,
+    ))
+    .unwrap();
     if DEBUG {
         println!("============ Actual result ============");
         println!("{graph}");
