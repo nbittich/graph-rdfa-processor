@@ -84,7 +84,7 @@ fn rdfa_to_turtle_without_blank_nodes_roundtrips() {
 
 #[wasm_bindgen_test]
 fn html_to_rdfa_then_rdfa_to_turtle() {
-    let rdfa = html_to_rdfa(HTML, "https://example.com/", "");
+    let rdfa = html_to_rdfa(HTML, "https://example.com/", "", None);
     let ttl = rdfa_to_turtle(&rdfa, None);
 
     assert_same_ttl(

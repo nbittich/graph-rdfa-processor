@@ -12,7 +12,7 @@ static ALLOCATOR: AssumeSingleThreaded<FreeListAllocator> =
 
 thread_local! {
     static JS_UUID_FN: RefCell<Option<js_sys::Function>> = const { RefCell::new(None) };
-        static JS_UUID_ERR: RefCell<Option<JsValue>> = const { RefCell::new(None) };
+    static JS_UUID_ERR: RefCell<Option<JsValue>> = const { RefCell::new(None) };
 }
 
 fn js_uuid_gen() -> String {
@@ -63,13 +63,20 @@ fn js_err<E: std::fmt::Display>(err: E) -> JsValue {
 }
 
 #[wasm_bindgen]
-pub fn html_to_rdfa(html: &str, base: &str, well_known_prefix: &str) -> String {
+pub fn html_to_rdfa(
+    html: &str,
+    base: &str,
+    well_known_prefix: &str,
+    uuid_fn: Option<js_sys::Function>,
+) -> String {
     utils::set_panic_hook();
+    let (uuid_fn, _guard) = install_uuid_fn(uuid_fn);
+
     let wkp = {
         let wkp = well_known_prefix.trim();
         if wkp.is_empty() { None } else { Some(wkp) }
     };
-    RdfaGraph::parse_str(html, base, wkp).unwrap()
+    RdfaGraph::parse_str(html, base, wkp, uuid_fn).unwrap()
 }
 
 #[wasm_bindgen]
