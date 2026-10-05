@@ -624,6 +624,7 @@ fn handle_children<'a>(
                 base: ctx.base,
                 lang: ctx.lang,
                 empty_ref_node_substitute: ctx.empty_ref_node_substitute,
+                uuid_gen_fn: ctx.uuid_gen_fn,
                 ..Default::default()
             };
 
