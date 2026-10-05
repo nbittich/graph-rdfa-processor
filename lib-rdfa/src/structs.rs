@@ -33,6 +33,7 @@ pub struct Context<'a> {
     pub in_list: Option<Vec<Node<'a>>>,
     pub current_node: Option<Node<'a>>,
     pub prefixes: HashMap<&'a str, &'a str>,
+    pub uuid_gen_fn: Option<fn() -> String>,
 }
 
 #[derive(Debug)]

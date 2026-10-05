@@ -75,6 +75,7 @@ impl<'a> RdfaGraph<'a> {
         html: &'a str,
         base: &'a str,
         well_known_prefix: Option<&'a str>,
+        uuid_gen_fn: Option<fn() -> String>,
     ) -> Result<String, Box<dyn Error>> {
         let document = scraper::Html::parse_document(html);
         let empty_ref_node_substitue = get_uuid();
@@ -84,6 +85,7 @@ impl<'a> RdfaGraph<'a> {
             base,
             empty_ref_node_substitute: &empty_ref_node_substitue,
             well_known_prefix: well_known_prefix.filter(|f| !f.is_empty()),
+            uuid_gen_fn,
             ..Default::default()
         };
         RdfaGraph::parse(&root, root_ctx).map(|g| g.to_string())
@@ -187,7 +189,7 @@ fn traverse_element<'a, 'b>(
     let mut current_node = if !IS_SPECIAL_NODE_FN(&datatype) {
         base.clone()
     } else {
-        make_bnode()
+        make_bnode(&ctx.uuid_gen_fn)
     };
 
     // if parent is inlist
@@ -203,7 +205,7 @@ fn traverse_element<'a, 'b>(
             Node::Ref(Arc::new(extract_literal(&elt, &datatype, &ctx)?))
         };
         for rel in parent_in_list {
-            push_triples_inlist(in_list_stmts, &subject, rel, &obj);
+            push_triples_inlist(in_list_stmts, &subject, rel, &obj, &ctx.uuid_gen_fn);
         }
         current_node = subject;
     }
@@ -226,7 +228,7 @@ fn traverse_element<'a, 'b>(
                     let Some(rels) = rels.take() else {
                         unreachable!()
                     };
-                    current_node = make_bnode();
+                    current_node = make_bnode(&ctx.uuid_gen_fn);
                     handle_children(NodeContext {
                         element_ref,
                         ctx: ctx.clone(),
@@ -256,9 +258,16 @@ fn traverse_element<'a, 'b>(
                                 &subject,
                                 rel,
                                 &existing_rel_in_list,
+                                &ctx.uuid_gen_fn,
                             );
                         } else {
-                            push_triples_inlist(in_list_stmts, &subject, rel, &current_node);
+                            push_triples_inlist(
+                                in_list_stmts,
+                                &subject,
+                                rel,
+                                &current_node,
+                                &ctx.uuid_gen_fn,
+                            );
                         }
                     }
                     return Ok(Some(subject));
@@ -281,7 +290,7 @@ fn traverse_element<'a, 'b>(
                 Node::Ref(Arc::new(extract_literal(&elt, &datatype, &ctx)?))
             };
             for rel in rels {
-                push_triples_inlist(in_list_stmts, &subject, rel, &obj);
+                push_triples_inlist(in_list_stmts, &subject, rel, &obj, &ctx.uuid_gen_fn);
             }
         }
         let obj = if let (Some(resource), false) = (resource, in_rel) {
@@ -291,7 +300,7 @@ fn traverse_element<'a, 'b>(
         };
         if let Some(predicates) = predicates.take() {
             for predicate in predicates {
-                push_triples_inlist(in_list_stmts, &subject, predicate, &obj);
+                push_triples_inlist(in_list_stmts, &subject, predicate, &obj, &ctx.uuid_gen_fn);
             }
         }
 
@@ -362,7 +371,7 @@ fn traverse_element<'a, 'b>(
             push_triples(stmts, &src_or_href, &revs, &current_node);
         }
         if is_empty {
-            current_node = make_bnode();
+            current_node = make_bnode(&ctx.uuid_gen_fn);
         }
     }
     // now the interesting bits
@@ -381,7 +390,7 @@ fn traverse_element<'a, 'b>(
         let src_or_href = src_or_href.take().ok_or("no src")?;
         current_node = get_parent_subject(&parent, &ctx)
             .ok()
-            .unwrap_or_else(make_bnode);
+            .unwrap_or_else(|| make_bnode(&ctx.uuid_gen_fn));
 
         let mut has_term = false;
         let mut emit_triple = false;
@@ -457,14 +466,16 @@ fn traverse_element<'a, 'b>(
             && !elt.has_content_or_datatype()
             && (parent_in_rel.is_some() || parent_in_rev.is_some())
         {
-            current_node = make_bnode();
-            let node = src_or_href.take().unwrap_or_else(make_bnode);
+            current_node = make_bnode(&ctx.uuid_gen_fn);
+            let node = src_or_href
+                .take()
+                .unwrap_or_else(|| make_bnode(&ctx.uuid_gen_fn));
             for to in type_ofs.take().iter().flatten() {
                 push_triples(stmts, &node, &Some(vec![NODE_NS_TYPE.clone()]), to);
             }
             push_triples(stmts, &current_node, &predicates, &node);
         } else if rels.is_some() {
-            current_node = make_bnode();
+            current_node = make_bnode(&ctx.uuid_gen_fn);
 
             for to in type_ofs.take().into_iter().flatten() {
                 stmts.push(Statement {
@@ -503,12 +514,12 @@ fn traverse_element<'a, 'b>(
             {
                 base.clone()
             } else {
-                make_bnode()
+                make_bnode(&ctx.uuid_gen_fn)
             };
 
             let subject = get_parent_subject(&parent, &ctx)
                 .ok()
-                .unwrap_or_else(make_bnode);
+                .unwrap_or_else(|| make_bnode(&ctx.uuid_gen_fn));
 
             push_triples(stmts, &subject, &predicates, &current_node);
         } else {
@@ -597,7 +608,7 @@ fn handle_children<'a>(
 
             if triples_completed {
                 // Triples are also 'completed' if any one of @property, @rel or @rev are present.
-                let b_node = make_bnode();
+                let b_node = make_bnode(&ctx.uuid_gen_fn);
                 push_triples(stmts, &current_node, &ctx.in_rel.take(), &b_node);
                 push_triples(stmts, &b_node, &ctx.in_rev.take(), &current_node);
 
@@ -884,8 +895,9 @@ fn push_triples_inlist<'a>(
     subject: &Node<'a>,
     predicate: Node<'a>,
     obj: &Node<'a>,
+    uuid_gen_fn: &Option<fn() -> String>,
 ) {
-    let b_node = make_bnode();
+    let b_node = make_bnode(uuid_gen_fn);
     stmts.push(Statement {
         subject: b_node.clone(),
         predicate: NODE_RDF_FIRST.clone(),
@@ -964,8 +976,8 @@ fn get_children<'a>(
 }
 
 #[inline]
-fn make_bnode<'a>() -> Node<'a> {
-    Node::Blank(get_uuid())
+fn make_bnode<'a>(uuid_gen: &Option<fn() -> String>) -> Node<'a> {
+    Node::Blank((uuid_gen.unwrap_or(get_uuid))())
 }
 
 #[inline]
