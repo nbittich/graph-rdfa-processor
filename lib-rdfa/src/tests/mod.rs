@@ -45,10 +45,8 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     let document = Html::parse_document(html);
     let root = document.root_element();
 
-    let empty_ref_node_substitute = "00000000-0000-0000-0000-000000000000";
     let root_ctx = Context {
         base,
-        empty_ref_node_substitute,
         ..Default::default()
     };
     let graph = RdfaGraph::parse(&root, root_ctx).unwrap().to_string();
@@ -74,6 +72,11 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     }
     let mut diff = ttl.difference(&graph).unwrap();
     diff = diff.add(graph.difference(&ttl).unwrap());
+    if !diff.is_empty() && DEBUG {
+        println!("============ Difference ============");
+        println!("{diff}");
+    }
+
     if !diff.is_empty() && DEBUG {
         println!("============ Difference ============");
         println!("{diff}");

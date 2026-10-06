@@ -22,10 +22,8 @@ pub fn test_host_instead_of_base() {
     let document = Html::parse_document(example);
     let root = document.root_element();
 
-    let empty_ref_node_substitute = "00000000-0000-0000-0000-000000000000";
     let root_ctx = Context {
         base: "https://ranst.meetingburger.net/rmw/09795852-b9a1-4389-b391-d4bac55627a0/agenda",
-        empty_ref_node_substitute,
         ..Default::default()
     };
     let graph = RdfaGraph::parse(&root, root_ctx).unwrap().to_string();

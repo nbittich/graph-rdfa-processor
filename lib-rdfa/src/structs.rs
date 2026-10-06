@@ -25,7 +25,6 @@ pub struct RdfaGraph<'a> {
 pub struct Context<'a> {
     pub base: &'a str,
     pub well_known_prefix: Option<&'a str>,
-    pub empty_ref_node_substitute: &'a str,
     pub vocab: Option<&'a str>,
     pub lang: Option<&'a str>,
     pub in_rel: Option<Vec<Node<'a>>>,

@@ -34,6 +34,7 @@ pub static NS_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 pub static RDF_FIRST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
 pub static RDF_REST: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest";
 pub static RDF_NIL: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil";
+pub static NULL_BLANK_NODE: &str = "00000000-0000-0000-0000-000000000000";
 
 pub static RESERVED_KEYWORDS: [&str; 3] = ["license", "describedby", "role"];
 

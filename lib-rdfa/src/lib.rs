@@ -20,6 +20,8 @@ use structs::{Context, DataTypeFromPattern, Literal, Node, Statement};
 
 pub use structs::RdfaGraph;
 
+use crate::constants::NULL_BLANK_NODE;
+
 struct NodeContext<'a, 'b> {
     element_ref: &'b ElementRef<'a>,
     ctx: Context<'a>,
@@ -42,12 +44,7 @@ impl<'a> RdfaGraph<'a> {
         let mut triples = vec![];
         let mut inlist_triples = vec![];
         let well_known_prefix = initial_context.well_known_prefix;
-        if initial_context.empty_ref_node_substitute.is_empty() {
-            return Err(
-                "if you provide a context, you most provide an empty_ref_node_substitute property."
-                    .into(),
-            );
-        }
+
         traverse_element(
             input,
             None,
@@ -78,12 +75,10 @@ impl<'a> RdfaGraph<'a> {
         uuid_gen_fn: Option<fn() -> String>,
     ) -> Result<String, Box<dyn Error>> {
         let document = scraper::Html::parse_document(html);
-        let empty_ref_node_substitue = get_uuid();
         let root = document.root_element();
 
         let root_ctx = Context {
             base,
-            empty_ref_node_substitute: &empty_ref_node_substitue,
             well_known_prefix: well_known_prefix.filter(|f| !f.is_empty()),
             uuid_gen_fn,
             ..Default::default()
@@ -623,7 +618,6 @@ fn handle_children<'a>(
             let child_ctx = Context {
                 base: ctx.base,
                 lang: ctx.lang,
-                empty_ref_node_substitute: ctx.empty_ref_node_substitute,
                 uuid_gen_fn: ctx.uuid_gen_fn,
                 ..Default::default()
             };
@@ -796,7 +790,7 @@ fn resolve_uri<'a>(
                 let prefix = prefix.trim();
                 if prefix == "_" {
                     let id = if reference.is_empty() {
-                        ctx.empty_ref_node_substitute
+                        NULL_BLANK_NODE
                     } else {
                         reference
                     };
