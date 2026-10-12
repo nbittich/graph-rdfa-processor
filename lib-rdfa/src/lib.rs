@@ -9,7 +9,7 @@ mod tests;
 use constants::{
     COMMON_PREFIXES, IS_SPECIAL_NODE_FN, NODE_NS_TYPE, NODE_RDF_FIRST, NODE_RDF_NIL,
     NODE_RDF_PLAIN_LITERAL, NODE_RDF_REST, NODE_RDFA_PATTERN_TYPE, NODE_RDFA_USES_VOCABULARY,
-    RESERVED_KEYWORDS, get_uuid,
+    NODE_RDF_HTML_LITERAL, RESERVED_KEYWORDS, get_uuid,
 };
 use log::{debug, error};
 use rdfa_elt::RdfaElement;
@@ -18,7 +18,7 @@ use url::{Origin, Url};
 
 use structs::{Context, DataTypeFromPattern, Literal, Node, Statement};
 
-pub use structs::RdfaGraph;
+pub use structs::{HtmlExtraction, RdfaGraph};
 
 use crate::constants::NULL_BLANK_NODE;
 
@@ -74,6 +74,19 @@ impl<'a> RdfaGraph<'a> {
         well_known_prefix: Option<&'a str>,
         uuid_gen_fn: Option<fn() -> String>,
     ) -> Result<String, Box<dyn Error>> {
+        Self::parse_str_with_html_extraction(html, base, well_known_prefix, uuid_gen_fn, None)
+    }
+
+    /// Same as [`RdfaGraph::parse_str`], with the optional html extraction feature:
+    /// for every element with `property=<extraction.source>`, the inner html of that
+    /// element is also stored under `<extraction.target>` as an `rdf:HTML` literal.
+    pub fn parse_str_with_html_extraction(
+        html: &'a str,
+        base: &'a str,
+        well_known_prefix: Option<&'a str>,
+        uuid_gen_fn: Option<fn() -> String>,
+        html_extraction: Option<HtmlExtraction<'a>>,
+    ) -> Result<String, Box<dyn Error>> {
         let document = scraper::Html::parse_document(html);
         let root = document.root_element();
 
@@ -81,6 +94,8 @@ impl<'a> RdfaGraph<'a> {
             base,
             well_known_prefix: well_known_prefix.filter(|f| !f.is_empty()),
             uuid_gen_fn,
+            html_extraction: html_extraction
+                .filter(|e| !e.source.trim().is_empty() && !e.target.trim().is_empty()),
             ..Default::default()
         };
         RdfaGraph::parse(&root, root_ctx).map(|g| g.to_string())
@@ -186,6 +201,8 @@ fn traverse_element<'a, 'b>(
     } else {
         make_bnode(&ctx.uuid_gen_fn)
     };
+
+    let stmts_start = stmts.len();
 
     // if parent is inlist
     if let Some(parent_in_list) = parent_in_list.take() {
@@ -543,6 +560,11 @@ fn traverse_element<'a, 'b>(
         );
     }
 
+    if let Some(extraction) = ctx.html_extraction {
+        let extra = extract_html_statements(&stmts[stmts_start..], &extraction, &elt);
+        stmts.extend(extra);
+    }
+
     handle_children(NodeContext {
         element_ref,
         ctx,
@@ -556,6 +578,40 @@ fn traverse_element<'a, 'b>(
         parent_in_rev,
         parent: &parent,
     })
+}
+
+/// For every statement produced by `elt` whose predicate is `extraction.source`,
+/// build a sibling statement (same subject) with predicate `extraction.target` and the
+/// element's inner html as an `rdf:HTML` literal.
+fn extract_html_statements<'a>(
+    elt_stmts: &[Statement<'a>],
+    extraction: &HtmlExtraction<'a>,
+    elt: &RdfaElement<'a, '_>,
+) -> Vec<Statement<'a>> {
+    let source = Node::Iri(Cow::Borrowed(extraction.source));
+    let mut subjects: Vec<&Node<'a>> = elt_stmts
+        .iter()
+        .filter(|s| s.predicate == source)
+        .map(|s| &s.subject)
+        .collect();
+    subjects.dedup();
+    if subjects.is_empty() {
+        return vec![];
+    }
+    let target = Node::Iri(Cow::Borrowed(extraction.target));
+    let html = Node::Literal(Literal {
+        datatype: Some(Box::new(NODE_RDF_HTML_LITERAL.clone())),
+        value: Cow::Owned(elt.inner_html()),
+        lang: None,
+    });
+    subjects
+        .into_iter()
+        .map(|subject| Statement {
+            subject: subject.clone(),
+            predicate: target.clone(),
+            object: html.clone(),
+        })
+        .collect()
 }
 fn handle_children<'a>(
     NodeContext {
@@ -619,6 +675,7 @@ fn handle_children<'a>(
                 base: ctx.base,
                 lang: ctx.lang,
                 uuid_gen_fn: ctx.uuid_gen_fn,
+                html_extraction: ctx.html_extraction,
                 ..Default::default()
             };
 
