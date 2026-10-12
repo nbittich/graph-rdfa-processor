@@ -39,15 +39,25 @@ async function run() {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const data = new FormData(e.target);
-    let res = htmlToRdfa(
-      data.get("html") || "",
-      data.get("base") || "",
-      data.get("wellKnownPrefix") || "",
-    );
-    // transform to turtle for better reading. could be just a button.
-    let turtle = rdfaToTurtle(res)
     const out = document.querySelector("pre");
-    out.innerText = turtle;
+    try {
+      // optional html extraction: both properties must be set together
+      const htmlSourceProperty = (data.get("htmlSourceProperty") || "").trim();
+      const htmlTargetProperty = (data.get("htmlTargetProperty") || "").trim();
+      let res = htmlToRdfa(
+        data.get("html") || "",
+        data.get("base") || "",
+        data.get("wellKnownPrefix") || "",
+        undefined, // optional uuid function
+        htmlSourceProperty || undefined,
+        htmlTargetProperty || undefined,
+      );
+      // transform to turtle for better reading. could be just a button.
+      out.innerText = rdfaToTurtle(res);
+    } catch (err) {
+      out.innerText = `Error: ${err?.message ?? err}`;
+      console.error(err);
+    }
   });
   const issueLink = document.querySelector("#issueLink");
   issueLink.onclick = (e) => {
@@ -67,6 +77,10 @@ async function run() {
 ### Well Known Prefix:
 
   \`${data.get("base") || ""}\`
+
+### Html extraction (source -> target):
+
+  \`${data.get("htmlSourceProperty") || ""}\` -> \`${data.get("htmlTargetProperty") || ""}\`
 
 ### Html:
   

@@ -21,6 +21,17 @@ pub struct RdfaGraph<'a> {
     pub statements: HashSet<Statement<'a>>,
 }
 
+/// Optional feature: whenever an element carries `property="<source>"`, an extra
+/// statement `<subject> <target> "<inner html>"^^rdf:HTML` is emitted, so the raw
+/// html behind the property is preserved. The original `<source>` statement is kept.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HtmlExtraction<'a> {
+    /// full IRI of the property to look for, e.g. `http://www.w3.org/ns/prov#value`
+    pub source: &'a str,
+    /// full IRI of the predicate used for the html literal
+    pub target: &'a str,
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct Context<'a> {
     pub base: &'a str,
@@ -33,6 +44,7 @@ pub struct Context<'a> {
     pub current_node: Option<Node<'a>>,
     pub prefixes: HashMap<&'a str, &'a str>,
     pub uuid_gen_fn: Option<fn() -> String>,
+    pub html_extraction: Option<HtmlExtraction<'a>>,
 }
 
 #[derive(Debug)]

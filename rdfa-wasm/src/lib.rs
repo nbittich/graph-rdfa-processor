@@ -1,6 +1,6 @@
 #![cfg(target_arch = "wasm32")]
 mod utils;
-use graph_rdfa_processor::RdfaGraph;
+use graph_rdfa_processor::{HtmlExtraction, RdfaGraph};
 use lol_alloc::{AssumeSingleThreaded, FreeListAllocator};
 use std::cell::RefCell;
 use tortank::turtle::turtle_doc::TurtleDoc;
@@ -62,21 +62,47 @@ fn js_err<E: std::fmt::Display>(err: E) -> JsValue {
     js_sys::Error::new(&err.to_string()).into()
 }
 
+/// Converts html with rdfa annotations to n-triples.
+///
+/// Optional html extraction: when both `html_source_property` and `html_target_property`
+/// are given (full IRIs, e.g. `http://www.w3.org/ns/prov#value` and
+/// `http://lblod.data.gift/vocabularies/besluit/extractedDecisionContent`), the inner html of
+/// every element carrying `property=<html_source_property>` is also stored under
+/// `<html_target_property>` as a `^^rdf:HTML` literal. Giving only one of the two throws.
 #[wasm_bindgen]
 pub fn html_to_rdfa(
     html: &str,
     base: &str,
     well_known_prefix: &str,
     uuid_fn: Option<js_sys::Function>,
-) -> String {
+    html_source_property: Option<String>,
+    html_target_property: Option<String>,
+) -> Result<String, JsValue> {
     utils::set_panic_hook();
+    fn non_empty(o: &Option<String>) -> Option<&str> {
+        o.as_deref().map(str::trim).filter(|s| !s.is_empty())
+    }
+    let html_extraction = match (
+        non_empty(&html_source_property),
+        non_empty(&html_target_property),
+    ) {
+        (Some(source), Some(target)) => Some(HtmlExtraction { source, target }),
+        (None, None) => None,
+        _ => {
+            return Err(js_err(
+                "html_source_property and html_target_property must be provided together",
+            ));
+        }
+    };
+
     let (uuid_fn, _guard) = install_uuid_fn(uuid_fn);
 
     let wkp = {
         let wkp = well_known_prefix.trim();
         if wkp.is_empty() { None } else { Some(wkp) }
     };
-    RdfaGraph::parse_str(html, base, wkp, uuid_fn).unwrap()
+    RdfaGraph::parse_str_with_html_extraction(html, base, wkp, uuid_fn, html_extraction)
+        .map_err(js_err)
 }
 
 #[wasm_bindgen]

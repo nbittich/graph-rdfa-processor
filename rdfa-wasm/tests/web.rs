@@ -84,7 +84,7 @@ fn rdfa_to_turtle_without_blank_nodes_roundtrips() {
 
 #[wasm_bindgen_test]
 fn html_to_rdfa_then_rdfa_to_turtle() {
-    let rdfa = html_to_rdfa(HTML, "https://example.com/", "", None);
+    let rdfa = html_to_rdfa(HTML, "https://example.com/", "", None, None, None).unwrap();
     let ttl = rdfa_to_turtle(&rdfa, None);
 
     assert_same_ttl(
@@ -96,4 +96,39 @@ fn html_to_rdfa_then_rdfa_to_turtle() {
         <https://example.com/alice> <http://schema.org/name> "Alice" .
         "#,
     );
+}
+
+#[wasm_bindgen_test]
+fn html_to_rdfa_extracts_html_content() {
+    let html = r#"
+    <div prefix="prov: http://www.w3.org/ns/prov#" resource="https://example.com/decision">
+      <div property="prov:value"><p>Hello <b>world</b></p></div>
+    </div>
+    "#;
+    let nt = html_to_rdfa(
+        html,
+        "https://example.com/",
+        "",
+        None,
+        Some("http://www.w3.org/ns/prov#value".to_string()),
+        Some("http://lblod.data.gift/vocabularies/besluit/extractedDecisionContent".to_string()),
+    )
+    .unwrap();
+    assert!(nt.contains(
+        "<http://lblod.data.gift/vocabularies/besluit/extractedDecisionContent> \"\"\"<p>Hello <b>world</b></p>\"\"\"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>"
+    ), "{nt}");
+    assert!(nt.contains("<http://www.w3.org/ns/prov#value>"), "{nt}");
+}
+
+#[wasm_bindgen_test]
+fn html_to_rdfa_html_extraction_needs_both_properties() {
+    let res = html_to_rdfa(
+        HTML,
+        "https://example.com/",
+        "",
+        None,
+        Some("http://www.w3.org/ns/prov#value".to_string()),
+        None,
+    );
+    assert!(res.is_err());
 }

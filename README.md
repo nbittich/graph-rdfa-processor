@@ -17,7 +17,7 @@ use graph_rdfa_processor::RdfaGraph;
     let base = "http://example.com";
     let well_known_prefix = Some("http://example.org/.well_known");
 
-    RdfaGraph::parse_str(html, base, well_known_prefix).unwrap()
+    RdfaGraph::parse_str(html, base, well_known_prefix, None).unwrap()
 
 ```
 
@@ -49,6 +49,27 @@ const example = `
 
 console.log(html_to_rdfa(example, "http://data.lblod.info", ""));
 ```
+
+### Extracting the html behind a property (optional)
+
+Given a source and a target predicate, the inner html of every element carrying
+`property=<source>` is additionally stored under `<target>` as an `rdf:HTML` literal
+(the original `<source>` triple is kept).
+
+```js
+const nt = html_to_rdfa(
+  html,
+  "http://data.lblod.info",
+  "",
+  undefined, // optional uuid function
+  "http://www.w3.org/ns/prov#value", // html_source_property
+  "http://lblod.data.gift/vocabularies/besluit/extractedDecisionContent", // html_target_property
+);
+// <subject> <http://lblod.data.gift/vocabularies/besluit/extractedDecisionContent> """<p>..</p>"""^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>.
+```
+
+Both properties must be given together (giving only one throws). In Rust, use
+`RdfaGraph::parse_str_with_html_extraction(html, base, wkp, None, Some(HtmlExtraction { source, target }))`.
 
 ### Web usage (not published on npm yet):
 
