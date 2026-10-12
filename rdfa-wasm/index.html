@@ -74,6 +74,49 @@
                     </div>
                   </div>
                 </div>
+                <div class="mb-2 align-items-center">
+                  <div class="col-auto">
+                    <label for="htmlSourceProperty" class="col-form-label fw-bold"
+                      >Extract html: source property
+                      <span class="fw-normal text-secondary">(optional)</span></label
+                    >
+                  </div>
+                  <div class="col-auto">
+                    <input
+                      type="url"
+                      id="htmlSourceProperty"
+                      name="htmlSourceProperty"
+                      class="form-control flat"
+                      aria-describedby="html extraction source property"
+                      placeholder="http://www.w3.org/ns/prov#value"
+                    />
+                  </div>
+                </div>
+
+                <div class="mb-2 align-items-center">
+                  <div class="col-auto">
+                    <label for="htmlTargetProperty" class="col-form-label fw-bold"
+                      >Extract html: target property
+                      <span class="fw-normal text-secondary">(optional)</span></label
+                    >
+                  </div>
+                  <div class="col-auto">
+                    <input
+                      type="url"
+                      id="htmlTargetProperty"
+                      name="htmlTargetProperty"
+                      class="form-control flat"
+                      aria-describedby="html extraction target property"
+                      placeholder="http://lblod.data.gift/vocabularies/besluit/extractedDecisionContent"
+                    />
+                    <div class="form-text">
+                      When both are set, the inner html of every element with
+                      <code>property=&lt;source&gt;</code> is also stored under
+                      <code>&lt;target&gt;</code> as a
+                      <code>^^rdf:HTML</code> literal.
+                    </div>
+                  </div>
+                </div>
                 <!-- Doesnt work on github pages because of cors -->
                 <!-- <div class="mb-2 align-items-center"> -->
                 <!--   <div class="col-auto"> -->
