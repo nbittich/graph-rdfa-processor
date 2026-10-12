@@ -3,11 +3,12 @@ use std::{ops::Add, path::PathBuf};
 use scraper::Html;
 use tortank::turtle::turtle_doc::TurtleDoc;
 
-use crate::{Context, RdfaGraph, constants::reset_fake_uuid_gen};
+use crate::{Context, HtmlExtraction, RdfaGraph, constants::reset_fake_uuid_gen};
 
 mod bug;
 mod earl_html5;
 mod html_extraction;
+mod html_extraction_files;
 mod other;
 mod rdfa_core;
 mod rdfa_primer;
@@ -17,6 +18,15 @@ const WRITE_DIFF_TO_FILE: bool = true;
 
 const DEFAULT_WELL_KNOWN_PREFIX: &str = "http://data.lblod.info/.well-known/genid#";
 fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
+    cmp_files_with_extraction(test_name, input_output_dir, base, None)
+}
+
+fn cmp_files_with_extraction(
+    test_name: &str,
+    input_output_dir: &str,
+    base: &str,
+    html_extraction: Option<HtmlExtraction<'_>>,
+) {
     let _ = env_logger::try_init();
 
     println!("running test {test_name}");
@@ -48,6 +58,7 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
 
     let root_ctx = Context {
         base,
+        html_extraction,
         ..Default::default()
     };
     let graph = RdfaGraph::parse(&root, root_ctx).unwrap().to_string();
@@ -73,11 +84,6 @@ fn cmp_files(test_name: &str, input_output_dir: &str, base: &str) {
     }
     let mut diff = ttl.difference(&graph).unwrap();
     diff = diff.add(graph.difference(&ttl).unwrap());
-    if !diff.is_empty() && DEBUG {
-        println!("============ Difference ============");
-        println!("{diff}");
-    }
-
     if !diff.is_empty() && DEBUG {
         println!("============ Difference ============");
         println!("{diff}");

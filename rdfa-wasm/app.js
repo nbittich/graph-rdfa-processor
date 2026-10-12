@@ -38,6 +38,12 @@ async function run() {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    const uuiGen = ()=> {
+      let n = 0;
+      return () => {
+        `${n++}`;
+      }
+    };
     const data = new FormData(e.target);
     const out = document.querySelector("pre");
     try {
@@ -48,7 +54,7 @@ async function run() {
         data.get("html") || "",
         data.get("base") || "",
         data.get("wellKnownPrefix") || "",
-        undefined, // optional uuid function
+        uuiGen,
         htmlSourceProperty || undefined,
         htmlTargetProperty || undefined,
       );
